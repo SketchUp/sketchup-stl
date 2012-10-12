@@ -35,25 +35,30 @@ def dxf_export_mesh_file
          export_ents = Sketchup.active_model.selection
       end
       if (export_ents.length > 0)
-         #get units for export
-         dxf_dxf_units_dialog
-         #get DXF export option
-         dxf_option = dxf_dxf_options_dialog
-         if (dxf_option =="stl")
+        # Get units for export.
+        dxf_dxf_units_dialog
+        
+        # Get DXF export option.
+        dxf_option = dxf_dxf_options_dialog
+        if (dxf_option =="stl")
           file_type="stl"
-         else
+        else
           file_type="dxf"
-         end
-         #exported file name
-         out_name = UI.savepanel( file_type+" file location", "." , "#{File.basename(model.path).split(".")[0]}." +file_type )
-         $mesh_file = File.new( out_name , "w" )  
-         model_name = model_filename.split(".")[0]
-         dxf_header(dxf_option,model_name)
-         # Recursively export faces and edges, exploding groups as we go.
-         #Count "other" objects we can't parse.
-         others = dxf_find_faces(0, export_ents, Geom::Transformation.new(), model.active_layer.name,dxf_option)
-         dxf_end(dxf_option,model_name)
-         UI.messagebox( $face_count.to_s + " faces exported " + $line_count.to_s + " lines exported\n" + others.to_s + " objects ignored" )
+        end
+        
+        # Get exported file name and export.
+        out_name = UI.savepanel( file_type.upcase + " file location", "" , "#{File.basename(model.path).split(".")[0]}untitled." +file_type )
+        if out_name
+          $mesh_file = File.new( out_name , "w" )  
+          model_name = model_filename.split(".")[0]
+          dxf_header(dxf_option,model_name)
+          
+          # Recursively export faces and edges, exploding groups as we go.
+          # Count "other" objects we can't parse.
+          others = dxf_find_faces(0, export_ents, Geom::Transformation.new(), model.active_layer.name,dxf_option)
+          dxf_end(dxf_option,model_name)
+          UI.messagebox( $face_count.to_s + " faces exported " + $line_count.to_s + " lines exported\n" + others.to_s + " objects ignored" )
+        end
       end
       model.commit_operation
 end
@@ -226,6 +231,9 @@ def dxf_write_polyface(face,tform,layername)
 end
 
 def dxf_dxf_options_dialog
+   # Hardcoding for STL export for now.
+   return "stl"
+
    options_list=["polyface mesh","polylines","triangular mesh","lines","stl"].join("|")
    prompts=["Export to DXF options"]
    enums=[options_list]
@@ -236,6 +244,10 @@ def dxf_dxf_options_dialog
 end
 
 def dxf_dxf_units_dialog
+   # Hardcoding for millimeters export for now.
+   $stl_conv = 25.4
+   return
+
    cu=Sketchup.active_model.options[0]["LengthUnit"]
    case cu
    when 4
@@ -287,8 +299,7 @@ def dxf_end(dxf_option,model_name)
 end
 
 if( not file_loaded?("skp_to_dxf.rb") )
-   add_separator_to_menu("Tools")
-   UI.menu("Tools").add_item("Export to DXF or STL") { dxf_export_mesh_file }
+   UI.menu("File").add_item("Export STL...", 17) { dxf_export_mesh_file }
 end
 
 file_loaded("skp_to_dxf.rb")

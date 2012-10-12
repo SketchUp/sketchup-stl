@@ -6,7 +6,7 @@ require 'sketchup.rb'
 require 'extensions.rb'
 
 su_stl_extension = SketchupExtension.new 'STL Import/Export',
-    'sketchup-stl/stl-loader.rb'
+    'sketchup-stl/loader.rb'
 
 su_stl_extension.description = 'Adds STL file format import and export.'
 su_stl_extension.version = '1.0'

@@ -4,5 +4,5 @@
 
 require 'sketchup.rb'
 
-Sketchup::require 'sketchup-stl/jf-stl-importer'
+Sketchup::require 'sketchup-stl/jf_stl_importer'
 Sketchup::require 'sketchup-stl/skp_to_dxf'

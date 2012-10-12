@@ -1,6 +1,8 @@
 # jf_stl_importer.rb - Imports ascii and binary .stl file in SketchUp
 #
-# Copyright (C) 2010 Jim Foltz <jim.foltz@gmail.com>
+# Copyright (C) 2010 Jim Foltz (jim.foltz@gmail.com)
+#
+# License: Apache License, Version 2.0
 
 require 'sketchup'
 

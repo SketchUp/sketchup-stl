@@ -1,7 +1,8 @@
 # SketchUp to DXF STL Converter
 # Last edited: February 18, 2011
-# Authors: Nathan Bromham, Konrad Shroeder
-# Download from: http://www.guitar-list.com/download-software/convert-sketchup-skp-files-dxf-or-stl
+# Authors: Nathan Bromham, Konrad Shroeder (http://www.guitar-list.com/)
+#
+# License: Apache License, Version 2.0
 
 require 'sketchup.rb'
 

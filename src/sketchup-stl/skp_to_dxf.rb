@@ -298,8 +298,16 @@ def dxf_end(dxf_option,model_name)
   $mesh_file.close
 end
 
-if( not file_loaded?("skp_to_dxf.rb") )
-   UI.menu("File").add_item("Export STL...", 17) { dxf_export_mesh_file }
+if( not $sketchup_stl_loaded )
+  IS_MAC = ( Object::RUBY_PLATFORM =~ /darwin/i ? true : false )
+  if IS_MAC
+    insert_index = 19
+  else
+    insert_index = 17
+  end
+  UI.menu("File").add_item("Export STL...", insert_index) {
+    dxf_export_mesh_file
+  }
 end
 
-file_loaded("skp_to_dxf.rb")
+$sketchup_stl_loaded = true

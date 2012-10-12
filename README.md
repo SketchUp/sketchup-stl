@@ -3,8 +3,21 @@
 A SketchUp Ruby Extension that adds STL (STereoLithography) file format
 import and export.
 
-If you're an owner of the repo, to get the code and make a change, here are some steps.
-(Documentation for non-owners coming soon.)
+3D printing is awesome, and the STL format has emerged as a standard way to share printable 3D models. To support this community, SketchUp has gathered a couple of Ruby plugins and packaged them into a single Extension. Stay tuned! This is our first foray into Open Source, an experiment we hope to repeat.
+
+## Installing
+
+The latest and greatest is available as an RBZ file. Download the file from this url:
+
+https://github.com/SketchUp/sketchup-stl/raw/master/sketchup-stl-1.0.0.rbz
+
+Then inside SketchUp, select Preferences > Extensions > Install Extension and select the RBZ file you just downloaded. Voila! SketchUp installs the extension. You'll find a new import type under File > Import and a File > Export STL menu option as well.
+
+## Contributing
+
+If you're a SketchUp Ruby community member, use git to grab the code, make some changes, then send us a pull request. (If you don't know what that is, that's okay, we barely know ourselves. Go google some github tutorials and give it a try. Please improve our README.md file with better instructions!)
+
+If you're an owner of this repo, here are some steps.
 
 Get a local copy of the files. This will create a sketchup-stl folder.
 
@@ -21,9 +34,9 @@ Use your favorite editor to edit README.md. Then...
 
 See the LICENSE and NOTICE files for more information.
 
-	Copyright: Copyright (c) 2012 Trimble Navigation, Ltd.
+Copyright: Copyright (c) 2012 Trimble Navigation, Ltd.
 
-	License: Apache License, Version 2.0
+License: Apache License, Version 2.0
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

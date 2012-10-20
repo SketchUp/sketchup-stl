@@ -34,7 +34,7 @@ Use your favorite editor to edit README.md. Then...
 
 #### Community 
 
-If you're a SketchUp Ruby community member, your need to fork this repo (If you don't know what that is, that's okay, we barely know ourselves. Go google some github tutorials and give it a try. Please improve our README.md file with better instructions!)
+If you're a SketchUp Ruby community member, you need to fork this repo (If you don't know what that is, that's okay, we barely know ourselves. Go google some github tutorials and give it a try. Please improve our README.md file with better instructions!)
 
 ##### Steps
 

@@ -11,7 +11,7 @@ The latest and greatest is available as an RBZ file. Download the file from this
 
 https://github.com/SketchUp/sketchup-stl/raw/master/sketchup-stl-1.0.0.rbz
 
-Then inside SketchUp, select Preferences > Extensions > Install Extension and select the RBZ file you just downloaded. Voila! SketchUp installs the extension. You'll find a new import type under File > Import and a File > Export STL menu option as well.
+Then inside SketchUp, select Window > Preferences (Microsoft Windows) or SketchUp > Preferences (Mac OS X) > Extensions > Install Extension and select the RBZ file you just downloaded. Voila! SketchUp installs the extension. You'll find a new import type under File > Import and a File > Export STL menu option as well.
 
 ## Contributing
 

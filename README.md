@@ -15,7 +15,9 @@ Then inside SketchUp, select Window > Preferences (Microsoft Windows) or SketchU
 
 ## Contributing
 
-If you're a SketchUp Ruby community member, use git to grab the code, make some changes, then send us a pull request. (If you don't know what that is, that's okay, we barely know ourselves. Go google some github tutorials and give it a try. Please improve our README.md file with better instructions!)
+
+
+#### Members
 
 If you're an owner of this repo, here are some steps.
 
@@ -29,6 +31,27 @@ Use your favorite editor to edit README.md. Then...
 	git add README.md                     // Marks README.md for edit.  
 	git commit -m "Editing our README"    // Records changes in the local branch.  
 	git push                              // Submits to repository. Yay!  
+
+#### Community 
+
+If you're a SketchUp Ruby community member, you need to fork this repo (If you don't know what that is, that's okay, we barely know ourselves. Go google some GitHub tutorials and give it a try. Please improve our README.md file with better instructions!)
+
+##### Steps
+
+1. Fork this repo ([tut](https://help.github.com/articles/fork-a-repo)). Forking will create a copy of this repo under your GitHub user name.
+
+1. Clone your fork. For this you will need git installed on your personal computer. [GitHub for Windows](http://windows.github.com/) is a good choice.
+
+1. Add this repo as a remote so you can pull in updates to your clone.
+
+		git remote add upstream https://github.com/SketchUp/sketchup-stl.git
+
+1. Make your changes to the code in your cloned repo, then commit. (`git commit ...`)
+
+1. Push your changes to your GitHub repo.  (`git push`)
+
+1. From your GitHub repo, send a Pull Request.
+
 
 ## License
 

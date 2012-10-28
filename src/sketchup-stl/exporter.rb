@@ -48,7 +48,7 @@ def dxf_export_mesh_file
 
     options = stl_options_dialog
     return if options == false
-    $stl_type = options[0]
+    $stl_type = options[0].downcase
 
     # Get exported file name and export.
     out_name = UI.savepanel( file_type.upcase + " file location", "" , "#{File.basename(model.path).split(".")[0]}untitled." +file_type )

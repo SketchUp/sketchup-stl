@@ -64,7 +64,7 @@ def dxf_export_mesh_file
       # Count "other" objects we can't parse.
       others = dxf_find_faces(0, export_ents, Geom::Transformation.new(), model.active_layer.name,dxf_option)
       dxf_end(dxf_option,model_name)
-      UI.messagebox( $face_count.to_s + " faces exported " + $line_count.to_s + " lines exported\n" + others.to_s + " objects ignored" )
+      UI.messagebox( $face_count.to_s + " facets exported " + $line_count.to_s + " lines exported\n" + others.to_s + " objects ignored" )
     end
   end
   model.commit_operation
@@ -218,8 +218,8 @@ def dxf_write_stl(face,tform)
         $mesh_file.write([0].pack("v"))
       end
     end
+    $face_count+=1
   end
-  $face_count+=1
 end
 
 def dxf_write_polyface(face,tform,layername)

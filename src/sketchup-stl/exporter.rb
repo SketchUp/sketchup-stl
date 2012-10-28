@@ -199,7 +199,15 @@ def dxf_write_stl(face,tform)
         $mesh_file.write([norm.z].pack("e")
       end
       for j in 0..2 do
-        $mesh_file.puts("vertex " + (mesh.point_at(polygon[j].abs).x.to_f * $stl_conv).to_s + " " + (mesh.point_at(polygon[j].abs).y.to_f * $stl_conv).to_s + " " + (mesh.point_at(polygon[j].abs).z.to_f * $stl_conv).to_s)
+        pt = mesh.point_at(polygon[j].abs)
+        pt = pt.map{|e| e * $stl_conv}
+        if $stl_type == "ascii"
+          $mesh_file.puts("vertex #{pt.x} #{pt.y} #{pt.x}"
+        else
+          $mesh_file.write([pt.x].pack("e"))
+          $mesh_file.write([pt.y].pack("e"))
+          $mesh_file.write([pt.z].pack("e"))
+        end
       end
       $mesh_file.puts( "endloop\nendfacet")
     end

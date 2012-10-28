@@ -209,7 +209,11 @@ def dxf_write_stl(face,tform)
           $mesh_file.write([pt.z].pack("e"))
         end
       end
-      $mesh_file.puts( "endloop\nendfacet")
+      if $stl_type == "ascii"
+        $mesh_file.puts( "endloop\nendfacet")
+      else
+        $mesh_file.write([0].pack("v"))
+      end
     end
   end
   $face_count+=1

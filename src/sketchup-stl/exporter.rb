@@ -46,6 +46,10 @@ def dxf_export_mesh_file
       file_type="dxf"
     end
 
+    options = stl_options_dialog
+    return if options == false
+    stl_type = options[0]
+
     # Get exported file name and export.
     out_name = UI.savepanel( file_type.upcase + " file location", "" , "#{File.basename(model.path).split(".")[0]}untitled." +file_type )
     if out_name
@@ -241,6 +245,13 @@ def dxf_dxf_options_dialog
   results = inputbox prompts, values, enums, "Choose which entities to export"
   return if not results
   results[0]
+end
+
+def stl_options_dialog
+  prompts  = ["ASCII or Binary? "]
+  defaults = ["Binary"]
+  options  = ["ASCII|Binary"]
+  UI.inputbox(prompts, defaults, options, "STL Type")
 end
 
 def dxf_dxf_units_dialog

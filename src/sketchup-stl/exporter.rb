@@ -189,8 +189,15 @@ def dxf_write_stl(face,tform)
   polygons = mesh.polygons
   polygons.each do |polygon|
     if (polygon.length == 3)
-      $mesh_file.puts( "facet normal " + mesh.normal_at(polygon[0].abs).x.to_s + " " + mesh.normal_at(polygon[0].abs).y.to_s + " " + mesh.normal_at(polygon[0].abs).z.to_s)
-      $mesh_file.puts( "outer loop")
+      norm = mesh.normal_at(polygon[0].abs)
+      if $stl_type == "ascii"
+        $mesh_file.puts("facet normal #{norm.x} #{norm.y} #{norm.z}")
+        $mesh_file.puts("outer loop")
+      else
+        $mesh_file.write([norm.x].pack("e")
+        $mesh_file.write([norm.y].pack("e")
+        $mesh_file.write([norm.z].pack("e")
+      end
       for j in 0..2 do
         $mesh_file.puts("vertex " + (mesh.point_at(polygon[j].abs).x.to_f * $stl_conv).to_s + " " + (mesh.point_at(polygon[j].abs).y.to_f * $stl_conv).to_s + " " + (mesh.point_at(polygon[j].abs).z.to_f * $stl_conv).to_s)
       end

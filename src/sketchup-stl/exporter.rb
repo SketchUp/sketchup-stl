@@ -54,7 +54,7 @@ def dxf_export_mesh_file
     out_name = UI.savepanel( file_type.upcase + " file location", "" , "#{File.basename(model.path).split(".")[0]}untitled." +file_type )
     if out_name
       $mesh_file = File.new( out_name , "w" )  
-      if $stl_type == "binary"
+      if $stl_type != "ascii"
         $mesh_file.binmode
       end
       model_name = model_filename.split(".")[0]

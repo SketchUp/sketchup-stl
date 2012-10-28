@@ -294,7 +294,12 @@ end
 
 def dxf_header(dxf_option,model_name)
   if (dxf_option=="stl")
-    $mesh_file.puts( "solid " + model_name)
+    if $stl_type == "ascii"
+      $mesh_file.puts( "solid " + model_name)
+    else
+      $mesh_file.write(["SketchUp STL #{model_name}"].pack("A80"))
+      $mesh_file.write([0xffffffff].pack("V"))
+    end
   else
     $mesh_file.puts( " 0\nSECTION\n 2\nENTITIES")
   end

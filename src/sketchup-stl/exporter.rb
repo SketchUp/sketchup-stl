@@ -326,7 +326,14 @@ end
 
 def dxf_end(dxf_option,model_name)
   if (dxf_option=="stl")
-    $mesh_file.puts( "endsolid " + model_name)
+    if $stl_type == "ascii"
+      $mesh_file.puts( "endsolid " + model_name)
+    else
+      # binary - update facet count
+      $mesh_file.flush
+      $mesh_file.seek(80)
+      $mesh_file.write([$face_count].pack("V"))
+    end
   else
     $mesh_file.puts( " 0\nENDSEC\n 0\nEOF")
   end

@@ -200,9 +200,9 @@ def dxf_write_stl(face,tform)
       end
       for j in 0..2 do
         pt = mesh.point_at(polygon[j].abs)
-        pt = pt.map{|e| e * $stl_conv}
+        pt = pt.to_a.map{|e| e * $stl_conv}
         if $stl_type == "ascii"
-          $mesh_file.puts("vertex #{pt.x} #{pt.y} #{pt.x}"
+          $mesh_file.puts("vertex #{pt.x} #{pt.y} #{pt.x}")
         else
           $mesh_file.write([pt.x].pack("e"))
           $mesh_file.write([pt.y].pack("e"))

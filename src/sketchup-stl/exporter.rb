@@ -194,9 +194,9 @@ def dxf_write_stl(face,tform)
         $mesh_file.puts("facet normal #{norm.x} #{norm.y} #{norm.z}")
         $mesh_file.puts("outer loop")
       else
-        $mesh_file.write([norm.x].pack("e")
-        $mesh_file.write([norm.y].pack("e")
-        $mesh_file.write([norm.z].pack("e")
+        $mesh_file.write([norm.x].pack("e"))
+        $mesh_file.write([norm.y].pack("e"))
+        $mesh_file.write([norm.z].pack("e"))
       end
       for j in 0..2 do
         pt = mesh.point_at(polygon[j].abs)

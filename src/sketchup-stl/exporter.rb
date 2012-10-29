@@ -46,10 +46,17 @@ def dxf_export_mesh_file
       file_type="dxf"
     end
 
+    options = stl_options_dialog
+    return if options == false
+    $stl_type = options[0].downcase
+
     # Get exported file name and export.
     out_name = UI.savepanel( file_type.upcase + " file location", "" , "#{File.basename(model.path).split(".")[0]}untitled." +file_type )
     if out_name
       $mesh_file = File.new( out_name , "w" )  
+      if $stl_type != "ascii"
+        $mesh_file.binmode
+      end
       model_name = model_filename.split(".")[0]
       dxf_header(dxf_option,model_name)
 
@@ -57,7 +64,7 @@ def dxf_export_mesh_file
       # Count "other" objects we can't parse.
       others = dxf_find_faces(0, export_ents, Geom::Transformation.new(), model.active_layer.name,dxf_option)
       dxf_end(dxf_option,model_name)
-      UI.messagebox( $face_count.to_s + " faces exported " + $line_count.to_s + " lines exported\n" + others.to_s + " objects ignored" )
+      UI.messagebox( $face_count.to_s + " facets exported " + $line_count.to_s + " lines exported\n" + others.to_s + " objects ignored" )
     end
   end
   model.commit_operation
@@ -185,15 +192,34 @@ def dxf_write_stl(face,tform)
   polygons = mesh.polygons
   polygons.each do |polygon|
     if (polygon.length == 3)
-      $mesh_file.puts( "facet normal " + mesh.normal_at(polygon[0].abs).x.to_s + " " + mesh.normal_at(polygon[0].abs).y.to_s + " " + mesh.normal_at(polygon[0].abs).z.to_s)
-      $mesh_file.puts( "outer loop")
-      for j in 0..2 do
-        $mesh_file.puts("vertex " + (mesh.point_at(polygon[j].abs).x.to_f * $stl_conv).to_s + " " + (mesh.point_at(polygon[j].abs).y.to_f * $stl_conv).to_s + " " + (mesh.point_at(polygon[j].abs).z.to_f * $stl_conv).to_s)
+      norm = mesh.normal_at(polygon[0].abs)
+      if $stl_type == "ascii"
+        $mesh_file.puts("facet normal #{norm.x} #{norm.y} #{norm.z}")
+        $mesh_file.puts("outer loop")
+      else
+        $mesh_file.write([norm.x].pack("e"))
+        $mesh_file.write([norm.y].pack("e"))
+        $mesh_file.write([norm.z].pack("e"))
       end
-      $mesh_file.puts( "endloop\nendfacet")
+      for j in 0..2 do
+        pt = mesh.point_at(polygon[j].abs)
+        pt = pt.to_a.map{|e| e * $stl_conv}
+        if $stl_type == "ascii"
+          $mesh_file.puts("vertex #{pt.x} #{pt.y} #{pt.x}")
+        else
+          $mesh_file.write([pt.x].pack("e"))
+          $mesh_file.write([pt.y].pack("e"))
+          $mesh_file.write([pt.z].pack("e"))
+        end
+      end
+      if $stl_type == "ascii"
+        $mesh_file.puts( "endloop\nendfacet")
+      else
+        $mesh_file.write([0].pack("v"))
+      end
     end
+    $face_count+=1
   end
-  $face_count+=1
 end
 
 def dxf_write_polyface(face,tform,layername)
@@ -243,6 +269,13 @@ def dxf_dxf_options_dialog
   results[0]
 end
 
+def stl_options_dialog
+  prompts  = ["ASCII or Binary? "]
+  defaults = ["Binary"]
+  options  = ["ASCII|Binary"]
+  UI.inputbox(prompts, defaults, options, "STL Type")
+end
+
 def dxf_dxf_units_dialog
   # Hardcoding for millimeters export for now.
   $stl_conv = 25.4
@@ -283,7 +316,12 @@ end
 
 def dxf_header(dxf_option,model_name)
   if (dxf_option=="stl")
-    $mesh_file.puts( "solid " + model_name)
+    if $stl_type == "ascii"
+      $mesh_file.puts( "solid " + model_name)
+    else
+      $mesh_file.write(["SketchUp STL #{model_name}"].pack("A80"))
+      $mesh_file.write([0xffffffff].pack("V"))
+    end
   else
     $mesh_file.puts( " 0\nSECTION\n 2\nENTITIES")
   end
@@ -291,7 +329,14 @@ end
 
 def dxf_end(dxf_option,model_name)
   if (dxf_option=="stl")
-    $mesh_file.puts( "endsolid " + model_name)
+    if $stl_type == "ascii"
+      $mesh_file.puts( "endsolid " + model_name)
+    else
+      # binary - update facet count
+      $mesh_file.flush
+      $mesh_file.seek(80)
+      $mesh_file.write([$face_count].pack("V"))
+    end
   else
     $mesh_file.puts( " 0\nENDSEC\n 0\nEOF")
   end

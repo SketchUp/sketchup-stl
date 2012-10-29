@@ -1,0 +1,12 @@
+# Ensure that line endings are dealt with properly across platforms.
+# https://help.github.com/articles/dealing-with-line-endings
+
+# text
+# "This setting tells git to always normalize the files specified. When
+# committed they are stored with LF, on checkout they are converted to the OS's
+# native line endings."
+
+*.rb text
+*.js text
+*.css text
+*.html text

@@ -60,7 +60,7 @@ module CommunityExtensions
         UI.messagebox('No geometry was imported.')
         return nil
       end
-      # (!) TODO: Clean up coplanar faces.
+      cleanup_geometry(entities)
       model.commit_operation
     end
     private :main
@@ -209,6 +209,36 @@ module CommunityExtensions
       Sketchup.write_default("STLImporter", 'import_units', results[0])
     end
     private :stl_dialog
+    
+    # Cleans up the geometry in the given +entities+ collection.
+    #
+    # @param [Sketchup::Entities] entities
+    # 
+    # @return [Nil]
+    def cleanup_geometry(entities)
+      stack = entities.select { |e| e.is_a?( Sketchup::Edge ) }
+      until stack.empty?
+        edge = stack.shift
+        next unless edge.valid?
+        next unless edge.faces.length == 2
+        face1, face2 = edge.faces
+        # Check if all the points of the two faces are on the same plane.
+        # Comparing normals is not reliable.
+        pts1 = face1.vertices.map { |vertex| vertex.position }
+        pts2 = face2.vertices.map { |vertex| vertex.position }
+        points = pts1 + pts2
+        plane = Geom.fit_plane_to_points( points )
+        next unless points.all? { |point| point.on_plane?(plane) }
+        # Erase the shared edges.
+        # (i) We try to erase all at once - but we might have to revert to first
+        #     erasing just one - let SketchUp heal the faces, then clean up the
+        #     remaining edges.
+        shared_edges = face1.edges & face2.edges
+        #entities.erase_entities(shared_edges)
+        shared_edges.first.erase!
+      end
+      nil
+    end
 
   end # class STLImporter
 

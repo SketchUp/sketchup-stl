@@ -14,16 +14,8 @@ def dxf_export_mesh_file
   end
   ss = model.selection
   $stl_conv = 1.0
-  $group_count = 0
-  $component_count = 0
   $face_count = 0
   $line_count = 0
-  entities = model.entities
-  if (Sketchup.version_number < 7)
-    model.start_operation("export_dxf_mesh")
-  else
-    model.start_operation("export_dxf_mesh",true)
-  end
   if ss.empty?
     answer = UI.messagebox("No objects selected. Export entire model?", MB_YESNOCANCEL)
     if( answer == 6 )
@@ -67,13 +59,12 @@ def dxf_export_mesh_file
       UI.messagebox( $face_count.to_s + " facets exported " + $line_count.to_s + " lines exported\n" + others.to_s + " objects ignored" )
     end
   end
-  model.commit_operation
 end
 
 def dxf_find_faces(others, entities, tform, layername,dxf_option)
   entities.each do |entity|
     #Face entity
-    if( entity.typename == "Face")
+    if( entity.is_a?(Sketchup::Face) )
       case dxf_option
       when "polylines"
         dxf_write_polyline(entity,tform,layername)
@@ -85,22 +76,37 @@ def dxf_find_faces(others, entities, tform, layername,dxf_option)
         dxf_write_stl(entity,tform)     
       end
       #Edge entity
-    elsif( entity.typename == "Edge") and((dxf_option=="lines")or(entity.faces.length==0 and dxf_option!="stl"))
+    elsif( entity.is_a?(Sketchup::Edge)) and((dxf_option=="lines")or(entity.faces.length==0 and dxf_option!="stl"))
       dxf_write_edge(entity, tform, layername)
-      #Group entity
-    elsif( entity.typename == "Group")
-      if entity.name==""
-        entity.name="GROUP"+$group_count.to_s
-        $group_count+=1
+      #Group & Componentinstanceentity
+    elsif entity.is_a?(Sketchup::Group) || entity.is_a?(Sketchup::ComponentInstance)
+      # I don't quite understand what the organization intention of the original
+      # code was in terms of working out the layer name. Appear to be based on
+      # object name... The old code name an incremental name prefixed GROUP or
+      # COMPONENT which didn't make any sense at all. And it modified the entity
+      # name.
+      # 
+      # At the moment I just make it take either the instance name or definition
+      # name. But I wonder if there's a more sensible name to use for this.
+      # 
+      # (!) This layername argument should be looked into further. But for now I
+      #     just wanted to avoid the exporter making model changes.
+      # 
+      # -ThomThom
+      if entity.is_a?(Sketchup::Group)
+        # (!) Beware - Due to a SketchUp bug this can be incorrect. Fix later.
+        definition = entity.entities.parent
+      else
+        definition = entity.definition
       end
-      others = dxf_find_faces(others, entity.entities, tform * entity.transformation, entity.name,dxf_option)
-      #Componentinstance entity
-    elsif( entity.typename == "ComponentInstance")
-      if entity.name==""
-        entity.name="COMPONENT"+$component_count.to_s
-        $component_count+=1
-      end
-      others = dxf_find_faces(others, entity.definition.entities, tform * entity.transformation, entity.name,dxf_option)
+      layer = ( entity.name.empty? ) ? definition.name : entity.name
+      others = dxf_find_faces(
+        others,
+        definition.entities,
+        tform * entity.transformation,
+        layer,
+        dxf_option
+      )
     else
       others = others + 1
     end
@@ -345,14 +351,23 @@ end
 
 if( not $sketchup_stl_loaded )
   IS_MAC = ( Object::RUBY_PLATFORM =~ /darwin/i ? true : false )
+  # Pick menu indexes for where to insert the Export menu. These numbers where
+  # picked when SketchUp 8 M4 was the latest version.
   if IS_MAC
     insert_index = 19
   else
     insert_index = 17
   end
-  UI.menu("File").add_item("Export STL...", insert_index) {
-    dxf_export_mesh_file
-  }
+  # (i) The menu_index argument isn't supported by older versions.
+  if Sketchup::Menu.instance_method(:add_item).arity == 1
+    UI.menu('File').add_item('Export STL...') {
+      dxf_export_mesh_file
+    }
+  else
+    UI.menu('File').add_item('Export STL...', insert_index) {
+      dxf_export_mesh_file
+    }
+  end
 end
 
 $sketchup_stl_loaded = true

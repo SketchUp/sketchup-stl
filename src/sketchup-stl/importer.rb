@@ -11,6 +11,7 @@ module CommunityExtensions
 
     def initialize
       @stl_conv = 1
+      @stl_merge = 'Yes'
     end
 
     def description
@@ -46,11 +47,27 @@ module CommunityExtensions
     def main(filename)
       file_type = detect_file_type(filename)
       #p file_type
+      model = Sketchup.active_model
+      model.start_operation("STL Import", true)
+      # Import geometry.
+      Sketchup.status_text = 'Importing geometry...'
       if file_type[/solid/]
-        stl_ascii_import(filename)
+        entities = stl_ascii_import(filename)
       else
-        stl_binary_import(filename)
+        entities = stl_binary_import(filename)
       end
+      # Verify that anything was imported.
+      if entities.nil? || entities.length == 0
+        model.abort_operation
+        UI.messagebox('No geometry was imported.')
+        return nil
+      end
+      Sketchup.status_text = 'Cleaning up geometry...'
+      if @stl_merge == 'Yes'
+        cleanup_geometry(entities)
+      end
+      Sketchup.status_text = 'Importing STL done!'
+      model.commit_operation
     end
     private :main
 
@@ -87,7 +104,7 @@ module CommunityExtensions
       msg =  "STL Importer (c) Jim Foltz\n\nSTL Binary Header:\n"+header+"\n\nFound #{ len.inspect } triangles. Continue?"
       if do_msg(msg) == IDNO
         f.close
-        return
+        return nil
       end
 
       pts = []
@@ -116,7 +133,7 @@ module CommunityExtensions
         entities = grp.entities
       end
       st = entities.fill_from_mesh(mesh, false, 0)
-      return st
+      return entities
     end
     private :stl_binary_import
 
@@ -145,9 +162,8 @@ module CommunityExtensions
       end
       msg = "STL Importer (c) Jim Foltz\n\nSTL ASCII File\nFound #{polys.length} polygons.\n\nContinue?"
       if do_msg(msg) == IDNO
-        return
+        return nil
       end
-      Sketchup.active_model.start_operation "STL Import", true
       mesh = Geom::PolygonMesh.new 3*polys.length, polys.length
       polys.each{ |poly| mesh.add_polygon(poly) }
       entities = Sketchup.active_model.entities
@@ -156,12 +172,12 @@ module CommunityExtensions
         entities = grp.entities
       end
       st = entities.fill_from_mesh(mesh, false, 0)
-      Sketchup.active_model.commit_operation
-      return st
+      return entities
     end
 
     def stl_dialog
       current_unit = Sketchup.read_default("STLImporter", 'import_units')
+      merge_faces  = Sketchup.read_default("STLImporter", 'merge_faces', @stl_merge)
       if current_unit.nil?
         cu=Sketchup.active_model.options["UnitsOptions"]["LengthUnit"]
         case cu
@@ -178,9 +194,10 @@ module CommunityExtensions
         end
       end
       units_list=["Meters","Centimeters","Millimeters","Inches","Feet"].join("|")
-      prompts=["Import Units "]
-      enums=[units_list]
-      values=[current_unit]
+      merge_list=['Yes', 'No'].join("|")
+      prompts=["Import Units ", 'Merge coplanar faces ']
+      enums=[units_list, merge_list]
+      values=[current_unit, merge_faces]
       results = inputbox prompts, values, enums, "STL Importer"
       return if not results
       mu = units_list.split('|')
@@ -197,9 +214,65 @@ module CommunityExtensions
       when 4
         @stl_conv = 1
       end
+      @stl_merge = results[1]
       Sketchup.write_default("STLImporter", 'import_units', results[0])
+      Sketchup.write_default("STLImporter", 'merge_faces',  @stl_merge)
     end
     private :stl_dialog
+    
+    # Cleans up the geometry in the given +entities+ collection.
+    #
+    # @param [Sketchup::Entities] entities
+    # 
+    # @return [Nil]
+    def cleanup_geometry(entities)
+      stack = entities.select { |e| e.is_a?( Sketchup::Edge ) }
+      until stack.empty?
+        edge = stack.shift
+        next unless edge.valid?
+        next unless edge.faces.length == 2
+        face1, face2 = edge.faces
+        # Check if all the points of the two faces are on the same plane.
+        # Comparing normals is not enough.
+        next unless face1.normal.samedirection?( face2.normal )
+        pts1 = face1.vertices.map { |vertex| vertex.position }
+        pts2 = face2.vertices.map { |vertex| vertex.position }
+        points = pts1 + pts2
+        plane = Geom.fit_plane_to_points( points )
+        next unless points.all? { |point| point.on_plane?(plane) }
+        # In CleanUp the faces are checked to not be duplicate of each other -
+        # overlapping. But since can we assume the STL importer doesn't create
+        # such messy geometry?
+        # 
+        # There is also a routine in CleanUp omitted here that checks if the
+        # faces to be merged are degenerate - all edges are parallel.
+        # 
+        # These check have been omitted to save processing time - as they might
+        # not appear in a STL import? The checks where required in CleanUp due
+        # to the large amount of degenerate geometry it was fed.
+        # 
+        # 
+        # Erasing the shared edges is tricky. Often things get messed up if we
+        # try to erase them all at once. When colouring the result of
+        # shared_edges it appear that edges between non-planar faces are
+        # returned. Not sure why this is.
+        # 
+        # What does seem to work best is to first erase the edge we got from the
+        # stack and then check the shared set of edges afterwards and erase them
+        # after we've verified they are not part of any faces anymore.
+        shared_edges = face1.edges & face2.edges
+        #shared_edges.each { |e| e.material = 'red' } # DEBUG
+        edge.erase!
+        # Find left over edges
+        loose_edges = shared_edges.select { |e| e.valid? && e.faces.length == 0 }
+        entities.erase_entities(loose_edges)
+        # Validate result
+        if face1.deleted? && face2.deleted?
+          puts 'Merge error!' # DEBUG. What should be do there?
+        end
+      end
+      nil
+    end
 
   end # class STLImporter
 

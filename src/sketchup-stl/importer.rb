@@ -6,7 +6,7 @@
 
 require 'sketchup'
 
-module JF
+module CommunityExtensions
   class STLImporter
 
     def initialize
@@ -161,7 +161,7 @@ module JF
     end
 
     def stl_dialog
-      current_unit = Sketchup.read_default("JFSTLImporter", 'import_units')
+      current_unit = Sketchup.read_default("STLImporter", 'import_units')
       if current_unit.nil?
         cu=Sketchup.active_model.options["UnitsOptions"]["LengthUnit"]
         case cu
@@ -181,7 +181,7 @@ module JF
       prompts=["Import Units "]
       enums=[units_list]
       values=[current_unit]
-      results = inputbox prompts, values, enums, "JF STL Importer"
+      results = inputbox prompts, values, enums, "STL Importer"
       return if not results
       mu = units_list.split('|')
       cu = mu.index(results[0])
@@ -197,12 +197,12 @@ module JF
       when 4
         @stl_conv = 1
       end
-      Sketchup.write_default("JFSTLImporter", 'import_units', results[0])
+      Sketchup.write_default("STLImporter", 'import_units', results[0])
     end
     private :stl_dialog
 
-  end # module STLImporter
+  end # class STLImporter
 
-end # module JF
+end # module CommunityExtensions
 
-Sketchup.register_importer(JF::STLImporter.new)
+Sketchup.register_importer(CommunityExtensions::STLImporter.new)

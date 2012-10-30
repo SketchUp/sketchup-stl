@@ -351,14 +351,23 @@ end
 
 if( not $sketchup_stl_loaded )
   IS_MAC = ( Object::RUBY_PLATFORM =~ /darwin/i ? true : false )
+  # Pick menu indexes for where to insesrt the Export menu. These numbers where
+  # picked when SketchUp 8 M4 was the latest version.
   if IS_MAC
     insert_index = 19
   else
     insert_index = 17
   end
-  UI.menu("File").add_item("Export STL...", insert_index) {
-    dxf_export_mesh_file
-  }
+  # (i) The menu_index argument isn't supported by older versions.
+  if Sketchup::Menu.instance_method(:add_item).arity == 1
+    UI.menu('File').add_item('Export STL...') {
+      dxf_export_mesh_file
+    }
+  else
+    UI.menu('File').add_item('Export STL...', insert_index) {
+      dxf_export_mesh_file
+    }
+  end
 end
 
 $sketchup_stl_loaded = true

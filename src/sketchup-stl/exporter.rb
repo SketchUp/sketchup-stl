@@ -14,16 +14,8 @@ def dxf_export_mesh_file
   end
   ss = model.selection
   $stl_conv = 1.0
-  $group_count = 0
-  $component_count = 0
   $face_count = 0
   $line_count = 0
-  entities = model.entities
-  if (Sketchup.version_number < 7)
-    model.start_operation("export_dxf_mesh")
-  else
-    model.start_operation("export_dxf_mesh",true)
-  end
   if ss.empty?
     answer = UI.messagebox("No objects selected. Export entire model?", MB_YESNOCANCEL)
     if( answer == 6 )
@@ -67,7 +59,6 @@ def dxf_export_mesh_file
       UI.messagebox( $face_count.to_s + " facets exported " + $line_count.to_s + " lines exported\n" + others.to_s + " objects ignored" )
     end
   end
-  model.commit_operation
 end
 
 def dxf_find_faces(others, entities, tform, layername,dxf_option)
@@ -87,20 +78,25 @@ def dxf_find_faces(others, entities, tform, layername,dxf_option)
       #Edge entity
     elsif( entity.is_a?(Sketchup::Edge)) and((dxf_option=="lines")or(entity.faces.length==0 and dxf_option!="stl"))
       dxf_write_edge(entity, tform, layername)
-      #Group entity
-    elsif( entity.is_a?(Sketchup::Group))
-      if entity.name==""
-        entity.name="GROUP"+$group_count.to_s
-        $group_count+=1
+      #Group & Componentinstanceentity
+    elsif entity.is_a?(Sketchup::Group) || entity.is_a?(Sketchup::ComponentInstance)
+      # I don't quite understand what the organization intention of the original
+      # code was in terms of working out the layer name. Appear to be based on
+      # object name...
+      if entity.is_a?(Sketchup::Group)
+        # (!) Beware - Due to a SketchUp bug this can be incorrect. Fix later.
+        definition = entity.entities.parent
+      else
+        definition = entity.definition
       end
-      others = dxf_find_faces(others, entity.entities, tform * entity.transformation, entity.name,dxf_option)
-      #Componentinstance entity
-    elsif( entity.is_a?(Sketchup::ComponentInstance))
-      if entity.name==""
-        entity.name="COMPONENT"+$component_count.to_s
-        $component_count+=1
-      end
-      others = dxf_find_faces(others, entity.definition.entities, tform * entity.transformation, entity.name,dxf_option)
+      layer = ( entity.name.empty? ) ? definition.name : entity.name
+      others = dxf_find_faces(
+        others,
+        definition.entities,
+        tform * entity.transformation,
+        layer,
+        dxf_option
+      )
     else
       others = others + 1
     end

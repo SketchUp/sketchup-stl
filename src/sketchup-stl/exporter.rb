@@ -82,7 +82,17 @@ def dxf_find_faces(others, entities, tform, layername,dxf_option)
     elsif entity.is_a?(Sketchup::Group) || entity.is_a?(Sketchup::ComponentInstance)
       # I don't quite understand what the organization intention of the original
       # code was in terms of working out the layer name. Appear to be based on
-      # object name...
+      # object name... The old code name an incremental name prefixed GROUP or
+      # COMPONENT which didn't make any sense at all. And it modified the entity
+      # name.
+      # 
+      # At the moment I just make it take either the instance name or definition
+      # name. But I wonder if there's a more sensible name to use for this.
+      # 
+      # (!) This layername argument should be looked into further. But for now I
+      #     just wanted to avoid the exporter making model changes.
+      # 
+      # -ThomThom
       if entity.is_a?(Sketchup::Group)
         # (!) Beware - Due to a SketchUp bug this can be incorrect. Fix later.
         definition = entity.entities.parent

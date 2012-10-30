@@ -351,7 +351,7 @@ end
 
 if( not $sketchup_stl_loaded )
   IS_MAC = ( Object::RUBY_PLATFORM =~ /darwin/i ? true : false )
-  # Pick menu indexes for where to insesrt the Export menu. These numbers where
+  # Pick menu indexes for where to insert the Export menu. These numbers where
   # picked when SketchUp 8 M4 was the latest version.
   if IS_MAC
     insert_index = 19

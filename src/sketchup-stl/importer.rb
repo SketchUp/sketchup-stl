@@ -278,4 +278,7 @@ module CommunityExtensions
 
 end # module CommunityExtensions
 
-Sketchup.register_importer(CommunityExtensions::STLImporter.new)
+unless file_loaded?(__FILE__)
+  Sketchup.register_importer(CommunityExtensions::STLImporter.new)
+  file_loaded(__FILE__)
+end

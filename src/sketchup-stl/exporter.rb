@@ -73,7 +73,7 @@ end
 def dxf_find_faces(others, entities, tform, layername,dxf_option)
   entities.each do |entity|
     #Face entity
-    if( entity.typename == "Face")
+    if( entity.is_a?(Sketchup::Face) )
       case dxf_option
       when "polylines"
         dxf_write_polyline(entity,tform,layername)
@@ -85,17 +85,17 @@ def dxf_find_faces(others, entities, tform, layername,dxf_option)
         dxf_write_stl(entity,tform)     
       end
       #Edge entity
-    elsif( entity.typename == "Edge") and((dxf_option=="lines")or(entity.faces.length==0 and dxf_option!="stl"))
+    elsif( entity.is_a?(Sketchup::Edge)) and((dxf_option=="lines")or(entity.faces.length==0 and dxf_option!="stl"))
       dxf_write_edge(entity, tform, layername)
       #Group entity
-    elsif( entity.typename == "Group")
+    elsif( entity.is_a?(Sketchup::Group))
       if entity.name==""
         entity.name="GROUP"+$group_count.to_s
         $group_count+=1
       end
       others = dxf_find_faces(others, entity.entities, tform * entity.transformation, entity.name,dxf_option)
       #Componentinstance entity
-    elsif( entity.typename == "ComponentInstance")
+    elsif( entity.is_a?(Sketchup::ComponentInstance))
       if entity.name==""
         entity.name="COMPONENT"+$component_count.to_s
         $component_count+=1

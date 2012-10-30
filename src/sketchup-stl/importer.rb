@@ -46,11 +46,22 @@ module CommunityExtensions
     def main(filename)
       file_type = detect_file_type(filename)
       #p file_type
+      model = Sketchup.active_model
+      model.start_operation("STL Import", true)
+      # Import geometry.
       if file_type[/solid/]
-        stl_ascii_import(filename)
+        entities = stl_ascii_import(filename)
       else
-        stl_binary_import(filename)
+        entities = stl_binary_import(filename)
       end
+      # Verify that anything was imported.
+      if entities.nil? || entities.length == 0
+        model.abort_operation
+        UI.messagebox('No geometry was imported.')
+        return nil
+      end
+      # (!) TODO: Clean up coplanar faces.
+      model.commit_operation
     end
     private :main
 
@@ -87,7 +98,7 @@ module CommunityExtensions
       msg =  "STL Importer (c) Jim Foltz\n\nSTL Binary Header:\n"+header+"\n\nFound #{ len.inspect } triangles. Continue?"
       if do_msg(msg) == IDNO
         f.close
-        return
+        return nil
       end
 
       pts = []
@@ -116,7 +127,7 @@ module CommunityExtensions
         entities = grp.entities
       end
       st = entities.fill_from_mesh(mesh, false, 0)
-      return st
+      return entities
     end
     private :stl_binary_import
 
@@ -145,9 +156,8 @@ module CommunityExtensions
       end
       msg = "STL Importer (c) Jim Foltz\n\nSTL ASCII File\nFound #{polys.length} polygons.\n\nContinue?"
       if do_msg(msg) == IDNO
-        return
+        return nil
       end
-      Sketchup.active_model.start_operation "STL Import", true
       mesh = Geom::PolygonMesh.new 3*polys.length, polys.length
       polys.each{ |poly| mesh.add_polygon(poly) }
       entities = Sketchup.active_model.entities
@@ -156,8 +166,7 @@ module CommunityExtensions
         entities = grp.entities
       end
       st = entities.fill_from_mesh(mesh, false, 0)
-      Sketchup.active_model.commit_operation
-      return st
+      return entities
     end
 
     def stl_dialog

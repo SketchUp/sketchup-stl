@@ -1,0 +1,38 @@
+/*
+ * Reset
+ */
+html {
+  border: 0;
+  overflow: hidden;
+}
+
+body {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+
+/*
+ * Fonts
+ */
+html, input, textarea, select, button {
+  font: caption; /* Use native UI fonts */
+}
+
+
+/*
+ * Colors
+ */
+html {
+  background: ThreeDFace; /* Use native window background */
+}
+
+
+/*
+ * Buttons
+ */
+button {
+  width: 75px;
+  height: 25px;
+}

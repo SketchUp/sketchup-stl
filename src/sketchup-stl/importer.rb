@@ -8,10 +8,19 @@ require 'sketchup'
 
 module CommunityExtensions
   class STLImporter
+  
+    Sketchup::require File.join( PLUGIN_PATH, 'webdialog_extensions')
+  
+    UNIT_METERS      = 4
+    UNIT_CENTIMETERS = 3
+    UNIT_MILLIMETERS = 2
+    UNIT_FEET        = 1
+    UNIT_INCHES      = 0
+    
+    PREF_KEY = 'STLImporter'.freeze
 
     def initialize
-      @stl_units = 0
-      @stl_conv = get_unit_ratio(@stl_units)
+      @stl_units = UNIT_INCHES
       @stl_merge = false
       @stl_preserve_origin = true
     end
@@ -90,6 +99,7 @@ module CommunityExtensions
     private :do_msg
 
     def stl_binary_import(filename, try = 1)
+      stl_conv = get_unit_ratio(@stl_units)
       f = File.new(filename, "rb")
       # Header
       header = ""
@@ -113,11 +123,11 @@ module CommunityExtensions
       while !f.eof 
         normal = f.read(3 * float_size).unpack('fff')
         v1 = f.read(3 * float_size).unpack('fff') 
-        v1.map!{|e| e * @stl_conv}
+        v1.map!{|e| e * stl_conv}
         v2 = f.read(3 * float_size).unpack('fff')
-        v2.map!{|e| e * @stl_conv}
+        v2.map!{|e| e * stl_conv}
         v3 = f.read(3 * float_size).unpack('fff')
-        v3.map!{|e| e * @stl_conv}
+        v3.map!{|e| e * stl_conv}
         # UINT16 Attribute byte count? (STL format spec)
         abc = f.read(2)
         pts << [v1, v2, v3]
@@ -140,6 +150,7 @@ module CommunityExtensions
     private :stl_binary_import
 
     def stl_ascii_import(filename, try = 1)
+      stl_conv = get_unit_ratio(@stl_units)
       polys = []
       poly = []
       vcnt = 0
@@ -148,7 +159,7 @@ module CommunityExtensions
         if line[/vertex/]
           vcnt += 1
           c, *pts = line.split
-          pts.map! { |pt| pt.to_f * @stl_conv }
+          pts.map! { |pt| pt.to_f * stl_conv }
           poly << pts
           if vcnt == 3
             polys.push(poly.dup)# if vcnt > 0
@@ -177,17 +188,18 @@ module CommunityExtensions
       return entities
     end
     
+    # Returns conversion ratio based on unit type.
     def get_unit_ratio(unit_type)
       case unit_type
-      when 4 # Meters
+      when UNIT_METERS
         100.0 / 2.54
-      when 3 # Centimeters
+      when UNIT_CENTIMETERS
         1.0 / 2.54
-      when 2 # Millimeters
+      when UNIT_MILLIMETERS
         0.1 / 2.54
-      when 1 # Feet
+      when UNIT_FEET
         12.0
-      when 0 # Inches
+      when UNIT_INCHES
         1
       end
     end
@@ -209,22 +221,23 @@ module CommunityExtensions
       }
       
       window = UI::WebDialog.new(window_options)
+      window.extend( WebDialogExtensions )
       window.set_size(window_options[:width], window_options[:height])
       window.navigation_buttons_enabled = false
       
       window.add_action_callback('Window_Ready') { |dialog, params|
         # Read settings
-        merge_faces     = Sketchup.read_default('STLImporter', 'merge_faces',     @stl_merge)
-        current_unit    = Sketchup.read_default('STLImporter', 'import_units',    @stl_units)
-        preserve_origin = Sketchup.read_default('STLImporter', 'preserve_origin', @stl_preserve_origin)
-        # Ensure they are in proper format
+        merge_faces     = read_setting('merge_faces',     @stl_merge)
+        current_unit    = read_setting('import_units',    @stl_units)
+        preserve_origin = read_setting('preserve_origin', @stl_preserve_origin)
+        # Ensure they are in proper format. (Recovers from old settings)
         merge_faces     = ( merge_faces == true )
         current_unit    = current_unit.to_i
         preserve_origin = ( preserve_origin == true )
         # Update webdialog
-        dialog.execute_script("UI.update_value('chkMergeCoplanar', #{merge_faces});")
-        dialog.execute_script("UI.update_value('lstUnits', #{current_unit});")
-        dialog.execute_script("UI.update_value('chkPreserveOrigin', #{preserve_origin});")
+        dialog.update_value('chkMergeCoplanar', merge_faces)
+        dialog.update_value('lstUnits', current_unit)
+        dialog.update_value('chkPreserveOrigin', preserve_origin)
       }
       
       window.add_action_callback('Event_Accept') { |dialog, params|
@@ -236,15 +249,14 @@ module CommunityExtensions
         }
         dialog.close
         #p options # DEBUG
-        # Convert to Ruby values
+        # Convert to Ruby values.
         @stl_merge            = (options[:merge_coplanar] == 'true')
         @stl_preserve_origin  = (options[:preserve_origin] == 'true')
         @stl_units            = options[:units].to_i
-        @stl_conv             = get_unit_ratio(@stl_units)
         # Store preferences
-        Sketchup.write_default('STLImporter', 'merge_faces',     @stl_merge)
-        Sketchup.write_default('STLImporter', 'import_units',    @stl_units)
-        Sketchup.write_default('STLImporter', 'preserve_origin', @stl_preserve_origin)
+        write_setting('merge_faces',     @stl_merge)
+        write_setting('import_units',    @stl_units)
+        write_setting('preserve_origin', @stl_preserve_origin)
       }
 
       window.add_action_callback('Event_Cancel') { |dialog, params|
@@ -255,6 +267,20 @@ module CommunityExtensions
       window.show_modal
     end
     private :stl_dialog
+    
+    # Wrapper to shorten the syntax and create a central place to modify in case
+    # preferences are stored differently in the future.
+    def read_setting(key, default)
+      Sketchup.read_default(PREF_KEY, key, default)
+    end
+    private :read_setting
+    
+    # Wrapper to shorten the syntax and create a central place to modify in case
+    # preferences are stored differently in the future.
+    def write_setting(key, value)
+      Sketchup.write_default(PREF_KEY, key, value)
+    end
+    private :write_setting
     
     # Cleans up the geometry in the given +entities+ collection.
     #

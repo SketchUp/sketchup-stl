@@ -1,14 +1,33 @@
 /* UI namespace */
 var UI = function() {
+  
+  var KEYCODE_ENTER = 13;
+  var KEYCODE_ESC   = 27;
+  
   return {
   
     init : function() {
+      UI.activate_key_shortcuts();
       UI.sync_checkbox_values();
       // Disable native browser functions to make the dialog appear more native.
       UI.disable_select();
       UI.disable_context_menu();
       // Ready Event
       window.location = 'skp:Window_Ready';
+    },
+    
+    // Ensure links are opened in the default browser.
+    activate_key_shortcuts : function() {
+      $(document).on('keyup', function(event) {
+        switch ( event.keyCode ) {
+        case KEYCODE_ENTER:
+          $('button.default').first().trigger('click');
+          break;
+        case KEYCODE_ESC:
+          $('button.cancel').first().trigger('click');
+          break;
+        }
+      });
     },
     
     // Ensure links are opened in the default browser.

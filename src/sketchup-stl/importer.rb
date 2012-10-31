@@ -75,6 +75,16 @@ module CommunityExtensions
         UI.messagebox('No geometry was imported.')
         return nil
       end
+      # Reposition to ORIGIN.
+      group = entities.parent.instances[0]
+      unless @stl_preserve_origin
+        point = group.bounds.corner(0)
+        vector = point.vector_to(ORIGIN)
+        group.transform!(vector) if vector.valid?
+      end
+      # Focus camera on imported geometry.
+      model.active_view.zoom( group )
+      # Clean up geometry.
       Sketchup.status_text = 'Cleaning up geometry...'
       if @stl_merge
         cleanup_geometry(entities)

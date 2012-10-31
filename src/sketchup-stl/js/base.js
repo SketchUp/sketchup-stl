@@ -35,6 +35,9 @@ var UI = function() {
       $(document).on('mousedown selectstart', function(event) {
         return $(event.target).is('input, textarea, select, option');
       });
+      // Add extra CSS rules for OSX. Without text will highlight when the user
+      // right click on text.
+      $(':not(input, textarea, select, option)').css('user-select', 'none');
     },
     
     // Ensure links are opened in the default browser.

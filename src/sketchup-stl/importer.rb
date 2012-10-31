@@ -72,7 +72,8 @@ module CommunityExtensions
       # Verify that anything was imported.
       if entities.nil? || entities.length == 0
         model.abort_operation
-        UI.messagebox('No geometry was imported.')
+        UI.messagebox('No geometry was imported.') if entities
+        Sketchup.status_text = '' # OSX doesn't reset the statusbar like Windows.
         return nil
       end
       # Reposition to ORIGIN.
@@ -240,7 +241,7 @@ module CommunityExtensions
         :left             => 300,
         :top              => 200,
         :width            => 315,
-        :height           => 255
+        :height           => 265
       }
       
       window = UI::WebDialog.new(window_options)

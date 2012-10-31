@@ -10,8 +10,10 @@ module CommunityExtensions
   class STLImporter
 
     def initialize
-      @stl_conv = 1
-      @stl_merge = 'Yes'
+      @stl_units = 0
+      @stl_conv = get_unit_ratio(@stl_units)
+      @stl_merge = false
+      @stl_preserve_origin = true
     end
 
     def description
@@ -63,7 +65,7 @@ module CommunityExtensions
         return nil
       end
       Sketchup.status_text = 'Cleaning up geometry...'
-      if @stl_merge == 'Yes'
+      if @stl_merge
         cleanup_geometry(entities)
       end
       Sketchup.status_text = 'Importing STL done!'
@@ -174,49 +176,82 @@ module CommunityExtensions
       st = entities.fill_from_mesh(mesh, false, 0)
       return entities
     end
-
+    
+    def get_unit_ratio(unit_type)
+      case unit_type
+      when 4 # Meters
+        100.0 / 2.54
+      when 3 # Centimeters
+        1.0 / 2.54
+      when 2 # Millimeters
+        0.1 / 2.54
+      when 1 # Feet
+        12.0
+      when 0 # Inches
+        1
+      end
+    end
+    private :get_unit_ratio
+    
     def stl_dialog
-      current_unit = Sketchup.read_default("STLImporter", 'import_units')
-      merge_faces  = Sketchup.read_default("STLImporter", 'merge_faces', @stl_merge)
-      if current_unit.nil?
-        cu=Sketchup.active_model.options["UnitsOptions"]["LengthUnit"]
-        case cu
-        when 4
-          current_unit= "Meters"
-        when 3
-          current_unit= "Centimeters"
-        when 2
-          current_unit= "Millimeters"
-        when 1
-          current_unit= "Feet"
-        when 0
-          current_unit= "Inches"
-        end
-      end
-      units_list=["Meters","Centimeters","Millimeters","Inches","Feet"].join("|")
-      merge_list=['Yes', 'No'].join("|")
-      prompts=["Import Units ", 'Merge coplanar faces ']
-      enums=[units_list, merge_list]
-      values=[current_unit, merge_faces]
-      results = inputbox prompts, values, enums, "STL Importer"
-      return if not results
-      mu = units_list.split('|')
-      cu = mu.index(results[0])
-      case cu
-      when 0
-        @stl_conv = 100.0 / 2.54
-      when 1
-        @stl_conv = 1.0 / 2.54
-      when 2
-        @stl_conv = 0.1 / 2.54
-      when 3
-        @stl_conv = 12.0
-      when 4
-        @stl_conv = 1
-      end
-      @stl_merge = results[1]
-      Sketchup.write_default("STLImporter", 'import_units', results[0])
-      Sketchup.write_default("STLImporter", 'merge_faces',  @stl_merge)
+      html_source = File.join(PLUGIN_PATH, 'html', 'importer.html')
+      
+      # (?) Size and position not saved when using Hash? (See TT::GUI::Window)
+      window_options = {
+        :dialog_title     => 'Import STL Options',
+        :preferences_key  => false,
+        :scrollable       => false,
+        :resizable        => false,
+        :left             => 300,
+        :top              => 200,
+        :width            => 315,
+        :height           => 255
+      }
+      
+      window = UI::WebDialog.new(window_options)
+      window.set_size(window_options[:width], window_options[:height])
+      
+      window.add_action_callback('Window_Ready') { |dialog, params|
+        # Read settings
+        merge_faces     = Sketchup.read_default('STLImporter', 'merge_faces',     @stl_merge)
+        current_unit    = Sketchup.read_default('STLImporter', 'import_units',    @stl_units)
+        preserve_origin = Sketchup.read_default('STLImporter', 'preserve_origin', @stl_preserve_origin)
+        # Ensure they are in proper format
+        merge_faces     = ( merge_faces == true )
+        current_unit    = current_unit.to_i
+        preserve_origin = ( preserve_origin == true )
+        # Update webdialog
+        dialog.execute_script("UI.update_value('chkMergeCoplanar', #{merge_faces});")
+        dialog.execute_script("UI.update_value('lstUnits', #{current_unit});")
+        dialog.execute_script("UI.update_value('chkPreserveOrigin', #{preserve_origin});")
+      }
+      
+      window.add_action_callback('Event_Accept') { |dialog, params|
+        # Get data from webdialog
+        options = {
+          :merge_coplanar   => dialog.get_element_value('chkMergeCoplanar'),
+          :units            => dialog.get_element_value('lstUnits'),
+          :preserve_origin  => dialog.get_element_value('chkPreserveOrigin')
+        }
+        dialog.close
+        #p options # DEBUG
+        # Convert to Ruby values
+        @stl_merge            = (options[:merge_coplanar] == 'true')
+        @stl_preserve_origin  = (options[:preserve_origin] == 'true')
+        @stl_units            = options[:units].to_i
+        @stl_conv             = get_unit_ratio(@stl_units)
+        # Store preferences
+        Sketchup.write_default('STLImporter', 'merge_faces',     @stl_merge)
+        Sketchup.write_default('STLImporter', 'import_units',    @stl_units)
+        Sketchup.write_default('STLImporter', 'preserve_origin', @stl_preserve_origin)
+      }
+
+      window.add_action_callback('Event_Cancel') { |dialog, params|
+        dialog.close
+      }
+      
+      window.set_file( html_source )
+      window.show_modal
     end
     private :stl_dialog
     

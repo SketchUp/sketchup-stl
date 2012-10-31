@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Import STL Options</title>
+  
+  <meta http-equiv="X-UA-Compatible"    content="IE=edge"/>
+	<meta http-equiv="content-type"       content="text/html; charset=utf-8" />
+	<meta http-equiv="MSThemeCompatible"  content="Yes">
+
+  <link href="../css/base.css"      rel="stylesheet" type="text/css"/>
+  <link href="../css/importer.css"  rel="stylesheet" type="text/css"/>
+
+  <script src="../js/jquery.js"   type="text/javascript"></script>
+  <script src="../js/base.js"     type="text/javascript"></script>
+  <script src="../js/importer.js" type="text/javascript"></script>
+</head>
+<body>
+
+<fieldset id="geometry">
+  <legend>Geometry</legend>
+  
+  <label id="merge_coplanar" class="checkbox">
+    <input type="checkbox" id="chkMergeCoplanar" />
+    Merge coplanar faces
+  </label>
+</fieldset>
+
+<fieldset id="scale">
+  <legend>Scale</legend>
+  
+  <label id="units" class="droplist">
+    <span>Units:</span>
+    <select id="lstUnits">
+      <option value="4">Meters</option>
+      <option value="3">Centimeters</option>
+      <option value="2">Millimeters</option>
+      <option value="1">Feet</option>
+      <option value="0">Inches</option>
+    </select>
+  </label>
+  
+  <label id="preserve_origin" class="checkbox">
+    <input type="checkbox" id="chkPreserveOrigin" />
+    Preserve drawing origin
+  </label>
+  
+</fieldset>
+
+<div id="footer">
+  <button id="btnAccept">Accept</button>
+  <button id="btnCancel">Cancel</button>
+</div>
+
+</body>
+</html>
+

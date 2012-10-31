@@ -210,6 +210,7 @@ module CommunityExtensions
       
       window = UI::WebDialog.new(window_options)
       window.set_size(window_options[:width], window_options[:height])
+      window.navigation_buttons_enabled = false
       
       window.add_action_callback('Window_Ready') { |dialog, params|
         # Read settings

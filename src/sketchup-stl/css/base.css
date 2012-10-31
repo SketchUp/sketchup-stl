@@ -4,6 +4,7 @@
 html {
   border: 0;
   overflow: hidden;
+  cursor: default;
 }
 
 body {

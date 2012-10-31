@@ -83,7 +83,7 @@ module CommunityExtensions
         group.transform!(vector) if vector.valid?
       end
       # Focus camera on imported geometry.
-      model.active_view.zoom( group )
+      model.active_view.zoom(group)
       # Clean up geometry.
       Sketchup.status_text = 'Cleaning up geometry...'
       if @stl_merge

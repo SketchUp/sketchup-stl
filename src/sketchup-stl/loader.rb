@@ -4,5 +4,11 @@
 
 require 'sketchup.rb'
 
-Sketchup::require 'sketchup-stl/importer'
-Sketchup::require 'sketchup-stl/exporter'
+module CommunityExtensions
+  class STLImporter
+  
+    Sketchup::require File.join( PLUGIN_PATH, 'importer')
+    Sketchup::require File.join( PLUGIN_PATH, 'exporter')
+
+  end # class STLImporter
+end # module CommunityExtensions

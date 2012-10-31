@@ -23,6 +23,8 @@ module CommunityExtensions
       @stl_units = UNIT_INCHES
       @stl_merge = false
       @stl_preserve_origin = true
+      
+      @option_window = nil # (See comment at top of `stl_dialog()`.)
     end
 
     def description
@@ -206,9 +208,20 @@ module CommunityExtensions
     private :get_unit_ratio
     
     def stl_dialog
+      # Since WebDialogs under OSX isn't truly modal wthere is a chance the user
+      # can click the Options button while the window is already open. We then
+      # just bring it to the front.
+      # 
+      # The reference is being released when the window is closed so it's
+      # easier to develop - make updates. Otherwise the WebDialog object would
+      # have been cached. And it also should ensure it's garbage collected.
+      if @option_window && @option_window.visible?
+        @option_window.bring_to_front
+        return false
+      end
+      
       html_source = File.join(PLUGIN_PATH, 'html', 'importer.html')
       
-      # (?) Size and position not saved when using Hash? (See TT::GUI::Window)
       window_options = {
         :dialog_title     => 'Import STL Options',
         :preferences_key  => false,
@@ -262,9 +275,14 @@ module CommunityExtensions
       window.add_action_callback('Event_Cancel') { |dialog, params|
         dialog.close
       }
+      window.set_on_close {
+        @option_window = nil # (See comment at beginning of method.)
+      }
       
       window.set_file( html_source )
       window.show_modal
+      @option_window = window # (See comment at beginning of method.)
+      true
     end
     private :stl_dialog
     

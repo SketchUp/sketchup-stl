@@ -245,12 +245,12 @@ module CommunityExtensions
       }
       
       window = UI::WebDialog.new(window_options)
-      window.extend( WebDialogExtensions )
+      window.extend(WebDialogExtensions)
       window.set_size(window_options[:width], window_options[:height])
       window.navigation_buttons_enabled = false
       
       window.add_action_callback('Window_Ready') { |dialog, params|
-        # Read settings
+        # Read import settings.
         merge_faces     = read_setting('merge_faces',     @stl_merge)
         current_unit    = read_setting('import_units',    @stl_units)
         preserve_origin = read_setting('preserve_origin', @stl_preserve_origin)
@@ -258,14 +258,14 @@ module CommunityExtensions
         merge_faces     = ( merge_faces == true )
         current_unit    = current_unit.to_i
         preserve_origin = ( preserve_origin == true )
-        # Update webdialog
+        # Update webdialog values.
         dialog.update_value('chkMergeCoplanar', merge_faces)
         dialog.update_value('lstUnits', current_unit)
         dialog.update_value('chkPreserveOrigin', preserve_origin)
       }
       
       window.add_action_callback('Event_Accept') { |dialog, params|
-        # Get data from webdialog
+        # Get data from webdialog.
         options = {
           :merge_coplanar   => dialog.get_element_value('chkMergeCoplanar'),
           :units            => dialog.get_element_value('lstUnits'),
@@ -277,7 +277,7 @@ module CommunityExtensions
         @stl_merge            = (options[:merge_coplanar] == 'true')
         @stl_preserve_origin  = (options[:preserve_origin] == 'true')
         @stl_units            = options[:units].to_i
-        # Store preferences
+        # Store last used preferences.
         write_setting('merge_faces',     @stl_merge)
         write_setting('import_units',    @stl_units)
         write_setting('preserve_origin', @stl_preserve_origin)
@@ -354,10 +354,10 @@ module CommunityExtensions
         shared_edges = face1.edges & face2.edges
         #shared_edges.each { |e| e.material = 'red' } # DEBUG
         edge.erase!
-        # Find left over edges
+        # Find left over edges that are no longer connected to any face.
         loose_edges = shared_edges.select { |e| e.valid? && e.faces.length == 0 }
         entities.erase_entities(loose_edges)
-        # Validate result
+        # Validate result - check if we destroyed some geometry.
         if face1.deleted? && face2.deleted?
           puts 'Merge error!' # DEBUG. What should be do there?
         end

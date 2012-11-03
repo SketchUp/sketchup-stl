@@ -34,12 +34,8 @@ module CommunityExtensions
         dxf_dxf_units_dialog
 
         # Get DXF export option.
-        dxf_option = dxf_dxf_options_dialog
-        if (dxf_option =="stl")
-          file_type="stl"
-        else
-          file_type="dxf"
-        end
+        dxf_option = "stl"
+        file_type="stl"
 
         options = stl_options_dialog
         return if options == false
@@ -53,12 +49,12 @@ module CommunityExtensions
             @mesh_file.binmode
           end
           model_name = model_filename.split(".")[0]
-          dxf_header(dxf_option,model_name)
+          dxf_header(model_name)
 
           # Recursively export faces and edges, exploding groups as we go.
           # Count "other" objects we can't parse.
           others = dxf_find_faces(0, export_ents, Geom::Transformation.new(), model.active_layer.name,dxf_option)
-          dxf_end(dxf_option,model_name)
+          dxf_end(model_name)
           UI.messagebox( @face_count.to_s + " facets exported " + @line_count.to_s + " lines exported\n" + others.to_s + " objects ignored" )
         end
       end
@@ -144,19 +140,6 @@ module CommunityExtensions
       end
     end
 
-    def self.dxf_dxf_options_dialog
-      # Hardcoding for STL export for now.
-      return "stl"
-
-      options_list=["polyface mesh","polylines","triangular mesh","lines","stl"].join("|")
-      prompts=["Export to DXF options"]
-      enums=[options_list]
-      values=["polyface mesh"]
-      results = inputbox prompts, values, enums, "Choose which entities to export"
-      return if not results
-      results[0]
-    end
-
     def self.stl_options_dialog
       prompts  = ["ASCII or Binary? "]
       defaults = ["Binary"]
@@ -202,31 +185,23 @@ module CommunityExtensions
       end
     end
 
-    def self.dxf_header(dxf_option,model_name)
-      if (dxf_option=="stl")
-        if @stl_type == "ascii"
-          @mesh_file.puts( "solid " + model_name)
-        else
-          @mesh_file.write(["SketchUp STL #{model_name}"].pack("A80"))
-          @mesh_file.write([0xffffffff].pack("V"))
-        end
+    def self.dxf_header(model_name)
+      if @stl_type == "ascii"
+        @mesh_file.puts( "solid " + model_name)
       else
-        @mesh_file.puts( " 0\nSECTION\n 2\nENTITIES")
+        @mesh_file.write(["SketchUp STL #{model_name}"].pack("A80"))
+        @mesh_file.write([0xffffffff].pack("V"))
       end
     end
 
-    def self.dxf_end(dxf_option,model_name)
-      if (dxf_option=="stl")
-        if @stl_type == "ascii"
-          @mesh_file.puts( "endsolid " + model_name)
-        else
-          # binary - update facet count
-          @mesh_file.flush
-          @mesh_file.seek(80)
-          @mesh_file.write([@face_count].pack("V"))
-        end
+    def self.dxf_end(model_name)
+      if @stl_type == "ascii"
+        @mesh_file.puts( "endsolid " + model_name)
       else
-        @mesh_file.puts( " 0\nENDSEC\n 0\nEOF")
+        # binary - update facet count
+        @mesh_file.flush
+        @mesh_file.seek(80)
+        @mesh_file.write([@face_count].pack("V"))
       end
       @mesh_file.close
     end

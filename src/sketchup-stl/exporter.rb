@@ -9,7 +9,7 @@ require 'sketchup.rb'
 module CommunityExtensions
 module STL
 
-def dxf_export_mesh_file
+def self.dxf_export_mesh_file
   model = Sketchup.active_model
   model_filename = File.basename(model.path)
   if( model_filename == "" )
@@ -64,7 +64,7 @@ def dxf_export_mesh_file
   end
 end
 
-def dxf_find_faces(others, entities, tform, layername,dxf_option)
+def self.dxf_find_faces(others, entities, tform, layername,dxf_option)
   entities.each do |entity|
     #Face entity
     if( entity.is_a?(Sketchup::Face) )
@@ -117,20 +117,20 @@ def dxf_find_faces(others, entities, tform, layername,dxf_option)
   others
 end
 
-def dxf_transform_edge(edge, tform)
+def self.dxf_transform_edge(edge, tform)
   points=[]
   points.push(dxf_transform_vertex(edge.start, tform))
   points.push(dxf_transform_vertex(edge.end, tform))
   points
 end
 
-def dxf_transform_vertex(vertex, tform)
+def self.dxf_transform_vertex(vertex, tform)
   point = Geom::Point3d.new(vertex.position.x, vertex.position.y, vertex.position.z)
   point.transform! tform
   point
 end
 
-def dxf_write_edge(edge, tform, layername)
+def self.dxf_write_edge(edge, tform, layername)
   points = dxf_transform_edge(edge, tform)
   $mesh_file.puts( "  0\nLINE\n 8\n"+layername+"\n")
   for j in 0..1 do
@@ -141,7 +141,7 @@ def dxf_write_edge(edge, tform, layername)
   $line_count+=1
 end
 
-def dxf_write_polyline(face, tform,layername)
+def self.dxf_write_polyline(face, tform,layername)
   face.loops.each do |aloop|
     $mesh_file.puts("  0\nPOLYLINE\n 8\n"+layername+"\n 66\n     1")
     $mesh_file.puts("70\n    8\n 10\n0.0\n 20\n 0.0\n 30\n0.0")
@@ -166,7 +166,7 @@ def dxf_write_polyline(face, tform,layername)
 end
 
 
-def dxf_write_face(face,tform, layername)
+def self.dxf_write_face(face,tform, layername)
   mesh = face.mesh 0
   mesh.transform! tform
   polygons = mesh.polygons
@@ -195,7 +195,7 @@ def dxf_write_face(face,tform, layername)
   $face_count+=1
 end
 
-def dxf_write_stl(face,tform)
+def self.dxf_write_stl(face,tform)
   mesh = face.mesh 7
   mesh.transform! tform
   polygons = mesh.polygons
@@ -231,7 +231,7 @@ def dxf_write_stl(face,tform)
   end
 end
 
-def dxf_write_polyface(face,tform,layername)
+def self.dxf_write_polyface(face,tform,layername)
   mesh = face.mesh 0
   mesh.transform! tform
   polygons = mesh.polygons
@@ -265,7 +265,7 @@ def dxf_write_polyface(face,tform,layername)
   $face_count+=1
 end
 
-def dxf_dxf_options_dialog
+def self.dxf_dxf_options_dialog
   # Hardcoding for STL export for now.
   return "stl"
 
@@ -278,14 +278,14 @@ def dxf_dxf_options_dialog
   results[0]
 end
 
-def stl_options_dialog
+def self.stl_options_dialog
   prompts  = ["ASCII or Binary? "]
   defaults = ["Binary"]
   options  = ["ASCII|Binary"]
   UI.inputbox(prompts, defaults, options, "STL Type")
 end
 
-def dxf_dxf_units_dialog
+def self.dxf_dxf_units_dialog
   # Hardcoding for millimeters export for now.
   $stl_conv = 25.4
   return
@@ -323,7 +323,7 @@ def dxf_dxf_units_dialog
   end
 end
 
-def dxf_header(dxf_option,model_name)
+def self.dxf_header(dxf_option,model_name)
   if (dxf_option=="stl")
     if $stl_type == "ascii"
       $mesh_file.puts( "solid " + model_name)
@@ -336,7 +336,7 @@ def dxf_header(dxf_option,model_name)
   end
 end
 
-def dxf_end(dxf_option,model_name)
+def self.dxf_end(dxf_option,model_name)
   if (dxf_option=="stl")
     if $stl_type == "ascii"
       $mesh_file.puts( "endsolid " + model_name)

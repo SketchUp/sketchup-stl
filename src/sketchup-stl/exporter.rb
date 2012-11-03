@@ -62,7 +62,7 @@ module CommunityExtensions
     def self.find_faces(others, entities, tform)
       entities.each do |entity|
         #Face entity
-        if( entity.is_a?(Sketchup::Face) )
+        if entity.is_a?(Sketchup::Face)
           write_face(entity,tform)     
           #Group & Componentinstanceentity
         elsif entity.is_a?(Sketchup::Group) || entity.is_a?(Sketchup::ComponentInstance)
@@ -72,11 +72,7 @@ module CommunityExtensions
           else
             definition = entity.definition
           end
-          others = find_faces(
-            others,
-            definition.entities,
-            tform * entity.transformation
-          )
+          others = find_faces(others, definition.entities, tform * entity.transformation)
         else
           others = others + 1
         end
@@ -95,7 +91,7 @@ module CommunityExtensions
             @mesh_file.puts("facet normal #{norm.x} #{norm.y} #{norm.z}")
             @mesh_file.puts("outer loop")
           else
-            @mesh_file.write([norm.x, norm.y, norm.z].pack("e3"))
+            @mesh_file.write(norm.to_a.pack("e3"))
           end
           for j in 0..2 do
             pt = mesh.point_at(polygon[j].abs)
@@ -114,6 +110,27 @@ module CommunityExtensions
         end
         @face_count+=1
       end
+    end
+
+    def self.write_header(model_name)
+      if @stl_type == "ascii"
+        @mesh_file.puts( "solid " + model_name)
+      else
+        @mesh_file.write(["SketchUp STL #{model_name}"].pack("A80"))
+        @mesh_file.write([0xffffffff].pack("V"))
+      end
+    end
+
+    def self.write_footer(model_name)
+      if @stl_type == "ascii"
+        @mesh_file.puts( "endsolid " + model_name)
+      else
+        # binary - update facet count
+        @mesh_file.flush
+        @mesh_file.seek(80)
+        @mesh_file.write([@face_count].pack("V"))
+      end
+      @mesh_file.close
     end
 
     def self.stl_options_dialog
@@ -159,27 +176,6 @@ module CommunityExtensions
       when "Inches"
         @stl_conv=1
       end
-    end
-
-    def self.write_header(model_name)
-      if @stl_type == "ascii"
-        @mesh_file.puts( "solid " + model_name)
-      else
-        @mesh_file.write(["SketchUp STL #{model_name}"].pack("A80"))
-        @mesh_file.write([0xffffffff].pack("V"))
-      end
-    end
-
-    def self.write_footer(model_name)
-      if @stl_type == "ascii"
-        @mesh_file.puts( "endsolid " + model_name)
-      else
-        # binary - update facet count
-        @mesh_file.flush
-        @mesh_file.seek(80)
-        @mesh_file.write([@face_count].pack("V"))
-      end
-      @mesh_file.close
     end
 
     if( not @sketchup_stl_loaded )

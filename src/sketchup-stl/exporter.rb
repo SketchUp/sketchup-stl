@@ -112,9 +112,7 @@ module CommunityExtensions
             @mesh_file.puts("facet normal #{norm.x} #{norm.y} #{norm.z}")
             @mesh_file.puts("outer loop")
           else
-            @mesh_file.write([norm.x].pack("e"))
-            @mesh_file.write([norm.y].pack("e"))
-            @mesh_file.write([norm.z].pack("e"))
+            @mesh_file.write([norm.x, norm.y, norm.z].pack("e3"))
           end
           for j in 0..2 do
             pt = mesh.point_at(polygon[j].abs)
@@ -122,9 +120,7 @@ module CommunityExtensions
             if @stl_type == "ascii"
               @mesh_file.puts("vertex #{pt.x} #{pt.y} #{pt.x}")
             else
-              @mesh_file.write([pt.x].pack("e"))
-              @mesh_file.write([pt.y].pack("e"))
-              @mesh_file.write([pt.z].pack("e"))
+              @mesh_file.write(pt.pack("e3"))
             end
           end
           if @stl_type == "ascii"

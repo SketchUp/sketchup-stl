@@ -12,17 +12,20 @@ module CommunityExtensions
 
     def self.export_mesh_file
       model = Sketchup.active_model
+      if model.active_entities.length == 0
+        return UI.messagebox("Nothing to export.")
+      end
       model_filename = File.basename(model.path)
-      if( model_filename == "" )
+      if model_filename == ""
         model_filename = "model"
       end
-      ss = model.selection
       @stl_conv = 1.0
       @face_count = 0
       @line_count = 0
+      ss = model.selection
       if ss.empty?
         answer = UI.messagebox("No objects selected. Export entire model?", MB_YESNOCANCEL)
-        if( answer == 6 )
+        if answer == IDYES
           export_ents = model.entities
         else
           export_ents = ss

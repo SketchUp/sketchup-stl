@@ -117,13 +117,6 @@ module CommunityExtensions
       others
     end
 
-    def self.dxf_transform_edge(edge, tform)
-      points=[]
-      points.push(dxf_transform_vertex(edge.start, tform))
-      points.push(dxf_transform_vertex(edge.end, tform))
-      points
-    end
-
     def self.dxf_transform_vertex(vertex, tform)
       point = Geom::Point3d.new(vertex.position.x, vertex.position.y, vertex.position.z)
       point.transform! tform

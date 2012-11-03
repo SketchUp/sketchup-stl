@@ -6,6 +6,9 @@
 
 require 'sketchup.rb'
 
+module CommunityExtensions
+module STL
+
 def dxf_export_mesh_file
   model = Sketchup.active_model
   model_filename = File.basename(model.path)
@@ -371,3 +374,6 @@ if( not $sketchup_stl_loaded )
 end
 
 $sketchup_stl_loaded = true
+
+end # module STL
+end # module CommunityExtensions

@@ -5,10 +5,10 @@
 require 'sketchup.rb'
 
 module CommunityExtensions
-  class STLImporter
+  module STL
   
     Sketchup::require File.join( PLUGIN_PATH, 'importer')
     Sketchup::require File.join( PLUGIN_PATH, 'exporter')
 
-  end # class STLImporter
+  end # module STL
 end # module CommunityExtensions

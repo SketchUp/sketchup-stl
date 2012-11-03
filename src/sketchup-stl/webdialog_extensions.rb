@@ -1,7 +1,7 @@
 require 'sketchup'
 
 module CommunityExtensions
-  class STLImporter
+  module STL
 
   
   # Helper module to ease some of the communication with WebDialogs.
@@ -45,5 +45,5 @@ module CommunityExtensions
   end # module WebDialogBridge
 
   
-  end # class STLImporter
+  end # module STL
 end # module CommunityExtensions

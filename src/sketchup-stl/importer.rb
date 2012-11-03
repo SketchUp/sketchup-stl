@@ -7,16 +7,17 @@
 require 'sketchup'
 
 module CommunityExtensions
-  class STLImporter
-  
+  module STL
+  class Importer
+
     Sketchup::require File.join( PLUGIN_PATH, 'webdialog_extensions')
-  
+
     UNIT_METERS      = 4
     UNIT_CENTIMETERS = 3
     UNIT_MILLIMETERS = 2
     UNIT_FEET        = 1
     UNIT_INCHES      = 0
-    
+
     PREF_KEY = 'STLImporter'.freeze
 
     def initialize
@@ -367,9 +368,10 @@ module CommunityExtensions
 
   end # class STLImporter
 
+end # module STL
 end # module CommunityExtensions
 
 unless file_loaded?(__FILE__)
-  Sketchup.register_importer(CommunityExtensions::STLImporter.new)
+  Sketchup.register_importer(CommunityExtensions::STL::Importer.new)
   file_loaded(__FILE__)
 end

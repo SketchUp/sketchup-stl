@@ -34,7 +34,6 @@ module CommunityExtensions
         units_dialog()
 
         # Get DXF export option.
-        dxf_option = "stl"
         file_type="stl"
 
         options = stl_options_dialog
@@ -53,14 +52,14 @@ module CommunityExtensions
 
           # Recursively export faces and edges, exploding groups as we go.
           # Count "other" objects we can't parse.
-          others = find_faces(0, export_ents, Geom::Transformation.new(), model.active_layer.name,dxf_option)
+          others = find_faces(0, export_ents, Geom::Transformation.new(), model.active_layer.name)
           write_footer(model_name)
           UI.messagebox( @face_count.to_s + " facets exported " + @line_count.to_s + " lines exported\n" + others.to_s + " objects ignored" )
         end
       end
     end
 
-    def self.find_faces(others, entities, tform, layername,dxf_option)
+    def self.find_faces(others, entities, tform, layername)
       entities.each do |entity|
         #Face entity
         if( entity.is_a?(Sketchup::Face) )
@@ -80,6 +79,9 @@ module CommunityExtensions
           #     just wanted to avoid the exporter making model changes.
           # 
           # -ThomThom
+          #
+          # The intent was only relavent for dxf output - there are no layers in stl. 
+          # -JimJim
           if entity.is_a?(Sketchup::Group)
             # (!) Beware - Due to a SketchUp bug this can be incorrect. Fix later.
             definition = entity.entities.parent
@@ -91,8 +93,7 @@ module CommunityExtensions
             others,
             definition.entities,
             tform * entity.transformation,
-            layer,
-            dxf_option
+            layer
           )
         else
           others = others + 1

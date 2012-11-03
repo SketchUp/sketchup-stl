@@ -65,9 +65,6 @@ module CommunityExtensions
         #Face entity
         if( entity.is_a?(Sketchup::Face) )
           dxf_write_stl(entity,tform)     
-          #Edge entity
-        elsif( entity.is_a?(Sketchup::Edge)) and((dxf_option=="lines")or(entity.faces.length==0 and dxf_option!="stl"))
-          dxf_write_edge(entity, tform, layername)
           #Group & Componentinstanceentity
         elsif entity.is_a?(Sketchup::Group) || entity.is_a?(Sketchup::ComponentInstance)
           # I don't quite understand what the organization intention of the original

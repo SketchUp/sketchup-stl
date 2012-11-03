@@ -68,16 +68,7 @@ module CommunityExtensions
       entities.each do |entity|
         #Face entity
         if( entity.is_a?(Sketchup::Face) )
-          case dxf_option
-          when "polylines"
-            dxf_write_polyline(entity,tform,layername)
-          when "polyface mesh"
-            dxf_write_polyface(entity,tform,layername)
-          when "triangular mesh"
-            dxf_write_face(entity,tform,layername)
-          when "stl"
-            dxf_write_stl(entity,tform)     
-          end
+          dxf_write_stl(entity,tform)     
           #Edge entity
         elsif( entity.is_a?(Sketchup::Edge)) and((dxf_option=="lines")or(entity.faces.length==0 and dxf_option!="stl"))
           dxf_write_edge(entity, tform, layername)

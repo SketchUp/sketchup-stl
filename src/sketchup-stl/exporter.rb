@@ -52,48 +52,30 @@ module CommunityExtensions
 
           # Recursively export faces and edges, exploding groups as we go.
           # Count "other" objects we can't parse.
-          others = find_faces(0, export_ents, Geom::Transformation.new(), model.active_layer.name)
+          others = find_faces(0, export_ents, Geom::Transformation.new())
           write_footer(model_name)
           UI.messagebox( @face_count.to_s + " facets exported " + @line_count.to_s + " lines exported\n" + others.to_s + " objects ignored" )
         end
       end
     end
 
-    def self.find_faces(others, entities, tform, layername)
+    def self.find_faces(others, entities, tform)
       entities.each do |entity|
         #Face entity
         if( entity.is_a?(Sketchup::Face) )
           write_face(entity,tform)     
           #Group & Componentinstanceentity
         elsif entity.is_a?(Sketchup::Group) || entity.is_a?(Sketchup::ComponentInstance)
-          # I don't quite understand what the organization intention of the original
-          # code was in terms of working out the layer name. Appear to be based on
-          # object name... The old code name an incremental name prefixed GROUP or
-          # COMPONENT which didn't make any sense at all. And it modified the entity
-          # name.
-          # 
-          # At the moment I just make it take either the instance name or definition
-          # name. But I wonder if there's a more sensible name to use for this.
-          # 
-          # (!) This layername argument should be looked into further. But for now I
-          #     just wanted to avoid the exporter making model changes.
-          # 
-          # -ThomThom
-          #
-          # The intent was only relavent for dxf output - there are no layers in stl. 
-          # -JimJim
           if entity.is_a?(Sketchup::Group)
             # (!) Beware - Due to a SketchUp bug this can be incorrect. Fix later.
             definition = entity.entities.parent
           else
             definition = entity.definition
           end
-          layer = ( entity.name.empty? ) ? definition.name : entity.name
           others = find_faces(
             others,
             definition.entities,
-            tform * entity.transformation,
-            layer
+            tform * entity.transformation
           )
         else
           others = others + 1

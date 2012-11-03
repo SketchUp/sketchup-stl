@@ -117,31 +117,6 @@ module CommunityExtensions
       others
     end
 
-    def self.dxf_write_polyline(face, tform,layername)
-      face.loops.each do |aloop|
-        @mesh_file.puts("  0\nPOLYLINE\n 8\n"+layername+"\n 66\n     1")
-        @mesh_file.puts("70\n    8\n 10\n0.0\n 20\n 0.0\n 30\n0.0")
-        for j in 0..aloop.vertices.length do
-          if (j==aloop.vertices.length)
-            count = 0
-          else
-            count = j
-          end
-          point = dxf_transform_vertex(aloop.vertices[count],tform)
-          @mesh_file.puts( "  0\nVERTEX\n  8\nMY3DLAYER")
-          @mesh_file.puts("10\n"+(point.x.to_f * @stl_conv).to_s)
-          @mesh_file.puts("20\n"+(point.y.to_f * @stl_conv).to_s)
-          @mesh_file.puts("30\n"+(point.z.to_f * @stl_conv).to_s)
-          @mesh_file.puts( " 70\n     32")
-        end
-        if (aloop.vertices.length > 0)
-          @mesh_file.puts( "  0\nSEQEND")
-        end
-      end
-      @face_count+=1
-    end
-
-
     def self.dxf_write_face(face,tform, layername)
       mesh = face.mesh 0
       mesh.transform! tform

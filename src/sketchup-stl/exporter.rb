@@ -16,9 +16,9 @@ def self.dxf_export_mesh_file
     model_filename = "model"
   end
   ss = model.selection
-  $stl_conv = 1.0
-  $face_count = 0
-  $line_count = 0
+  @stl_conv = 1.0
+  @face_count = 0
+  @line_count = 0
   if ss.empty?
     answer = UI.messagebox("No objects selected. Export entire model?", MB_YESNOCANCEL)
     if( answer == 6 )
@@ -43,14 +43,14 @@ def self.dxf_export_mesh_file
 
     options = stl_options_dialog
     return if options == false
-    $stl_type = options[0].downcase
+    @stl_type = options[0].downcase
 
     # Get exported file name and export.
     out_name = UI.savepanel( file_type.upcase + " file location", "" , "#{File.basename(model.path).split(".")[0]}untitled." +file_type )
     if out_name
-      $mesh_file = File.new( out_name , "w" )  
-      if $stl_type != "ascii"
-        $mesh_file.binmode
+      @mesh_file = File.new( out_name , "w" )  
+      if @stl_type != "ascii"
+        @mesh_file.binmode
       end
       model_name = model_filename.split(".")[0]
       dxf_header(dxf_option,model_name)
@@ -59,7 +59,7 @@ def self.dxf_export_mesh_file
       # Count "other" objects we can't parse.
       others = dxf_find_faces(0, export_ents, Geom::Transformation.new(), model.active_layer.name,dxf_option)
       dxf_end(dxf_option,model_name)
-      UI.messagebox( $face_count.to_s + " facets exported " + $line_count.to_s + " lines exported\n" + others.to_s + " objects ignored" )
+      UI.messagebox( @face_count.to_s + " facets exported " + @line_count.to_s + " lines exported\n" + others.to_s + " objects ignored" )
     end
   end
 end
@@ -132,19 +132,19 @@ end
 
 def self.dxf_write_edge(edge, tform, layername)
   points = dxf_transform_edge(edge, tform)
-  $mesh_file.puts( "  0\nLINE\n 8\n"+layername+"\n")
+  @mesh_file.puts( "  0\nLINE\n 8\n"+layername+"\n")
   for j in 0..1 do
-    $mesh_file.puts((10+j).to_s+"\n"+(points[j].x.to_f * $stl_conv).to_s)#x
-    $mesh_file.puts((20+j).to_s+"\n"+(points[j].y.to_f * $stl_conv).to_s)#y
-    $mesh_file.puts((30+j).to_s+"\n"+(points[j].z.to_f * $stl_conv).to_s)#z
+    @mesh_file.puts((10+j).to_s+"\n"+(points[j].x.to_f * @stl_conv).to_s)#x
+    @mesh_file.puts((20+j).to_s+"\n"+(points[j].y.to_f * @stl_conv).to_s)#y
+    @mesh_file.puts((30+j).to_s+"\n"+(points[j].z.to_f * @stl_conv).to_s)#z
   end
-  $line_count+=1
+  @line_count+=1
 end
 
 def self.dxf_write_polyline(face, tform,layername)
   face.loops.each do |aloop|
-    $mesh_file.puts("  0\nPOLYLINE\n 8\n"+layername+"\n 66\n     1")
-    $mesh_file.puts("70\n    8\n 10\n0.0\n 20\n 0.0\n 30\n0.0")
+    @mesh_file.puts("  0\nPOLYLINE\n 8\n"+layername+"\n 66\n     1")
+    @mesh_file.puts("70\n    8\n 10\n0.0\n 20\n 0.0\n 30\n0.0")
     for j in 0..aloop.vertices.length do
       if (j==aloop.vertices.length)
         count = 0
@@ -152,17 +152,17 @@ def self.dxf_write_polyline(face, tform,layername)
         count = j
       end
       point = dxf_transform_vertex(aloop.vertices[count],tform)
-      $mesh_file.puts( "  0\nVERTEX\n  8\nMY3DLAYER")
-      $mesh_file.puts("10\n"+(point.x.to_f * $stl_conv).to_s)
-      $mesh_file.puts("20\n"+(point.y.to_f * $stl_conv).to_s)
-      $mesh_file.puts("30\n"+(point.z.to_f * $stl_conv).to_s)
-      $mesh_file.puts( " 70\n     32")
+      @mesh_file.puts( "  0\nVERTEX\n  8\nMY3DLAYER")
+      @mesh_file.puts("10\n"+(point.x.to_f * @stl_conv).to_s)
+      @mesh_file.puts("20\n"+(point.y.to_f * @stl_conv).to_s)
+      @mesh_file.puts("30\n"+(point.z.to_f * @stl_conv).to_s)
+      @mesh_file.puts( " 70\n     32")
     end
     if (aloop.vertices.length > 0)
-      $mesh_file.puts( "  0\nSEQEND")
+      @mesh_file.puts( "  0\nSEQEND")
     end
   end
-  $face_count+=1
+  @face_count+=1
 end
 
 
@@ -173,7 +173,7 @@ def self.dxf_write_face(face,tform, layername)
   polygons.each do |polygon|
     if (polygon.length > 2)
       flags = 0
-      $mesh_file.puts( "  0\n3DFACE\n 8\n"+layername)
+      @mesh_file.puts( "  0\n3DFACE\n 8\n"+layername)
       for j in 0..polygon.length do
         if (j==polygon.length)
           count = polygon.length-1
@@ -184,15 +184,15 @@ def self.dxf_write_face(face,tform, layername)
         if ((polygon[count]<0))
           flags+=2**j
         end
-        $mesh_file.puts((10+j).to_s+"\n"+(mesh.point_at(polygon[count].abs).x.to_f * $stl_conv).to_s)
-        $mesh_file.puts((20+j).to_s+"\n"+(mesh.point_at(polygon[count].abs).y.to_f * $stl_conv).to_s)
-        $mesh_file.puts((30+j).to_s+"\n"+(mesh.point_at(polygon[count].abs).z.to_f * $stl_conv).to_s)
+        @mesh_file.puts((10+j).to_s+"\n"+(mesh.point_at(polygon[count].abs).x.to_f * @stl_conv).to_s)
+        @mesh_file.puts((20+j).to_s+"\n"+(mesh.point_at(polygon[count].abs).y.to_f * @stl_conv).to_s)
+        @mesh_file.puts((30+j).to_s+"\n"+(mesh.point_at(polygon[count].abs).z.to_f * @stl_conv).to_s)
       end
       #edge visibiliy flags
-      $mesh_file.puts("70\n"+flags.to_s)  
+      @mesh_file.puts("70\n"+flags.to_s)  
     end
   end
-  $face_count+=1
+  @face_count+=1
 end
 
 def self.dxf_write_stl(face,tform)
@@ -202,32 +202,32 @@ def self.dxf_write_stl(face,tform)
   polygons.each do |polygon|
     if (polygon.length == 3)
       norm = mesh.normal_at(polygon[0].abs)
-      if $stl_type == "ascii"
-        $mesh_file.puts("facet normal #{norm.x} #{norm.y} #{norm.z}")
-        $mesh_file.puts("outer loop")
+      if @stl_type == "ascii"
+        @mesh_file.puts("facet normal #{norm.x} #{norm.y} #{norm.z}")
+        @mesh_file.puts("outer loop")
       else
-        $mesh_file.write([norm.x].pack("e"))
-        $mesh_file.write([norm.y].pack("e"))
-        $mesh_file.write([norm.z].pack("e"))
+        @mesh_file.write([norm.x].pack("e"))
+        @mesh_file.write([norm.y].pack("e"))
+        @mesh_file.write([norm.z].pack("e"))
       end
       for j in 0..2 do
         pt = mesh.point_at(polygon[j].abs)
-        pt = pt.to_a.map{|e| e * $stl_conv}
-        if $stl_type == "ascii"
-          $mesh_file.puts("vertex #{pt.x} #{pt.y} #{pt.x}")
+        pt = pt.to_a.map{|e| e * @stl_conv}
+        if @stl_type == "ascii"
+          @mesh_file.puts("vertex #{pt.x} #{pt.y} #{pt.x}")
         else
-          $mesh_file.write([pt.x].pack("e"))
-          $mesh_file.write([pt.y].pack("e"))
-          $mesh_file.write([pt.z].pack("e"))
+          @mesh_file.write([pt.x].pack("e"))
+          @mesh_file.write([pt.y].pack("e"))
+          @mesh_file.write([pt.z].pack("e"))
         end
       end
-      if $stl_type == "ascii"
-        $mesh_file.puts( "endloop\nendfacet")
+      if @stl_type == "ascii"
+        @mesh_file.puts( "endloop\nendfacet")
       else
-        $mesh_file.write([0].pack("v"))
+        @mesh_file.write([0].pack("v"))
       end
     end
-    $face_count+=1
+    @face_count+=1
   end
 end
 
@@ -236,33 +236,33 @@ def self.dxf_write_polyface(face,tform,layername)
   mesh.transform! tform
   polygons = mesh.polygons
   points = mesh.points
-  $mesh_file.puts("  0\nPOLYLINE\n 8\n"+layername+"\n 66\n     1")
-  $mesh_file.puts("10\n0.0\n 20\n 0.0\n 30\n0.0\n")
-  $mesh_file.puts("70\n    64\n") #flag for 3D polyface
-  $mesh_file.puts("71\n"+mesh.count_points.to_s)
-  $mesh_file.puts("72\n   1")
+  @mesh_file.puts("  0\nPOLYLINE\n 8\n"+layername+"\n 66\n     1")
+  @mesh_file.puts("10\n0.0\n 20\n 0.0\n 30\n0.0\n")
+  @mesh_file.puts("70\n    64\n") #flag for 3D polyface
+  @mesh_file.puts("71\n"+mesh.count_points.to_s)
+  @mesh_file.puts("72\n   1")
   #points
   points.each do |point| 
-    $mesh_file.puts( "  0\nVERTEX\n  8\n"+layername)
-    $mesh_file.puts("10\n"+(point.x.to_f * $stl_conv).to_s)
-    $mesh_file.puts("20\n"+(point.y.to_f * $stl_conv).to_s)
-    $mesh_file.puts("30\n"+(point.z.to_f * $stl_conv).to_s)
-    $mesh_file.puts( " 70\n     192")
+    @mesh_file.puts( "  0\nVERTEX\n  8\n"+layername)
+    @mesh_file.puts("10\n"+(point.x.to_f * @stl_conv).to_s)
+    @mesh_file.puts("20\n"+(point.y.to_f * @stl_conv).to_s)
+    @mesh_file.puts("30\n"+(point.z.to_f * @stl_conv).to_s)
+    @mesh_file.puts( " 70\n     192")
   end
   #polygons
   polygons.each do |polygon| 
-    $mesh_file.puts( "  0\nVERTEX\n  8\n"+layername)
-    $mesh_file.puts("10\n0.0\n 20\n 0.0\n 30\n0.0\n")
-    $mesh_file.puts( " 70\n     128")
-    $mesh_file.puts( " 71\n"+polygon[0].to_s)
-    $mesh_file.puts( " 72\n"+polygon[1].to_s)
-    $mesh_file.puts( " 73\n"+polygon[2].to_s)
+    @mesh_file.puts( "  0\nVERTEX\n  8\n"+layername)
+    @mesh_file.puts("10\n0.0\n 20\n 0.0\n 30\n0.0\n")
+    @mesh_file.puts( " 70\n     128")
+    @mesh_file.puts( " 71\n"+polygon[0].to_s)
+    @mesh_file.puts( " 72\n"+polygon[1].to_s)
+    @mesh_file.puts( " 73\n"+polygon[2].to_s)
     if (polygon.length==4)
-      $mesh_file.puts( " 74\n"+polygon[3]..abs.to_s)
+      @mesh_file.puts( " 74\n"+polygon[3]..abs.to_s)
     end
   end
-  $mesh_file.puts( "  0\nSEQEND")
-  $face_count+=1
+  @mesh_file.puts( "  0\nSEQEND")
+  @face_count+=1
 end
 
 def self.dxf_dxf_options_dialog
@@ -287,7 +287,7 @@ end
 
 def self.dxf_dxf_units_dialog
   # Hardcoding for millimeters export for now.
-  $stl_conv = 25.4
+  @stl_conv = 25.4
   return
 
   cu=Sketchup.active_model.options[0]["LengthUnit"]
@@ -311,48 +311,48 @@ def self.dxf_dxf_units_dialog
   return if not results
   case results[0]
   when "Meters"
-    $stl_conv=0.0254
+    @stl_conv=0.0254
   when "Centimeters"
-    $stl_conv=2.54
+    @stl_conv=2.54
   when "Millimeters"
-    $stl_conv=25.4
+    @stl_conv=25.4
   when "Feet"
-    $stl_conv=0.0833333333333333
+    @stl_conv=0.0833333333333333
   when "Inches"
-    $stl_conv=1
+    @stl_conv=1
   end
 end
 
 def self.dxf_header(dxf_option,model_name)
   if (dxf_option=="stl")
-    if $stl_type == "ascii"
-      $mesh_file.puts( "solid " + model_name)
+    if @stl_type == "ascii"
+      @mesh_file.puts( "solid " + model_name)
     else
-      $mesh_file.write(["SketchUp STL #{model_name}"].pack("A80"))
-      $mesh_file.write([0xffffffff].pack("V"))
+      @mesh_file.write(["SketchUp STL #{model_name}"].pack("A80"))
+      @mesh_file.write([0xffffffff].pack("V"))
     end
   else
-    $mesh_file.puts( " 0\nSECTION\n 2\nENTITIES")
+    @mesh_file.puts( " 0\nSECTION\n 2\nENTITIES")
   end
 end
 
 def self.dxf_end(dxf_option,model_name)
   if (dxf_option=="stl")
-    if $stl_type == "ascii"
-      $mesh_file.puts( "endsolid " + model_name)
+    if @stl_type == "ascii"
+      @mesh_file.puts( "endsolid " + model_name)
     else
       # binary - update facet count
-      $mesh_file.flush
-      $mesh_file.seek(80)
-      $mesh_file.write([$face_count].pack("V"))
+      @mesh_file.flush
+      @mesh_file.seek(80)
+      @mesh_file.write([@face_count].pack("V"))
     end
   else
-    $mesh_file.puts( " 0\nENDSEC\n 0\nEOF")
+    @mesh_file.puts( " 0\nENDSEC\n 0\nEOF")
   end
-  $mesh_file.close
+  @mesh_file.close
 end
 
-if( not $sketchup_stl_loaded )
+if( not @sketchup_stl_loaded )
   IS_MAC = ( Object::RUBY_PLATFORM =~ /darwin/i ? true : false )
   # Pick menu indexes for where to insert the Export menu. These numbers where
   # picked when SketchUp 8 M4 was the latest version.
@@ -373,7 +373,7 @@ if( not $sketchup_stl_loaded )
   end
 end
 
-$sketchup_stl_loaded = true
+@sketchup_stl_loaded = true
 
 end # module STL
 end # module CommunityExtensions

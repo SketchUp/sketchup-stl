@@ -182,40 +182,6 @@ module CommunityExtensions
       end
     end
 
-    def self.dxf_write_polyface(face,tform,layername)
-      mesh = face.mesh 0
-      mesh.transform! tform
-      polygons = mesh.polygons
-      points = mesh.points
-      @mesh_file.puts("  0\nPOLYLINE\n 8\n"+layername+"\n 66\n     1")
-      @mesh_file.puts("10\n0.0\n 20\n 0.0\n 30\n0.0\n")
-      @mesh_file.puts("70\n    64\n") #flag for 3D polyface
-      @mesh_file.puts("71\n"+mesh.count_points.to_s)
-      @mesh_file.puts("72\n   1")
-      #points
-      points.each do |point| 
-        @mesh_file.puts( "  0\nVERTEX\n  8\n"+layername)
-        @mesh_file.puts("10\n"+(point.x.to_f * @stl_conv).to_s)
-        @mesh_file.puts("20\n"+(point.y.to_f * @stl_conv).to_s)
-        @mesh_file.puts("30\n"+(point.z.to_f * @stl_conv).to_s)
-        @mesh_file.puts( " 70\n     192")
-      end
-      #polygons
-      polygons.each do |polygon| 
-        @mesh_file.puts( "  0\nVERTEX\n  8\n"+layername)
-        @mesh_file.puts("10\n0.0\n 20\n 0.0\n 30\n0.0\n")
-        @mesh_file.puts( " 70\n     128")
-        @mesh_file.puts( " 71\n"+polygon[0].to_s)
-        @mesh_file.puts( " 72\n"+polygon[1].to_s)
-        @mesh_file.puts( " 73\n"+polygon[2].to_s)
-        if (polygon.length==4)
-          @mesh_file.puts( " 74\n"+polygon[3]..abs.to_s)
-        end
-      end
-      @mesh_file.puts( "  0\nSEQEND")
-      @face_count+=1
-    end
-
     def self.dxf_dxf_options_dialog
       # Hardcoding for STL export for now.
       return "stl"

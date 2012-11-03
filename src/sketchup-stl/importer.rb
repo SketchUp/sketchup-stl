@@ -18,7 +18,7 @@ module CommunityExtensions
       UNIT_FEET        = 1
       UNIT_INCHES      = 0
 
-      PREF_KEY = 'CommunityExtensions\STL'.freeze
+      PREF_KEY = 'CommunityExtensions\STL\Importer'.freeze
 
       def initialize
         @stl_units = UNIT_INCHES

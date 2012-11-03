@@ -117,17 +117,6 @@ module CommunityExtensions
       others
     end
 
-    def self.dxf_write_edge(edge, tform, layername)
-      points = dxf_transform_edge(edge, tform)
-      @mesh_file.puts( "  0\nLINE\n 8\n"+layername+"\n")
-      for j in 0..1 do
-        @mesh_file.puts((10+j).to_s+"\n"+(points[j].x.to_f * @stl_conv).to_s)#x
-        @mesh_file.puts((20+j).to_s+"\n"+(points[j].y.to_f * @stl_conv).to_s)#y
-        @mesh_file.puts((30+j).to_s+"\n"+(points[j].z.to_f * @stl_conv).to_s)#z
-      end
-      @line_count+=1
-    end
-
     def self.dxf_write_polyline(face, tform,layername)
       face.loops.each do |aloop|
         @mesh_file.puts("  0\nPOLYLINE\n 8\n"+layername+"\n 66\n     1")

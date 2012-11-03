@@ -8,6 +8,7 @@ require 'sketchup.rb'
 
 module CommunityExtensions
   module STL
+    module Exporter
 
     def self.export_mesh_file
       model = Sketchup.active_model
@@ -201,5 +202,6 @@ module CommunityExtensions
 
     @sketchup_stl_loaded = true
 
+    end # module Exporter
   end # module STL
 end # module CommunityExtensions

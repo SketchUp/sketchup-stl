@@ -117,12 +117,6 @@ module CommunityExtensions
       others
     end
 
-    def self.dxf_transform_vertex(vertex, tform)
-      point = Geom::Point3d.new(vertex.position.x, vertex.position.y, vertex.position.z)
-      point.transform! tform
-      point
-    end
-
     def self.dxf_write_edge(edge, tform, layername)
       points = dxf_transform_edge(edge, tform)
       @mesh_file.puts( "  0\nLINE\n 8\n"+layername+"\n")

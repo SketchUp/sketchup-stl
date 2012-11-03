@@ -117,35 +117,6 @@ module CommunityExtensions
       others
     end
 
-    def self.dxf_write_face(face,tform, layername)
-      mesh = face.mesh 0
-      mesh.transform! tform
-      polygons = mesh.polygons
-      polygons.each do |polygon|
-        if (polygon.length > 2)
-          flags = 0
-          @mesh_file.puts( "  0\n3DFACE\n 8\n"+layername)
-          for j in 0..polygon.length do
-            if (j==polygon.length)
-              count = polygon.length-1
-            else
-              count = j
-            end
-            #check edge visibility
-            if ((polygon[count]<0))
-              flags+=2**j
-            end
-            @mesh_file.puts((10+j).to_s+"\n"+(mesh.point_at(polygon[count].abs).x.to_f * @stl_conv).to_s)
-            @mesh_file.puts((20+j).to_s+"\n"+(mesh.point_at(polygon[count].abs).y.to_f * @stl_conv).to_s)
-            @mesh_file.puts((30+j).to_s+"\n"+(mesh.point_at(polygon[count].abs).z.to_f * @stl_conv).to_s)
-          end
-          #edge visibiliy flags
-          @mesh_file.puts("70\n"+flags.to_s)  
-        end
-      end
-      @face_count+=1
-    end
-
     def self.dxf_write_stl(face,tform)
       mesh = face.mesh 7
       mesh.transform! tform

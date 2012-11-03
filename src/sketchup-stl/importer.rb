@@ -8,10 +8,23 @@ require 'sketchup'
 
 module CommunityExtensions
   class STLImporter
+  
+    Sketchup::require File.join( PLUGIN_PATH, 'webdialog_extensions')
+  
+    UNIT_METERS      = 4
+    UNIT_CENTIMETERS = 3
+    UNIT_MILLIMETERS = 2
+    UNIT_FEET        = 1
+    UNIT_INCHES      = 0
+    
+    PREF_KEY = 'STLImporter'.freeze
 
     def initialize
-      @stl_conv = 1
-      @stl_merge = 'Yes'
+      @stl_units = UNIT_INCHES
+      @stl_merge = false
+      @stl_preserve_origin = true
+      
+      @option_window = nil # (See comment at top of `stl_dialog()`.)
     end
 
     def description
@@ -59,11 +72,22 @@ module CommunityExtensions
       # Verify that anything was imported.
       if entities.nil? || entities.length == 0
         model.abort_operation
-        UI.messagebox('No geometry was imported.')
+        UI.messagebox('No geometry was imported.') if entities
+        Sketchup.status_text = '' # OSX doesn't reset the statusbar like Windows.
         return nil
       end
+      # Reposition to ORIGIN.
+      group = entities.parent.instances[0]
+      unless @stl_preserve_origin
+        point = group.bounds.corner(0)
+        vector = point.vector_to(ORIGIN)
+        group.transform!(vector) if vector.valid?
+      end
+      # Focus camera on imported geometry.
+      model.active_view.zoom(group)
+      # Clean up geometry.
       Sketchup.status_text = 'Cleaning up geometry...'
-      if @stl_merge == 'Yes'
+      if @stl_merge
         cleanup_geometry(entities)
       end
       Sketchup.status_text = 'Importing STL done!'
@@ -88,6 +112,7 @@ module CommunityExtensions
     private :do_msg
 
     def stl_binary_import(filename, try = 1)
+      stl_conv = get_unit_ratio(@stl_units)
       f = File.new(filename, "rb")
       # Header
       header = ""
@@ -111,11 +136,11 @@ module CommunityExtensions
       while !f.eof 
         normal = f.read(3 * float_size).unpack('fff')
         v1 = f.read(3 * float_size).unpack('fff') 
-        v1.map!{|e| e * @stl_conv}
+        v1.map!{|e| e * stl_conv}
         v2 = f.read(3 * float_size).unpack('fff')
-        v2.map!{|e| e * @stl_conv}
+        v2.map!{|e| e * stl_conv}
         v3 = f.read(3 * float_size).unpack('fff')
-        v3.map!{|e| e * @stl_conv}
+        v3.map!{|e| e * stl_conv}
         # UINT16 Attribute byte count? (STL format spec)
         abc = f.read(2)
         pts << [v1, v2, v3]
@@ -138,6 +163,7 @@ module CommunityExtensions
     private :stl_binary_import
 
     def stl_ascii_import(filename, try = 1)
+      stl_conv = get_unit_ratio(@stl_units)
       polys = []
       poly = []
       vcnt = 0
@@ -146,7 +172,7 @@ module CommunityExtensions
         if line[/vertex/]
           vcnt += 1
           c, *pts = line.split
-          pts.map! { |pt| pt.to_f * @stl_conv }
+          pts.map! { |pt| pt.to_f * stl_conv }
           poly << pts
           if vcnt == 3
             polys.push(poly.dup)# if vcnt > 0
@@ -174,51 +200,116 @@ module CommunityExtensions
       st = entities.fill_from_mesh(mesh, false, 0)
       return entities
     end
-
+    
+    # Returns conversion ratio based on unit type.
+    def get_unit_ratio(unit_type)
+      case unit_type
+      when UNIT_METERS
+        100.0 / 2.54
+      when UNIT_CENTIMETERS
+        1.0 / 2.54
+      when UNIT_MILLIMETERS
+        0.1 / 2.54
+      when UNIT_FEET
+        12.0
+      when UNIT_INCHES
+        1
+      end
+    end
+    private :get_unit_ratio
+    
     def stl_dialog
-      current_unit = Sketchup.read_default("STLImporter", 'import_units')
-      merge_faces  = Sketchup.read_default("STLImporter", 'merge_faces', @stl_merge)
-      if current_unit.nil?
-        cu=Sketchup.active_model.options["UnitsOptions"]["LengthUnit"]
-        case cu
-        when 4
-          current_unit= "Meters"
-        when 3
-          current_unit= "Centimeters"
-        when 2
-          current_unit= "Millimeters"
-        when 1
-          current_unit= "Feet"
-        when 0
-          current_unit= "Inches"
-        end
+      # Since WebDialogs under OSX isn't truly modal wthere is a chance the user
+      # can click the Options button while the window is already open. We then
+      # just bring it to the front.
+      # 
+      # The reference is being released when the window is closed so it's
+      # easier to develop - make updates. Otherwise the WebDialog object would
+      # have been cached. And it also should ensure it's garbage collected.
+      if @option_window && @option_window.visible?
+        @option_window.bring_to_front
+        return false
       end
-      units_list=["Meters","Centimeters","Millimeters","Inches","Feet"].join("|")
-      merge_list=['Yes', 'No'].join("|")
-      prompts=["Import Units ", 'Merge coplanar faces ']
-      enums=[units_list, merge_list]
-      values=[current_unit, merge_faces]
-      results = inputbox prompts, values, enums, "STL Importer"
-      return if not results
-      mu = units_list.split('|')
-      cu = mu.index(results[0])
-      case cu
-      when 0
-        @stl_conv = 100.0 / 2.54
-      when 1
-        @stl_conv = 1.0 / 2.54
-      when 2
-        @stl_conv = 0.1 / 2.54
-      when 3
-        @stl_conv = 12.0
-      when 4
-        @stl_conv = 1
-      end
-      @stl_merge = results[1]
-      Sketchup.write_default("STLImporter", 'import_units', results[0])
-      Sketchup.write_default("STLImporter", 'merge_faces',  @stl_merge)
+      
+      html_source = File.join(PLUGIN_PATH, 'html', 'importer.html')
+      
+      window_options = {
+        :dialog_title     => 'Import STL Options',
+        :preferences_key  => false,
+        :scrollable       => false,
+        :resizable        => false,
+        :left             => 300,
+        :top              => 200,
+        :width            => 315,
+        :height           => 265
+      }
+      
+      window = UI::WebDialog.new(window_options)
+      window.extend(WebDialogExtensions)
+      window.set_size(window_options[:width], window_options[:height])
+      window.navigation_buttons_enabled = false
+      
+      window.add_action_callback('Window_Ready') { |dialog, params|
+        # Read import settings.
+        merge_faces     = read_setting('merge_faces',     @stl_merge)
+        current_unit    = read_setting('import_units',    @stl_units)
+        preserve_origin = read_setting('preserve_origin', @stl_preserve_origin)
+        # Ensure they are in proper format. (Recovers from old settings)
+        merge_faces     = ( merge_faces == true )
+        current_unit    = current_unit.to_i
+        preserve_origin = ( preserve_origin == true )
+        # Update webdialog values.
+        dialog.update_value('chkMergeCoplanar', merge_faces)
+        dialog.update_value('lstUnits', current_unit)
+        dialog.update_value('chkPreserveOrigin', preserve_origin)
+      }
+      
+      window.add_action_callback('Event_Accept') { |dialog, params|
+        # Get data from webdialog.
+        options = {
+          :merge_coplanar   => dialog.get_element_value('chkMergeCoplanar'),
+          :units            => dialog.get_element_value('lstUnits'),
+          :preserve_origin  => dialog.get_element_value('chkPreserveOrigin')
+        }
+        dialog.close
+        #p options # DEBUG
+        # Convert to Ruby values.
+        @stl_merge            = (options[:merge_coplanar] == 'true')
+        @stl_preserve_origin  = (options[:preserve_origin] == 'true')
+        @stl_units            = options[:units].to_i
+        # Store last used preferences.
+        write_setting('merge_faces',     @stl_merge)
+        write_setting('import_units',    @stl_units)
+        write_setting('preserve_origin', @stl_preserve_origin)
+      }
+
+      window.add_action_callback('Event_Cancel') { |dialog, params|
+        dialog.close
+      }
+      window.set_on_close {
+        @option_window = nil # (See comment at beginning of method.)
+      }
+      
+      window.set_file( html_source )
+      window.show_modal
+      @option_window = window # (See comment at beginning of method.)
+      true
     end
     private :stl_dialog
+    
+    # Wrapper to shorten the syntax and create a central place to modify in case
+    # preferences are stored differently in the future.
+    def read_setting(key, default)
+      Sketchup.read_default(PREF_KEY, key, default)
+    end
+    private :read_setting
+    
+    # Wrapper to shorten the syntax and create a central place to modify in case
+    # preferences are stored differently in the future.
+    def write_setting(key, value)
+      Sketchup.write_default(PREF_KEY, key, value)
+    end
+    private :write_setting
     
     # Cleans up the geometry in the given +entities+ collection.
     #
@@ -263,10 +354,10 @@ module CommunityExtensions
         shared_edges = face1.edges & face2.edges
         #shared_edges.each { |e| e.material = 'red' } # DEBUG
         edge.erase!
-        # Find left over edges
+        # Find left over edges that are no longer connected to any face.
         loose_edges = shared_edges.select { |e| e.valid? && e.faces.length == 0 }
         entities.erase_entities(loose_edges)
-        # Validate result
+        # Validate result - check if we destroyed some geometry.
         if face1.deleted? && face2.deleted?
           puts 'Merge error!' # DEBUG. What should be do there?
         end
@@ -278,4 +369,7 @@ module CommunityExtensions
 
 end # module CommunityExtensions
 
-Sketchup.register_importer(CommunityExtensions::STLImporter.new)
+unless file_loaded?(__FILE__)
+  Sketchup.register_importer(CommunityExtensions::STLImporter.new)
+  file_loaded(__FILE__)
+end

@@ -1,0 +1,33 @@
+fieldset {
+  margin: 10px;
+}
+
+label {
+  display: block;
+  position: relative;
+  margin: 10px 5px 15px 5px;
+}
+
+label.checkbox {
+  padding-left: 48px; /* -2px for invisible space */
+}
+label.checkbox  input {
+  vertical-align: -2px;
+}
+
+label.droplist span {
+  display: inline-block;
+  text-align: right;
+  width: 45px; /* -5px for padding */
+}
+label.droplist select {
+  position: absolute;
+  left: 50px;
+  width: 150px;
+}
+
+#footer {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}

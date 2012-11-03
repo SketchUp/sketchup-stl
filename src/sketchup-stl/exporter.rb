@@ -9,7 +9,7 @@ require 'sketchup.rb'
 module CommunityExtensions
   module STL
 
-    def self.dxf_export_mesh_file
+    def self.export_mesh_file
       model = Sketchup.active_model
       model_filename = File.basename(model.path)
       if( model_filename == "" )
@@ -31,7 +31,7 @@ module CommunityExtensions
       end
       if (export_ents.length > 0)
         # Get units for export.
-        dxf_dxf_units_dialog
+        units_dialog()
 
         # Get DXF export option.
         dxf_option = "stl"
@@ -49,22 +49,22 @@ module CommunityExtensions
             @mesh_file.binmode
           end
           model_name = model_filename.split(".")[0]
-          dxf_header(model_name)
+          write_header(model_name)
 
           # Recursively export faces and edges, exploding groups as we go.
           # Count "other" objects we can't parse.
-          others = dxf_find_faces(0, export_ents, Geom::Transformation.new(), model.active_layer.name,dxf_option)
-          dxf_end(model_name)
+          others = find_faces(0, export_ents, Geom::Transformation.new(), model.active_layer.name,dxf_option)
+          write_footer(model_name)
           UI.messagebox( @face_count.to_s + " facets exported " + @line_count.to_s + " lines exported\n" + others.to_s + " objects ignored" )
         end
       end
     end
 
-    def self.dxf_find_faces(others, entities, tform, layername,dxf_option)
+    def self.find_faces(others, entities, tform, layername,dxf_option)
       entities.each do |entity|
         #Face entity
         if( entity.is_a?(Sketchup::Face) )
-          dxf_write_stl(entity,tform)     
+          write_face(entity,tform)     
           #Group & Componentinstanceentity
         elsif entity.is_a?(Sketchup::Group) || entity.is_a?(Sketchup::ComponentInstance)
           # I don't quite understand what the organization intention of the original
@@ -87,7 +87,7 @@ module CommunityExtensions
             definition = entity.definition
           end
           layer = ( entity.name.empty? ) ? definition.name : entity.name
-          others = dxf_find_faces(
+          others = find_faces(
             others,
             definition.entities,
             tform * entity.transformation,
@@ -101,7 +101,7 @@ module CommunityExtensions
       others
     end
 
-    def self.dxf_write_stl(face,tform)
+    def self.write_face(face, tform)
       mesh = face.mesh 7
       mesh.transform! tform
       polygons = mesh.polygons
@@ -135,12 +135,12 @@ module CommunityExtensions
 
     def self.stl_options_dialog
       prompts  = ["ASCII or Binary? "]
+      choices  = ["ASCII|Binary"]
       defaults = ["Binary"]
-      options  = ["ASCII|Binary"]
-      UI.inputbox(prompts, defaults, options, "STL Type")
+      UI.inputbox(prompts, defaults, choices, "STL Type")
     end
 
-    def self.dxf_dxf_units_dialog
+    def self.units_dialog
       # Hardcoding for millimeters export for now.
       @stl_conv = 25.4
       return
@@ -178,7 +178,7 @@ module CommunityExtensions
       end
     end
 
-    def self.dxf_header(model_name)
+    def self.write_header(model_name)
       if @stl_type == "ascii"
         @mesh_file.puts( "solid " + model_name)
       else
@@ -187,7 +187,7 @@ module CommunityExtensions
       end
     end
 
-    def self.dxf_end(model_name)
+    def self.write_footer(model_name)
       if @stl_type == "ascii"
         @mesh_file.puts( "endsolid " + model_name)
       else
@@ -211,11 +211,11 @@ module CommunityExtensions
       # (i) The menu_index argument isn't supported by older versions.
       if Sketchup::Menu.instance_method(:add_item).arity == 1
         UI.menu('File').add_item('Export STL...') {
-          dxf_export_mesh_file
+          export_mesh_file
         }
       else
         UI.menu('File').add_item('Export STL...', insert_index) {
-          dxf_export_mesh_file
+          export_mesh_file
         }
       end
     end

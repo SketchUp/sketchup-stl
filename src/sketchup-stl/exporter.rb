@@ -24,7 +24,8 @@ module CommunityExtensions
       @line_count = 0
       ss = model.selection
       if ss.empty?
-        answer = UI.messagebox("No objects selected. Export entire model?", MB_YESNOCANCEL)
+        answer = UI.messagebox("No objects selected. Export entire model?",
+                               MB_YESNOCANCEL)
         if answer == IDYES
           export_ents = model.entities
         else
@@ -45,7 +46,8 @@ module CommunityExtensions
         @stl_type = options[0].downcase
 
         # Get exported file name and export.
-        out_name = UI.savepanel( file_type.upcase + " file location", "" , "#{File.basename(model.path).split(".")[0]}untitled." +file_type )
+        out_name = UI.savepanel("#{file_type.upcase} file location", "" ,
+            "#{File.basename(model.path).split(".")[0]}untitled." +file_type)
         if out_name
           @mesh_file = File.new( out_name , "w" )  
           if @stl_type != "ascii"
@@ -58,7 +60,8 @@ module CommunityExtensions
           # Count "other" objects we can't parse.
           others = find_faces(0, export_ents, Geom::Transformation.new())
           write_footer(model_name)
-          UI.messagebox( @face_count.to_s + " facets exported " + @line_count.to_s + " lines exported\n" + others.to_s + " objects ignored" )
+          UI.messagebox("#{@face_count} facets exported\n#{others} objects" +
+                        " ignored")
         end
       end
     end
@@ -69,14 +72,17 @@ module CommunityExtensions
         if entity.is_a?(Sketchup::Face)
           write_face(entity,tform)     
           #Group & Componentinstanceentity
-        elsif entity.is_a?(Sketchup::Group) || entity.is_a?(Sketchup::ComponentInstance)
+        elsif entity.is_a?(Sketchup::Group) ||
+          entity.is_a?(Sketchup::ComponentInstance)
           if entity.is_a?(Sketchup::Group)
-            # (!) Beware - Due to a SketchUp bug this can be incorrect. Fix later.
+            # (!) Beware - Due to a SketchUp bug this can be incorrect.
+            # Fix later.
             definition = entity.entities.parent
           else
             definition = entity.definition
           end
-          others = find_faces(others, definition.entities, tform * entity.transformation)
+          others = find_faces(others, definition.entities,
+                              tform * entity.transformation)
         else
           others = others + 1
         end
@@ -184,8 +190,8 @@ module CommunityExtensions
 
     if( not @sketchup_stl_loaded )
       IS_MAC = ( Object::RUBY_PLATFORM =~ /darwin/i ? true : false )
-      # Pick menu indexes for where to insert the Export menu. These numbers where
-      # picked when SketchUp 8 M4 was the latest version.
+      # Pick menu indexes for where to insert the Export menu. These numbers
+      # where picked when SketchUp 8 M4 was the latest version.
       if IS_MAC
         insert_index = 19
       else

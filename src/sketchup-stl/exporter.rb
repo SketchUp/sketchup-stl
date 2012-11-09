@@ -101,7 +101,7 @@ module CommunityExtensions
             pt = mesh.point_at(polygon[j].abs)
             pt = pt.to_a.map{|e| e * @stl_conv}
             if @stl_type == "ascii"
-              @mesh_file.puts("vertex #{pt.x} #{pt.y} #{pt.x}")
+              @mesh_file.puts("vertex #{pt.x} #{pt.y} #{pt.z}")
             else
               @mesh_file.write(pt.pack("e3"))
             end

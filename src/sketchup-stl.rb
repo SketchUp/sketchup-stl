@@ -9,7 +9,7 @@ require 'sketchup.rb'
 require 'extensions.rb'
 
 module CommunityExtensions
-  class STLImporter
+  module STL
   
     PLUGIN_ROOT_PATH = File.dirname(__FILE__)
     PLUGIN_PATH = File.join(PLUGIN_ROOT_PATH, 'sketchup-stl')
@@ -28,5 +28,5 @@ module CommunityExtensions
         
     Sketchup.register_extension( extension, true )
     
-  end # class STLImporter
+  end # module STL
 end # module CommunityExtensions

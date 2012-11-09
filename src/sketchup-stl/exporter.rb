@@ -24,8 +24,10 @@ module CommunityExtensions
       @line_count = 0
       ss = model.selection
       if ss.empty?
-        answer = UI.messagebox("No objects selected. Export entire model?",
-                               MB_YESNOCANCEL)
+        answer = UI.messagebox(
+          "No objects selected. Export entire model?",
+          MB_YESNOCANCEL
+        )
         if answer == IDYES
           export_ents = model.entities
         else
@@ -168,7 +170,7 @@ module CommunityExtensions
       when 0
         current_unit= "Inches"
       end
-      units_list=["Meters","Centimeters","Millimeters","Inches","Feet"].join("|")
+      units_list=%w(Meters Centimeters Millimeters Inches Feet).join('|')
       prompts=["Export unit: "]
       enums=[units_list]
       values=[current_unit]

@@ -29,13 +29,15 @@ module CommunityExtensions
       end
 
       def description
-        "STL Importer (*.stl) by Jim Foltz"
+        'STereo Lithography Files (*.stl)'
       end
+
       def id
-        "jim.foltz@gmail.com/stl_importer"
+        'com.sketchup.sketchup-stl'
       end
+
       def file_extension
-        "stl"
+        'stl'
       end
 
       def supports_options?

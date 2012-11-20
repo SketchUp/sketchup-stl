@@ -86,6 +86,12 @@ module CommunityExtensions
           vector = point.vector_to(ORIGIN)
           group.transform!(vector) if vector.valid?
         end
+        # Check if the imported geometry is a solid. If not, attempt to
+        # automatically repair it.
+        unless is_solid?(group)
+          Sketchup.status_text = 'Repairing geometry...'
+          heal_geometry(entities)
+        end
         # Focus camera on imported geometry.
         model.active_view.zoom(group)
         # Clean up geometry.
@@ -367,6 +373,89 @@ module CommunityExtensions
         end
         nil
       end
+      private :cleanup_geometry
+      
+      # This function is ported from Vertex Tools. It attempts to trigger
+      # SketchUp's own healing mechanism.
+      #
+      # I have tried two versions of this method, one where there is one temp
+      # group and edge for each vertex, and one (this one) where there is only
+      # one temp group. This latter one is three times faster than the former.
+      # However, when testing Vertex Tools there appeared to be some edge cases
+      # where this one didn't fix everything.
+      # Those cases where very extreme cases of messed up geometry, so I chose
+      # to still use this one due to its performance.
+      #
+      # Should there be a number of cases where healing is required and this
+      # method doesn't cut it, then it can be replaced with the alternative
+      # version. But until we have a set of real world cases I want to use this
+      # one. 
+      #
+      # -ThomThom
+      #
+      # @param [Sketchup::Entities] entities
+      # @param [Array<Geom::Point3d>] points
+      #
+      # @return [Integer]
+      # @since 1.1.0
+      def heal_geometry(entities)
+        # Collect positions of all vertices.
+        vertices = entities.grep(Sketchup::Edge) { |edge|
+          edge.vertices
+        }
+        vertices.flatten!
+        vertices.uniq!
+        points = vertices.map! { |vertex| vertex.position }
+        # Heal vertices.
+        # Create a temp group with a set of zero length edges for each vertex -
+        # when exploded will trigger SketchUp's internal healing function.
+        temp_group = entities.add_group
+        offset_reverse = Z_AXIS.reverse
+        vertices = []
+        vectors = []
+        for point in points
+          temp_edge = temp_group.entities.add_line(point, point.offset(Z_AXIS))
+          vertices << temp_edge.end
+          vectors  << offset_reverse
+        end
+        temp_group.entities.transform_by_vectors(vertices, vectors)
+        temp_group.explode
+        points.size
+      end
+      private :heal_geometry
+      
+      # Checks of a given instance contains geometry that is solid. Compatible
+      # with older SketchUp versions before SketchUp 8.
+      #
+      # @param [Sketchup::Group,Sketchup::ComponentInstance] instance
+      def is_solid?(instance)
+        if instance.respond_to?(:manifold?) 
+          instance.manifold?
+        else
+          retrofit_manifold?(instance)
+        end
+      end
+      private :is_solid?
+      
+      # Fallback method for checking if an instance is solid for versions older
+      # older than SketchUp 8.
+      #
+      # @param [Sketchup::Group,Sketchup::ComponentInstance] instance
+      def retrofit_manifold?(instance)
+        if instance.is_a?(Sketchup::Group)
+          definition = instance.entities.parent
+        else
+          definition = instance.definition
+        end
+        # (i) Since we know the instance has been populated with a PolygonMesh
+        #     we know there won't be any sub-groups/components or any other
+        #     entities we have to test for.
+        definition.entities.grep(Sketchup::Edge) { |edge|
+          return false unless edge.faces.length == 2
+        }
+        true
+      end
+      private :retrofit_manifold?
 
     end # class Importer
 

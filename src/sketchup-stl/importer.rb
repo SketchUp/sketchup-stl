@@ -373,32 +373,25 @@ module CommunityExtensions
         end
         nil
       end
+      private :cleanup_geometry
       
-      # Performance test: HealVertices.skp (15299 Vertices)
+      # This function is ported from Vertex Tools. It attempts to trigger
+      # SketchUp's own healing mechanism.
       #
-      # Original healing method (calls heal_vertex)
-      # 
-      # Healing took: 75.799s
-      # Healing took: 79.11s
-      # Healing took: 81.0s
-      # 
-      # 
-      # Bulk healing method
-      # 
-      # Healing took: 23.9s
-      # Healing took: 23.92s
-      # Healing took: 24.04s
-      # 
-      # 
-      # While the new one is nearly three times faster, it appear to some times
-      # not heal every face. It's in any case still faster to run the bulk
-      # method twice in case the first operation didn't heal 100% than to run
-      # the original method.
+      # I have tried two versions of this method, one where there is one temp
+      # group and edge for each vertex, and one (this one) where there is only
+      # one temp group. This latter one is three times faster than the former.
+      # However, when testing Vertex Tools there appeared to be some edge cases
+      # where this one didn't fix everything.
+      # Those cases where very extreme cases of messed up geometry, so I chose
+      # to still use this one due to its performance.
       #
-      # This method was extracted from Vertex Tools - where the user could run
-      # this method. In this automated repair we might want to make use of the
-      # older, but slower version that appear to be more reliable in fixing
-      # everything. Though this needs testing first. I'd prefer the speed. (TT)
+      # Should there be a number of cases where healing is required and this
+      # method doesn't cut it, then it can be replaced with the alternative
+      # version. But until we have a set of real world cases I want to use this
+      # one. 
+      #
+      # -ThomThom
       #
       # @param [Sketchup::Entities] entities
       # @param [Array<Geom::Point3d>] points
@@ -429,6 +422,7 @@ module CommunityExtensions
         temp_group.explode
         points.size
       end
+      private :heal_geometry
       
       # Checks of a given instance contains geometry that is solid. Compatible
       # with older SketchUp versions before SketchUp 8.
@@ -441,6 +435,7 @@ module CommunityExtensions
           retrofit_manifold?(instance)
         end
       end
+      private :is_solid?
       
       # Fallback method for checking if an instance is solid for versions older
       # older than SketchUp 8.
@@ -456,10 +451,11 @@ module CommunityExtensions
         #     we know there won't be any sub-groups/components or any other
         #     entities we have to test for.
         definition.entities.grep(Sketchup::Edge) { |edge|
-          return false if edge.faces.length != 2
+          return false unless edge.faces.length == 2
         }
         true
       end
+      private :retrofit_manifold?
 
     end # class Importer
 

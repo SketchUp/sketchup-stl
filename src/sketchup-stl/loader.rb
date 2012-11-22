@@ -7,8 +7,8 @@ require 'sketchup.rb'
 module CommunityExtensions
   module STL
   
-    Sketchup::require File.join( PLUGIN_PATH, 'importer')
-    Sketchup::require File.join( PLUGIN_PATH, 'exporter')
+    Sketchup::require File.join(PLUGIN_PATH, 'importer')
+    Sketchup::require File.join(PLUGIN_PATH, 'exporter')
 
   end # module STL
 end # module CommunityExtensions

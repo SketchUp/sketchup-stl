@@ -67,8 +67,14 @@ module CommunityExtensions
         @stl_merge           = read_setting('merge_faces',     @stl_merge)
         @stl_units           = read_setting('import_units',    @stl_units)
         @stl_preserve_origin = read_setting('preserve_origin', @stl_preserve_origin)
+        # Wrap everything into one operation, ensuring compatibility with older
+        # SketchUp versions that did not feature the disable_ui argument.
         model = Sketchup.active_model
-        model.start_operation("STL Import", true)
+        if model.method(:start_operation).arity == 1
+          model.start_operation('STL Import')
+        else
+          model.start_operation('STL Import', true)
+        end
         # Import geometry.
         Sketchup.status_text = 'Importing geometry...'
         if file_type[/solid/]

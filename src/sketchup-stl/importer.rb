@@ -63,6 +63,10 @@ module CommunityExtensions
       def main(filename)
         file_type = detect_file_type(filename)
         #p file_type
+        # Read import settings.
+        @stl_merge           = read_setting('merge_faces',     @stl_merge)
+        @stl_units           = read_setting('import_units',    @stl_units)
+        @stl_preserve_origin = read_setting('preserve_origin', @stl_preserve_origin)
         model = Sketchup.active_model
         model.start_operation("STL Import", true)
         # Import geometry.

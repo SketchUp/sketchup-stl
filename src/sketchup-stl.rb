@@ -16,7 +16,7 @@ module CommunityExtensions
   
     extension = SketchupExtension.new(
       'STL Import & Export',
-      File.join( PLUGIN_PATH, 'loader.rb')
+      File.join(PLUGIN_PATH, 'loader.rb')
     )
 
     extension.description = 'Adds STL file format import and export. ' <<
@@ -26,7 +26,7 @@ module CommunityExtensions
     extension.copyright = '2012 Trimble Navigation, released under Apache 2.0'
     extension.creator = 'J. Foltz, N. Bromham, K. Shroeder, SketchUp Team'
         
-    Sketchup.register_extension( extension, true )
+    Sketchup.register_extension(extension, true)
     
   end # module STL
 end # module CommunityExtensions

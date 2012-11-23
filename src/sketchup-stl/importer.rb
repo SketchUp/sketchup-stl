@@ -121,12 +121,12 @@ module CommunityExtensions
 
       def detect_file_type(file)
         first_line = File.open(file, 'r') { |f| f.read(80) }
-        return(first_line)
+        return first_line
       end
       private :detect_file_type
 
       def do_msg(msg)
-        return( UI.messagebox(msg, MB_YESNO) )
+        return UI.messagebox(msg, MB_YESNO)
       end
       private :do_msg
 

@@ -179,7 +179,7 @@ module CommunityExtensions
       return [stl_conv, results[1]]
     end
 
-    if( not @sketchup_stl_loaded )
+    unless file_loaded?(__FILE__)
       IS_MAC = ( Object::RUBY_PLATFORM =~ /darwin/i ? true : false )
       # Pick menu indexes for where to insert the Export menu. These numbers
       # where picked when SketchUp 8 M4 was the latest version.
@@ -198,9 +198,8 @@ module CommunityExtensions
           export_mesh_file
         }
       end
+      file_loaded(__FILE__)
     end
-
-    @sketchup_stl_loaded = true
 
     end # module Exporter
   end # module STL

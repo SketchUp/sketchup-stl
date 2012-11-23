@@ -9,6 +9,9 @@ require 'sketchup.rb'
 module CommunityExtensions
   module STL
     module Exporter
+    
+    STL_ASCII  = 'ascii'.freeze
+    STL_BINARY = 'binary'.freeze
 
     def self.export_mesh_file
       model = Sketchup.active_model
@@ -50,7 +53,7 @@ module CommunityExtensions
             "#{model_name}.#{file_type}")
         if out_name
           @mesh_file = File.new(out_name , 'w')  
-          if @stl_type == 'binary'
+          if @stl_type == STL_BINARY
             @mesh_file.binmode
           end
           write_header(model_name)
@@ -96,7 +99,7 @@ module CommunityExtensions
       polygons.each do |polygon|
         if (polygon.length == 3)
           norm = mesh.normal_at(polygon[0].abs)
-          if @stl_type == "ascii"
+          if @stl_type == STL_ASCII
             @mesh_file.puts("facet normal #{norm.x} #{norm.y} #{norm.z}")
             @mesh_file.puts("outer loop")
           else
@@ -105,13 +108,13 @@ module CommunityExtensions
           for j in 0..2 do
             pt = mesh.point_at(polygon[j].abs)
             pt = pt.to_a.map{|e| e * @stl_conv}
-            if @stl_type == "ascii"
+            if @stl_type == STL_ASCII
               @mesh_file.puts("vertex #{pt.x} #{pt.y} #{pt.z}")
             else
               @mesh_file.write(pt.pack("e3"))
             end
           end
-          if @stl_type == "ascii"
+          if @stl_type == STL_ASCII
             @mesh_file.puts( "endloop\nendfacet")
           else
             @mesh_file.write([0].pack("v"))
@@ -122,7 +125,7 @@ module CommunityExtensions
     end
 
     def self.write_header(model_name)
-      if @stl_type == "ascii"
+      if @stl_type == STL_ASCII
         @mesh_file.puts( "solid " + model_name)
       else
         @mesh_file.write(["SketchUp STL #{model_name}"].pack("A80"))
@@ -131,7 +134,7 @@ module CommunityExtensions
     end
 
     def self.write_footer(model_name)
-      if @stl_type == "ascii"
+      if @stl_type == STL_ASCII
         @mesh_file.puts( "endsolid " + model_name)
       else
         # binary - update facet count

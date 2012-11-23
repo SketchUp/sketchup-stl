@@ -7,6 +7,8 @@ require 'sketchup.rb'
 module CommunityExtensions
   module STL
   
+    IS_OSX = ( Object::RUBY_PLATFORM =~ /darwin/i ? true : false )
+  
     # Matches Sketchup.active_model.options['UnitsOptions']['LengthUnit']
     UNIT_METERS      = 4
     UNIT_CENTIMETERS = 3

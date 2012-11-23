@@ -180,10 +180,9 @@ module CommunityExtensions
     end
 
     unless file_loaded?(__FILE__)
-      IS_MAC = ( Object::RUBY_PLATFORM =~ /darwin/i ? true : false )
       # Pick menu indexes for where to insert the Export menu. These numbers
       # where picked when SketchUp 8 M4 was the latest version.
-      if IS_MAC
+      if IS_OSX
         insert_index = 19
       else
         insert_index = 17

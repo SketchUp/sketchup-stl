@@ -159,7 +159,7 @@ module CommunityExtensions
         current_unit = 'Inches'
       end
       units_list = %w(Meters Centimeters Millimeters Inches Feet).join('|')
-      prompts  = ['Export unit: ', 'ASCII or Binary? ']
+      prompts  = ['Export unit: ', 'File Format ']
       choices  = [units_list, 'ASCII|Binary']
       defaults = [current_unit, 'Binary']
       results = UI.inputbox(prompts, defaults, choices, 'STL Export Options')

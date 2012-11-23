@@ -28,7 +28,7 @@ module CommunityExtensions
       if model.selection.empty?
         answer = UI.messagebox(
           'No objects selected. Export entire model?',
-          MB_YESNOCANCEL
+          MB_YESNO
         )
         if answer == IDYES
           export_ents = model.entities

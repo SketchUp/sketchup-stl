@@ -10,13 +10,7 @@ module CommunityExtensions
   module STL
     class Importer
 
-      Sketchup::require File.join( PLUGIN_PATH, 'webdialog_extensions')
-
-      UNIT_METERS      = 4
-      UNIT_CENTIMETERS = 3
-      UNIT_MILLIMETERS = 2
-      UNIT_FEET        = 1
-      UNIT_INCHES      = 0
+      Sketchup::require File.join(PLUGIN_PATH, 'webdialog_extensions')
 
       PREF_KEY = 'CommunityExtensions\STL\Importer'.freeze
 

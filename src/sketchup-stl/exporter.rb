@@ -159,15 +159,15 @@ module CommunityExtensions
 
       cu=Sketchup.active_model.options[0]["LengthUnit"]
       case cu
-      when 4
+      when UNIT_METERS
         current_unit= "Meters"
-      when 3
+      when UNIT_CENTIMETERS
         current_unit= "Centimeters"
-      when 2
+      when UNIT_MILLIMETERS
         current_unit= "Millimeters"
-      when 1
+      when UNIT_FEET
         current_unit= "Feet"
-      when 0
+      when UNIT_INCHES
         current_unit= "Inches"
       end
       units_list=%w(Meters Centimeters Millimeters Inches Feet).join('|')

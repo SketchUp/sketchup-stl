@@ -166,15 +166,15 @@ module CommunityExtensions
       return false if results == false
       case results[0]
       when 'Meters'
-        stl_conv=0.0254
+        stl_conv = 0.0254
       when 'Centimeters'
-        stl_conv=2.54
+        stl_conv = 2.54
       when 'Millimeters'
-        stl_conv=25.4
+        stl_conv = 25.4
       when 'Feet'
-        stl_conv=0.0833333333333333
+        stl_conv = 0.0833333333333333
       when 'Inches'
-        stl_conv=1
+        stl_conv = 1
       end
       return [stl_conv, results[1]]
     end

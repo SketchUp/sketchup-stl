@@ -16,7 +16,7 @@ module CommunityExtensions
     def self.export_mesh_file
       model = Sketchup.active_model
       if model.active_entities.length == 0
-        return UI.messagebox("Nothing to export.")
+        return UI.messagebox('Nothing to export.')
       end
       model_name = File.basename(model.path, '.skp')
       if model_name == ''
@@ -27,7 +27,7 @@ module CommunityExtensions
       @line_count = 0
       if model.selection.empty?
         answer = UI.messagebox(
-          "No objects selected. Export entire model?",
+          'No objects selected. Export entire model?',
           MB_YESNOCANCEL
         )
         if answer == IDYES
@@ -69,10 +69,10 @@ module CommunityExtensions
     end
 
     def self.find_faces(others, entities, tform)
-      entities.each do |entity|
+      entities.each { |entity|
         #Face entity
         if entity.is_a?(Sketchup::Face)
-          write_face(entity,tform)     
+          write_face(entity, tform)     
           #Group & Componentinstanceentity
         elsif entity.is_a?(Sketchup::Group) ||
           entity.is_a?(Sketchup::ComponentInstance)
@@ -88,59 +88,59 @@ module CommunityExtensions
         else
           others = others + 1
         end
-      end
+      }
       others
     end
 
     def self.write_face(face, tform)
-      mesh = face.mesh 7
-      mesh.transform! tform
+      mesh = face.mesh(7)
+      mesh.transform!(tform)
       polygons = mesh.polygons
-      polygons.each do |polygon|
-        if (polygon.length == 3)
+      polygons.each { |polygon|
+        if polygon.length == 3
           norm = mesh.normal_at(polygon[0].abs)
           if @stl_type == STL_ASCII
             @mesh_file.puts("facet normal #{norm.x} #{norm.y} #{norm.z}")
-            @mesh_file.puts("outer loop")
+            @mesh_file.puts('outer loop')
           else
-            @mesh_file.write(norm.to_a.pack("e3"))
+            @mesh_file.write(norm.to_a.pack('e3'))
           end
-          for j in 0..2 do
+          3.times { |j|
             pt = mesh.point_at(polygon[j].abs)
-            pt = pt.to_a.map{|e| e * @stl_conv}
+            pt = pt.to_a.map{ |e| e * @stl_conv }
             if @stl_type == STL_ASCII
               @mesh_file.puts("vertex #{pt.x} #{pt.y} #{pt.z}")
             else
-              @mesh_file.write(pt.pack("e3"))
+              @mesh_file.write(pt.pack('e3'))
             end
-          end
+          }
           if @stl_type == STL_ASCII
-            @mesh_file.puts( "endloop\nendfacet")
+            @mesh_file.puts("endloop\nendfacet")
           else
-            @mesh_file.write([0].pack("v"))
+            @mesh_file.write([0].pack('v'))
           end
         end
-        @face_count+=1
-      end
+        @face_count += 1
+      }
     end
 
     def self.write_header(model_name)
       if @stl_type == STL_ASCII
-        @mesh_file.puts( "solid " + model_name)
+        @mesh_file.puts("solid #{model_name}")
       else
         @mesh_file.write(["SketchUp STL #{model_name}"].pack("A80"))
-        @mesh_file.write([0xffffffff].pack("V"))
+        @mesh_file.write([0xffffffff].pack('V'))
       end
     end
 
     def self.write_footer(model_name)
       if @stl_type == STL_ASCII
-        @mesh_file.puts( "endsolid " + model_name)
+        @mesh_file.puts("endsolid #{model_name}")
       else
         # binary - update facet count
         @mesh_file.flush
         @mesh_file.seek(80)
-        @mesh_file.write([@face_count].pack("V"))
+        @mesh_file.write([@face_count].pack('V'))
       end
       @mesh_file.close
     end

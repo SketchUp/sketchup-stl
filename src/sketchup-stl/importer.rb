@@ -105,8 +105,8 @@ module CommunityExtensions
         # Focus camera on imported geometry.
         model.active_view.zoom(group)
         # Clean up geometry.
-        Sketchup.status_text = 'Cleaning up geometry...'
         if @stl_merge
+          Sketchup.status_text = 'Cleaning up geometry...'
           cleanup_geometry(entities)
         end
         Sketchup.status_text = 'Importing STL done!'

@@ -63,8 +63,18 @@ module CommunityExtensions
       def main(filename)
         file_type = detect_file_type(filename)
         #p file_type
+        # Read import settings.
+        @stl_merge           = read_setting('merge_faces',     @stl_merge)
+        @stl_units           = read_setting('import_units',    @stl_units)
+        @stl_preserve_origin = read_setting('preserve_origin', @stl_preserve_origin)
+        # Wrap everything into one operation, ensuring compatibility with older
+        # SketchUp versions that did not feature the disable_ui argument.
         model = Sketchup.active_model
-        model.start_operation("STL Import", true)
+        if model.method(:start_operation).arity == 1
+          model.start_operation('STL Import')
+        else
+          model.start_operation('STL Import', true)
+        end
         # Import geometry.
         Sketchup.status_text = 'Importing geometry...'
         if file_type[/solid/]
@@ -105,7 +115,7 @@ module CommunityExtensions
       private :main
 
       def get_filename
-        filename = UI.openpanel("Open STL File", nil, "*.stl;*.stlb")
+        filename = UI.openpanel('Open STL File', nil, '*.stl;*.stlb')
       end
       private :get_filename
 
@@ -122,9 +132,9 @@ module CommunityExtensions
 
       def stl_binary_import(filename, try = 1)
         stl_conv = get_unit_ratio(@stl_units)
-        f = File.new(filename, "rb")
+        f = File.new(filename, 'rb')
         # Header
-        header = ""
+        header = ''
         80.times {
           c = f.read(1).unpack('c')[0]
           if c <= 32 or c > 126 or c.nil?
@@ -135,7 +145,7 @@ module CommunityExtensions
         int_size = [42].pack('i').size
         float_size = [42.0].pack('f').size
         len = f.read(int_size).unpack('i')[0]
-        msg =  "STL Importer (c) Jim Foltz\n\nSTL Binary Header:\n"+header+"\n\nFound #{ len.inspect } triangles. Continue?"
+        msg =  "STL Importer (c) Jim Foltz\n\nSTL Binary Header:\n#{header}\n\nFound #{len.inspect} triangles. Continue?"
         if do_msg(msg) == IDNO
           f.close
           return nil

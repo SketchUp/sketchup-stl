@@ -13,6 +13,12 @@ module CommunityExtensions
       Sketchup::require File.join(PLUGIN_PATH, 'webdialog_extensions')
 
       PREF_KEY = 'CommunityExtensions\STL\Importer'.freeze
+      
+      IMPORT_SUCCESS                        = 0
+      IMPORT_FAILED                         = 1
+      IMPORT_CANCELLED                      = 2
+      IMPORT_FILE_NOT_FOUND                 = 4
+      IMPORT_SKETCHUP_VERSION_NOT_SUPPORTED = 5
 
       def initialize
         @stl_units = UNIT_MILLIMETERS
@@ -45,13 +51,12 @@ module CommunityExtensions
       def load_file(path,status)
         begin
           status = main(path)
-        rescue Exception=>e
+        rescue Exception => e
           puts e.message
-          puts e.backtrace
+          puts e.backtrace.join("\n")
+          status = IMPORT_FAILED
         end
-        r = 1
-        r = 0 if status == true
-        return r
+        return status
       end
 
       def main(filename)
@@ -76,12 +81,13 @@ module CommunityExtensions
         else
           entities = stl_binary_import(filename)
         end
+        return IMPORT_CANCELLED if entities == IMPORT_CANCELLED
         # Verify that anything was imported.
         if entities.nil? || entities.length == 0
           model.abort_operation
           UI.messagebox('No geometry was imported.') if entities
           Sketchup.status_text = '' # OSX doesn't reset the statusbar like Windows.
-          return nil
+          return IMPORT_FAILED
         end
         # Reposition to ORIGIN.
         group = entities.parent.instances[0]
@@ -105,6 +111,7 @@ module CommunityExtensions
         end
         Sketchup.status_text = 'Importing STL done!'
         model.commit_operation
+        return IMPORT_SUCCESS
       end
       private :main
 
@@ -142,7 +149,7 @@ module CommunityExtensions
         msg =  "STL Importer (c) Jim Foltz\n\nSTL Binary Header:\n#{header}\n\nFound #{len.inspect} triangles. Continue?"
         if do_msg(msg) == IDNO
           f.close
-          return nil
+          return IMPORT_CANCELLED
         end
 
         pts = []
@@ -201,7 +208,7 @@ module CommunityExtensions
         end
         msg = "STL Importer (c) Jim Foltz\n\nSTL ASCII File\nFound #{polys.length} polygons.\n\nContinue?"
         if do_msg(msg) == IDNO
-          return nil
+          return IMPORT_CANCELLED
         end
         mesh = Geom::PolygonMesh.new 3*polys.length, polys.length
         polys.each{ |poly| mesh.add_polygon(poly) }

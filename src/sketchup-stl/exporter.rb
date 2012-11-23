@@ -157,7 +157,7 @@ module CommunityExtensions
       @stl_conv = 25.4
       return
 
-      cu=Sketchup.active_model.options[0]["LengthUnit"]
+      cu=Sketchup.active_model.options['UnitsOptions']['LengthUnit']
       case cu
       when UNIT_METERS
         current_unit= "Meters"

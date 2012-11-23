@@ -21,7 +21,7 @@ module CommunityExtensions
       PREF_KEY = 'CommunityExtensions\STL\Importer'.freeze
 
       def initialize
-        @stl_units = UNIT_INCHES
+        @stl_units = UNIT_MILLIMETERS
         @stl_merge = false
         @stl_preserve_origin = true
 

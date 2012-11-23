@@ -15,15 +15,14 @@ module CommunityExtensions
       if model.active_entities.length == 0
         return UI.messagebox("Nothing to export.")
       end
-      model_filename = File.basename(model.path)
-      if model_filename == ""
-        model_filename = "model"
+      model_name = File.basename(model.path, '.skp')
+      if model_name == ''
+        model_name = 'untitled'
       end
       @stl_conv = 1.0
       @face_count = 0
       @line_count = 0
-      ss = model.selection
-      if ss.empty?
+      if model.selection.empty?
         answer = UI.messagebox(
           "No objects selected. Export entire model?",
           MB_YESNOCANCEL
@@ -31,31 +30,29 @@ module CommunityExtensions
         if answer == IDYES
           export_ents = model.entities
         else
-          export_ents = ss
+          export_ents = model.selection
         end
       else
         export_ents = Sketchup.active_model.selection
       end
-      if (export_ents.length > 0)
-        # Get units for export.
-        units_dialog()
-
+      if export_ents.length > 0
         # Get DXF export option.
-        file_type="stl"
-
-        options = stl_options_dialog
+        file_type='stl'
+        
+        # Get Export options.
+        options = options_dialog
         return if options == false
-        @stl_type = options[0].downcase
+        @stl_conv = options[0]
+        @stl_type = options[1].downcase
 
         # Get exported file name and export.
-        out_name = UI.savepanel("#{file_type.upcase} file location", "" ,
-            "#{File.basename(model.path).split(".")[0]}untitled." +file_type)
+        out_name = UI.savepanel("#{file_type.upcase} file location", nil,
+            "#{model_name}.#{file_type}")
         if out_name
-          @mesh_file = File.new( out_name , "w" )  
-          if @stl_type != "ascii"
+          @mesh_file = File.new(out_name , 'w')  
+          if @stl_type == 'binary'
             @mesh_file.binmode
           end
-          model_name = model_filename.split(".")[0]
           write_header(model_name)
 
           # Recursively export faces and edges, exploding groups as we go.
@@ -145,49 +142,38 @@ module CommunityExtensions
       @mesh_file.close
     end
 
-    def self.stl_options_dialog
-      prompts  = ["ASCII or Binary? "]
-      choices  = ["ASCII|Binary"]
-      defaults = ["Binary"]
-      UI.inputbox(prompts, defaults, choices, "STL Type")
-    end
-
-    def self.units_dialog
-      # Hardcoding for millimeters export for now.
-      @stl_conv = 25.4
-      return
-
-      cu=Sketchup.active_model.options['UnitsOptions']['LengthUnit']
-      case cu
+    def self.options_dialog
+      case Sketchup.active_model.options['UnitsOptions']['LengthUnit']
       when UNIT_METERS
-        current_unit= "Meters"
+        current_unit = 'Meters'
       when UNIT_CENTIMETERS
-        current_unit= "Centimeters"
+        current_unit = 'Centimeters'
       when UNIT_MILLIMETERS
-        current_unit= "Millimeters"
+        current_unit = 'Millimeters'
       when UNIT_FEET
-        current_unit= "Feet"
+        current_unit = 'Feet'
       when UNIT_INCHES
-        current_unit= "Inches"
+        current_unit = 'Inches'
       end
-      units_list=%w(Meters Centimeters Millimeters Inches Feet).join('|')
-      prompts=["Export unit: "]
-      enums=[units_list]
-      values=[current_unit]
-      results = inputbox prompts, values, enums, "Export units"
-      return if not results
+      units_list = %w(Meters Centimeters Millimeters Inches Feet).join('|')
+      prompts  = ['Export unit: ', 'ASCII or Binary? ']
+      choices  = [units_list, 'ASCII|Binary']
+      defaults = [current_unit, 'Binary']
+      results = UI.inputbox(prompts, defaults, choices, 'STL Export Options')
+      return false if results == false
       case results[0]
-      when "Meters"
-        @stl_conv=0.0254
-      when "Centimeters"
-        @stl_conv=2.54
-      when "Millimeters"
-        @stl_conv=25.4
-      when "Feet"
-        @stl_conv=0.0833333333333333
-      when "Inches"
-        @stl_conv=1
+      when 'Meters'
+        stl_conv=0.0254
+      when 'Centimeters'
+        stl_conv=2.54
+      when 'Millimeters'
+        stl_conv=25.4
+      when 'Feet'
+        stl_conv=0.0833333333333333
+      when 'Inches'
+        stl_conv=1
       end
+      return [stl_conv, results[1]]
     end
 
     if( not @sketchup_stl_loaded )

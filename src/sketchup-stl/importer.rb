@@ -115,11 +115,6 @@ module CommunityExtensions
       end
       private :main
 
-      def get_filename
-        filename = UI.openpanel('Open STL File', nil, '*.stl;*.stlb')
-      end
-      private :get_filename
-
       def detect_file_type(file)
         first_line = File.open(file, 'r') { |f| f.read(80) }
         return first_line

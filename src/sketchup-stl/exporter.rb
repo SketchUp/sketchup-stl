@@ -60,7 +60,7 @@ module CommunityExtensions
 
           # Recursively export faces and edges, exploding groups as we go.
           # Count "other" objects we can't parse.
-          others = find_faces(0, export_ents, Geom::Transformation.new())
+          others = find_faces(0, export_ents, Geom::Transformation.new)
           write_footer(model_name)
           UI.messagebox("#{@face_count} facets exported\n#{others} objects" +
                         " ignored")

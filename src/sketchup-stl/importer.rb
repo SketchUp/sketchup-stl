@@ -205,7 +205,7 @@ module CommunityExtensions
         if do_msg(msg) == IDNO
           return IMPORT_CANCELLED
         end
-        mesh = Geom::PolygonMesh.new 3*polys.length, polys.length
+        mesh = Geom::PolygonMesh.new(3 * polys.length, polys.length)
         polys.each{ |poly| mesh.add_polygon(poly) }
         entities = Sketchup.active_model.entities
         if entities.length > 0
@@ -332,7 +332,7 @@ module CommunityExtensions
       # 
       # @return [Nil]
       def cleanup_geometry(entities)
-        stack = entities.select { |e| e.is_a?( Sketchup::Edge ) }
+        stack = entities.select { |e| e.is_a?(Sketchup::Edge) }
         until stack.empty?
           edge = stack.shift
           next unless edge.valid?
@@ -340,11 +340,11 @@ module CommunityExtensions
           face1, face2 = edge.faces
           # Check if all the points of the two faces are on the same plane.
           # Comparing normals is not enough.
-          next unless face1.normal.samedirection?( face2.normal )
+          next unless face1.normal.samedirection?(face2.normal)
           pts1 = face1.vertices.map { |vertex| vertex.position }
           pts2 = face2.vertices.map { |vertex| vertex.position }
           points = pts1 + pts2
-          plane = Geom.fit_plane_to_points( points )
+          plane = Geom.fit_plane_to_points(points)
           next unless points.all? { |point| point.on_plane?(plane) }
           # In CleanUp the faces are checked to not be duplicate of each other -
           # overlapping. But since can we assume the STL importer doesn't create
@@ -370,7 +370,7 @@ module CommunityExtensions
           #shared_edges.each { |e| e.material = 'red' } # DEBUG
           edge.erase!
           # Find left over edges that are no longer connected to any face.
-          loose_edges = shared_edges.select { |e| e.valid? && e.faces.length == 0 }
+          loose_edges = shared_edges.select { |e| e.valid? && e.faces.empty? }
           entities.erase_entities(loose_edges)
           # Validate result - check if we destroyed some geometry.
           if face1.deleted? && face2.deleted?

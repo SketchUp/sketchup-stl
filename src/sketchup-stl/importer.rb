@@ -10,18 +10,18 @@ module CommunityExtensions
   module STL
     class Importer
 
-      Sketchup::require File.join( PLUGIN_PATH, 'webdialog_extensions')
-
-      UNIT_METERS      = 4
-      UNIT_CENTIMETERS = 3
-      UNIT_MILLIMETERS = 2
-      UNIT_FEET        = 1
-      UNIT_INCHES      = 0
+      Sketchup::require File.join(PLUGIN_PATH, 'webdialog_extensions')
 
       PREF_KEY = 'CommunityExtensions\STL\Importer'.freeze
+      
+      IMPORT_SUCCESS                        = 0
+      IMPORT_FAILED                         = 1
+      IMPORT_CANCELLED                      = 2
+      IMPORT_FILE_NOT_FOUND                 = 4
+      IMPORT_SKETCHUP_VERSION_NOT_SUPPORTED = 5
 
       def initialize
-        @stl_units = UNIT_INCHES
+        @stl_units = UNIT_MILLIMETERS
         @stl_merge = false
         @stl_preserve_origin = true
 
@@ -51,13 +51,12 @@ module CommunityExtensions
       def load_file(path,status)
         begin
           status = main(path)
-        rescue Exception=>e
+        rescue Exception => e
           puts e.message
-          puts e.backtrace
+          puts e.backtrace.join("\n")
+          status = IMPORT_FAILED
         end
-        r = 1
-        r = 0 if status == true
-        return r
+        return status
       end
 
       def main(filename)
@@ -82,12 +81,13 @@ module CommunityExtensions
         else
           entities = stl_binary_import(filename)
         end
+        return IMPORT_CANCELLED if entities == IMPORT_CANCELLED
         # Verify that anything was imported.
         if entities.nil? || entities.length == 0
           model.abort_operation
           UI.messagebox('No geometry was imported.') if entities
           Sketchup.status_text = '' # OSX doesn't reset the statusbar like Windows.
-          return nil
+          return IMPORT_FAILED
         end
         # Reposition to ORIGIN.
         group = entities.parent.instances[0]
@@ -111,13 +111,9 @@ module CommunityExtensions
         end
         Sketchup.status_text = 'Importing STL done!'
         model.commit_operation
+        return IMPORT_SUCCESS
       end
       private :main
-
-      def get_filename
-        filename = UI.openpanel('Open STL File', nil, '*.stl;*.stlb')
-      end
-      private :get_filename
 
       def detect_file_type(file)
         first_line = File.open(file, 'r') { |f| f.read(80) }
@@ -148,7 +144,7 @@ module CommunityExtensions
         msg =  "STL Importer (c) Jim Foltz\n\nSTL Binary Header:\n#{header}\n\nFound #{len.inspect} triangles. Continue?"
         if do_msg(msg) == IDNO
           f.close
-          return nil
+          return IMPORT_CANCELLED
         end
 
         pts = []
@@ -207,9 +203,9 @@ module CommunityExtensions
         end
         msg = "STL Importer (c) Jim Foltz\n\nSTL ASCII File\nFound #{polys.length} polygons.\n\nContinue?"
         if do_msg(msg) == IDNO
-          return nil
+          return IMPORT_CANCELLED
         end
-        mesh = Geom::PolygonMesh.new 3*polys.length, polys.length
+        mesh = Geom::PolygonMesh.new(3 * polys.length, polys.length)
         polys.each{ |poly| mesh.add_polygon(poly) }
         entities = Sketchup.active_model.entities
         if entities.length > 0
@@ -336,7 +332,7 @@ module CommunityExtensions
       # 
       # @return [Nil]
       def cleanup_geometry(entities)
-        stack = entities.select { |e| e.is_a?( Sketchup::Edge ) }
+        stack = entities.select { |e| e.is_a?(Sketchup::Edge) }
         until stack.empty?
           edge = stack.shift
           next unless edge.valid?
@@ -344,11 +340,11 @@ module CommunityExtensions
           face1, face2 = edge.faces
           # Check if all the points of the two faces are on the same plane.
           # Comparing normals is not enough.
-          next unless face1.normal.samedirection?( face2.normal )
+          next unless face1.normal.samedirection?(face2.normal)
           pts1 = face1.vertices.map { |vertex| vertex.position }
           pts2 = face2.vertices.map { |vertex| vertex.position }
           points = pts1 + pts2
-          plane = Geom.fit_plane_to_points( points )
+          plane = Geom.fit_plane_to_points(points)
           next unless points.all? { |point| point.on_plane?(plane) }
           # In CleanUp the faces are checked to not be duplicate of each other -
           # overlapping. But since can we assume the STL importer doesn't create
@@ -374,7 +370,7 @@ module CommunityExtensions
           #shared_edges.each { |e| e.material = 'red' } # DEBUG
           edge.erase!
           # Find left over edges that are no longer connected to any face.
-          loose_edges = shared_edges.select { |e| e.valid? && e.faces.length == 0 }
+          loose_edges = shared_edges.select { |e| e.valid? && e.faces.empty? }
           entities.erase_entities(loose_edges)
           # Validate result - check if we destroyed some geometry.
           if face1.deleted? && face2.deleted?

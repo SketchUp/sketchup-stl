@@ -1,8 +1,9 @@
 // path = CommunityExtensions::STL::PLUGIN_STRINGS_PATH
 // options = { :custom_path => path }
-// tr = CommunityExtensions::STL::Translator.new('STL.strings', options)
+// tr = CommunityExtensions::STL::Translator.new("STL.strings", options)
 
-// Extension Description
+
+// Extension Description ///////////////////////////////////////////////////////
 "STL Import & Export" = "STL Import & Export"
 
 "Adds STL file format import and export. " +
@@ -12,3 +13,44 @@
 "Adds STL file format import and export. " +
 "This is an open source project sponsored by the SketchUp team. More " +
 "info and updates at https://github.com/SketchUp/sketchup-stl"
+
+
+// Importer ////////////////////////////////////////////////////////////////////
+"STL Import" = "STL Import"
+"Importing geometry..." = "Importing geometry..."
+"No geometry was imported." = "No geometry was imported."
+"Repairing geometry..." = "Repairing geometry..."
+"Cleaning up geometry..." = "Cleaning up geometry..."
+"Importing STL done!" = "Importing STL done!"
+
+"Import STL Options" = "Import STL Options"
+
+// Binary Import
+"STL Importer (c) Jim Foltz
+
+STL Binary Header:
+%s
+
+Found %i triangles. Continue?"
+=
+"STL Importer (c) Jim Foltz
+
+STL Binary Header:
+%s
+
+Found %i triangles. Continue?"
+
+// ASCII Import
+"STL Importer (c) Jim Foltz
+
+STL ASCII File
+Found %i polygons.
+
+Continue?"
+=
+"STL Importer (c) Jim Foltz
+
+STL ASCII File
+Found %i polygons.
+
+Continue?"

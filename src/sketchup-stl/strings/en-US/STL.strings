@@ -15,6 +15,14 @@
 "info and updates at https://github.com/SketchUp/sketchup-stl"
 
 
+// Common //////////////////////////////////////////////////////////////////////
+"Meters" = "Meters"
+"Centimeters" = "Centimeters"
+"Millimeters" = "Millimeters"
+"Feet" = "Feet"
+"Inches" = "Inches"
+
+
 // Importer ////////////////////////////////////////////////////////////////////
 "STL Import" = "STL Import"
 "Importing geometry..." = "Importing geometry..."
@@ -54,3 +62,25 @@ STL ASCII File
 Found %i polygons.
 
 Continue?"
+
+
+// Exporter ////////////////////////////////////////////////////////////////////
+"Nothing to export." = "Nothing to export."
+"No objects selected. Export entire model?" = "No objects selected. Export entire model?"
+"%s file location" = "%s file location"
+
+"%i facets exported
+%i objects ignored"
+=
+"%i facets exported
+%i objects ignored"
+
+// Export Options
+"STL Export Options" = "STL Export Options"
+"Export unit: " = "Export unit: "
+"File Format " = "File Format "
+"ASCII" = "ASCII"
+"Binary" = "Binary"
+
+// Menu Item
+"Export STL..." = "Export STL..."

@@ -11,17 +11,36 @@ require 'extensions.rb'
 module CommunityExtensions
   module STL
   
-    PLUGIN_ROOT_PATH = File.dirname(__FILE__)
-    PLUGIN_PATH = File.join(PLUGIN_ROOT_PATH, 'sketchup-stl')
+    PLUGIN_ROOT_PATH    = File.dirname(__FILE__)
+    PLUGIN_PATH         = File.join(PLUGIN_ROOT_PATH, 'sketchup-stl')
+    PLUGIN_STRINGS_PATH = File.join(PLUGIN_PATH, 'strings')
+    
+    Sketchup::require File.join(PLUGIN_PATH, 'translator')
+    options = {
+      :custom_path => PLUGIN_STRINGS_PATH,
+      :debug => false
+    }
+    @translator = Translator.new('STL.strings', options)
+    
+    # Method for easy access to the translator instance to anything within this
+    # project.
+    # 
+    # @example
+    #   STL.string('Hello World')
+    def self.string(string)
+      @translator.get(string)
+    end
   
     extension = SketchupExtension.new(
-      'STL Import & Export',
+      STL.string('STL Import & Export'),
       File.join(PLUGIN_PATH, 'loader.rb')
     )
-
-    extension.description = 'Adds STL file format import and export. ' <<
+    
+    extension.description = STL.string(
+      'Adds STL file format import and export. ' <<
       'This is an open source project sponsored by the SketchUp team. More ' <<
       'info and updates at https://github.com/SketchUp/sketchup-stl'
+    )
     extension.version = '1.0.0'
     extension.copyright = '2012 Trimble Navigation, released under Apache 2.0'
     extension.creator = 'J. Foltz, N. Bromham, K. Shroeder, SketchUp Team'

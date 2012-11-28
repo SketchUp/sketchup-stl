@@ -1,0 +1,14 @@
+// path = CommunityExtensions::STL::PLUGIN_STRINGS_PATH
+// options = { :custom_path => path }
+// tr = CommunityExtensions::STL::Translator.new('STL.strings', options)
+
+// Extension Description
+"STL Import & Export" = "STL Import & Export"
+
+"Adds STL file format import and export. " +
+"This is an open source project sponsored by the SketchUp team. More " +
+"info and updates at https://github.com/SketchUp/sketchup-stl"
+=
+"Adds STL file format import and export. " +
+"This is an open source project sponsored by the SketchUp team. More " +
+"info and updates at https://github.com/SketchUp/sketchup-stl"

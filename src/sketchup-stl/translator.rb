@@ -1,4 +1,4 @@
-# 
+# Translator - the class formerly known as LanguageHandler2
 #
 # License: Apache License, Version 2.0
 
@@ -6,6 +6,25 @@ require 'sketchup'
 
 module CommunityExtensions
   module STL
+  
+    # Class that handles string localizations.
+    # 
+    # It is written to be able compatible with LanguageHandler which ships with
+    # SketchUp (Current version 8M4). Existing .string files can be used and
+    # methods are aliases so the class can be used as a drop in replacement.
+    # 
+    # Enhanced features include:
+    # * One-line comments can start anywhere.
+    # * Multi-line comments can start and stop anywhere outside a string.
+    # * ; at the end of a key - value pair is optional.
+    # * Strings can be split up by using the + operator.
+    # * Strings can cross multiple lines.
+    # * Strict enforcement of the format ensures an error is raised instead of
+    #   producing junk data.
+    # * Can be easily extened to include advanced features such as
+    #   escape-characters if needed.
+    # 
+    # See Tests folder for sample .strings files.
     class Translator
       
       STATE_SEARCH             = 0 # Looking for " or /
@@ -15,21 +34,33 @@ module CommunityExtensions
       STATE_IN_VALUE           = 4 # Looking for "
       STATE_EXPECT_END         = 5 # Looking for ;
       STATE_EXPECT_COMMENT     = 6 # Found / - Expecting * or / next
-      STATE_IN_COMMENT         = 7 # Found /* - Looking for */
+      STATE_IN_COMMENT_MULTI   = 7 # Found /* - Looking for */
       STATE_EXPECT_COMMENT_END = 8 # Found * - Expecting / next
-      STATE_EXPECT_EOL         = 9 # Found // - Looking for end of line
+      STATE_IN_COMMENT_SINGLE  = 9 # Found // - Looking for end of line
       
-      TOKEN_WHITESPACE = /\s/
-      TOKEN_QUOTE      = ?"
-      TOKEN_EQUAL      = ?=
-      TOKEN_END        = ?;
-      TOKEN_EOL        = /\n|\r/
-      TOKEN_COMMENT    = ?/
-      TOKEN_ML_COMMENT = ?*
-      TOKEN_CONCAT     = ?+
+      TOKEN_WHITESPACE     = /\s/
+      TOKEN_CONCAT         = ?+
+      TOKEN_QUOTE          = ?"
+      TOKEN_EQUAL          = ?=
+      TOKEN_END            = ?;
+      TOKEN_EOL            = /\n|\r/
+      TOKEN_COMMENT_START  = ?/
+      TOKEN_COMMENT_MULTI  = ?*
+      TOKEN_COMMENT_SINGLE = ?/
       
       class ParseError < StandardError; end
-
+      
+      # A second optional Hash argument can be used to spesify behaviour that
+      # differ from LanguageHandler.
+      # 
+      # Option Keys:
+      # * :custom_path - String pointing to a custom path where the localized
+      #                  strings are. If ommitted the Translator will look in
+      #                  SketchUp's Resource folder.
+      # * :debug       - Set to true for a detailed trace of the parsing.
+      #
+      # @param [String] filename
+      # @param [Nil,Hash] options
       def initialize(filename, options = nil)
         @path = nil
         @debug = false
@@ -43,16 +74,26 @@ module CommunityExtensions
         @strings = parse(filename, @path)
       end
       
-      def get(key)
-        @strings[key]
+      # If the requested string is not in the localization dictionary then the
+      # original string is returned.
+      #
+      # @param [String] string The String to be localized.
+      #
+      # @return [String] Localized string
+      def get(string)
+        @strings[string]
       end
       alias :GetString :get
 
+      # @return [Hash] The dictionary Hash used for localization.
       def dictionary
         @strings
       end
       alias :GetStrings :dictionary
 
+      # @param [String] custom_path
+      #
+      # @return [String]
       def self.GetResourceSubPath(custom_path = nil)
         if custom_path
           full_file_path = File.join(custom_path, Sketchup.get_locale)
@@ -63,6 +104,9 @@ module CommunityExtensions
         components[-2, 2].join(File::SEPARATOR)
       end
       
+      # Prints out the dictionary for visual inspection.
+      #
+      # @return [String]
       def print_dictionary
         output = ''
         for key, value in @strings
@@ -74,6 +118,7 @@ module CommunityExtensions
         puts output
       end
       
+      # @return [String]
       def inspect
         object_hex_id = "0x%x" % (self.object_id << 1)
         size = @strings.size
@@ -83,6 +128,12 @@ module CommunityExtensions
       
       private
       
+      # Parses the given file and returns a Hash lookup.
+      #
+      # @param [String] filename
+      # @param [String] custom_path
+      #
+      # @return [Hash]
       def parse(filename, custom_path = nil)
         # Find the correct file based on the current locale setting in SketchUp.
         # If no path has been given it'll revert back to the Resource folder in
@@ -114,10 +165,10 @@ module CommunityExtensions
         line_pos = 1
         
         File.open(full_file_path, 'r') { |file|
-          file.lineno = 1
+          file.lineno = 1 # Line numbers must be maually tracked.
           file.each_byte { |byte|
             # Count line numbers and keep track of line position.
-            if byte.chr =~ TOKEN_EOL
+            if byte.chr =~ TOKEN_EOL # (?) Can we avoid regex? Is 10 & 13 enough?
               line_pos = 0
               if last_line_break.nil? || byte == last_line_break
                 file.lineno += 1
@@ -129,15 +180,16 @@ module CommunityExtensions
             end
             
             # Process the current byte.
+            # Note that White-space and EOL matches are done with regex and
+            # therefore last in evaluation.
             log_state(state, byte)
             case state
+            
+            # Neutral state looking for the beginning of a key or comment.
             when STATE_SEARCH
-              # Accept: Whitespace, Comment
-              # Look for: " /
               if byte == TOKEN_QUOTE
                 state = STATE_IN_KEY
-                #key_buffer = ''
-              elsif byte == TOKEN_COMMENT
+              elsif byte == TOKEN_COMMENT_START
                 state_cache = state
                 state = STATE_EXPECT_COMMENT
               elsif byte.chr =~ TOKEN_WHITESPACE
@@ -145,13 +197,20 @@ module CommunityExtensions
               else
                 raise ParseError, parse_error(file, state, byte, line_pos)
               end
+            
+            # Parser is inside a key string looking for end-quote.
+            # All characters that are not the end-quote is considered part of
+            # the string and is added to the buffer.
             when STATE_IN_KEY
-              # Look for: "
               if byte == TOKEN_QUOTE
                 state = STATE_EXPECT_EQUAL
               else
                 key_buffer << byte
               end
+            
+            # After a key the parser expects to find an equal token or a concat
+            # token that will allow a string to be split up. Comments are
+            # allowed.
             when STATE_EXPECT_EQUAL
               # Accept: Whitespace, Comment
               # Look for: = /
@@ -159,7 +218,7 @@ module CommunityExtensions
                 state = STATE_EXPECT_VALUE
               elsif byte == TOKEN_CONCAT
                 state = STATE_SEARCH
-              elsif byte == TOKEN_COMMENT
+              elsif byte == TOKEN_COMMENT_START
                 state_cache = state
                 state = STATE_EXPECT_COMMENT
               elsif byte.chr =~ TOKEN_WHITESPACE
@@ -167,12 +226,13 @@ module CommunityExtensions
               else
                 raise ParseError, parse_error(file, state, byte, line_pos)
               end
+            
+            # After a key and equal-token is found the parser expects to find
+            # a value string. Comments are allowed.
             when STATE_EXPECT_VALUE
-              # Accept: Whitespace
-              # Look for: " /
               if byte == TOKEN_QUOTE
                 state = STATE_IN_VALUE
-              elsif byte == TOKEN_COMMENT
+              elsif byte == TOKEN_COMMENT_START
                 state_cache = state
                 state = STATE_EXPECT_COMMENT
               elsif byte.chr =~ TOKEN_WHITESPACE
@@ -180,57 +240,74 @@ module CommunityExtensions
               else
                 raise ParseError, parse_error(file, state, byte, line_pos)
               end
+            
+            # Parser is inside a value string looking for end-quote.
+            # All characters that are not the end-quote is considered part of
+            # the string and is added to the buffer.
             when STATE_IN_VALUE
-              # Look for: "
               if byte == TOKEN_QUOTE
                 state = STATE_EXPECT_END
                 strings[ key_buffer ] = value_buffer
               else
                 value_buffer << byte
               end
+            
+            # After a key and value pair has been found the parser expects to
+            # find and end token or end of line. The end token is only required
+            # if multiple statements are placed on the same line.
+            #
+            # A concat token will kick the parser back into looking for a value
+            # string.
+            # 
+            # Comments are allowed.
             when STATE_EXPECT_END
-              # Accept: Whitespace, Comment
-              # Look for: ; /
-              if byte == TOKEN_END
+              if byte == TOKEN_END || byte.chr =~ TOKEN_EOL
                 state = STATE_SEARCH
                 key_buffer = ''
                 value_buffer = ''
               elsif byte == TOKEN_CONCAT
                 state = STATE_EXPECT_VALUE
-              elsif byte == TOKEN_COMMENT
+              elsif byte == TOKEN_COMMENT_START
                 state_cache = state
                 state = STATE_EXPECT_COMMENT
-              # (i) Enable this rule to accept EOL as substitute for ;
-              elsif byte.chr =~ TOKEN_EOL
-                state = STATE_SEARCH
-                key_buffer = ''
-                value_buffer = ''
               elsif byte.chr =~ TOKEN_WHITESPACE
                 # Ignore.
               else
                 raise ParseError, parse_error(file, state, byte, line_pos)
               end
+            
+            # The beginning of a comment is found. The next token is expected to
+            # be a token for either singe-line or multi-line comment.
             when STATE_EXPECT_COMMENT
-              # Look for: / *
-              if byte == TOKEN_ML_COMMENT # Multiline Comment
-                state = STATE_IN_COMMENT
-              elsif byte == TOKEN_COMMENT # Single Line Comment
-                state = STATE_EXPECT_EOL
+              if byte == TOKEN_COMMENT_MULTI
+                state = STATE_IN_COMMENT_MULTI
+              elsif byte == TOKEN_COMMENT_SINGLE
+                state = STATE_IN_COMMENT_SINGLE
               else
                 raise ParseError, parse_error(file, state, byte, line_pos)
               end
-            when STATE_IN_COMMENT
-              # Look for: *
-              if byte == TOKEN_ML_COMMENT # Multiline Comment
+            
+            # The parser is processing a multi-line comment. When it encounter a
+            # multi-line token will look for an comment end-token next. All
+            # other data is ignored.
+            when STATE_IN_COMMENT_MULTI
+              if byte == TOKEN_COMMENT_MULTI # Multiline Comment
                 state = STATE_EXPECT_COMMENT_END
               end
+            
+            # The parser is processing a multi-line comment and the last token
+            # was an indication for end of comment. If this token is not an
+            # end-token it will resume to processing the comment.
             when STATE_EXPECT_COMMENT_END
-              # Look for: /
-              if byte == TOKEN_COMMENT
+              if byte == TOKEN_COMMENT_START # End token is the same as start.
                 state = state_cache
+              elsif byte != TOKEN_COMMENT_MULTI
+                state = STATE_IN_COMMENT_MULTI
               end
-            when STATE_EXPECT_EOL
-              # Look for: \n \r
+            
+            # The parser is processing a single-line comment. The comment ends
+            # at the first end-of-line.
+            when STATE_IN_COMMENT_SINGLE
               if byte.chr =~ TOKEN_EOL
                 state = state_cache
               end
@@ -242,6 +319,12 @@ module CommunityExtensions
       end
       alias :ParseLangFile :parse
       
+      # Converts a state code into a readable string. For debugging and error
+      # messages.
+      #
+      # @param [Integer] state
+      #
+      # @return [String]
       def state_to_string(state)
         {
           STATE_SEARCH              => 'STATE_SEARCH',
@@ -251,12 +334,20 @@ module CommunityExtensions
           STATE_IN_VALUE            => 'STATE_IN_VALUE',
           STATE_EXPECT_END          => 'STATE_EXPECT_END',
           STATE_EXPECT_COMMENT      => 'STATE_EXPECT_COMMENT',
-          STATE_IN_COMMENT          => 'STATE_IN_COMMENT',
+          STATE_IN_COMMENT_MULTI    => 'STATE_IN_COMMENT_MULTI',
           STATE_EXPECT_COMMENT_END  => 'STATE_EXPECT_COMMENT_END',
-          STATE_EXPECT_EOL          => 'STATE_EXPECT_EOL'
+          STATE_IN_COMMENT_SINGLE   => 'STATE_IN_COMMENT_SINGLE'
         }[state]
       end
       
+      # Prints out the current state of the parser if debugging is enabled.
+      # Slows down the process a lot when enabled - but gives detailed insight
+      # to what the parser is doing.
+      #
+      # @param [Integer] state
+      # @param [Integer] byte
+      #
+      # @return [Nil]
       def log_state(state, byte)
         return nil unless @debug
         token = if byte == TOKEN_QUOTE
@@ -265,10 +356,12 @@ module CommunityExtensions
           'TOKEN_EQUAL'
         elsif byte == TOKEN_END
           'TOKEN_END'
-        elsif byte == TOKEN_COMMENT
-          'TOKEN_COMMENT'
-        elsif byte == TOKEN_ML_COMMENT
-          'TOKEN_ML_COMMENT'
+        elsif byte == TOKEN_COMMENT_START
+          'TOKEN_COMMENT_START'
+        elsif byte == TOKEN_COMMENT_MULTI
+          'TOKEN_COMMENT_MULTI'
+        elsif byte == TOKEN_COMMENT_SINGLE
+          'TOKEN_COMMENT_SINGLE'
         elsif byte.chr =~ TOKEN_WHITESPACE
           'TOKEN_WHITESPACE'
         elsif byte.chr =~ TOKEN_EOL
@@ -277,8 +370,18 @@ module CommunityExtensions
           'TOKEN_NEUTRAL'
         end
         puts "#{state_to_string(state)}\n #{token} (#{byte})"
+        nil
       end
       
+      # Generates a formatted string with debug info - used when a ParseError
+      # is raised.
+      # 
+      # @param [File] file The File object being parsed.
+      # @param [Integer] state The state of the parser.
+      # @param [Integer] byte The current byte being read.
+      # @param [Integer] line_pos The current position on the current line.
+      #
+      # @return [String]
       def parse_error(file, state, byte, line_pos)
         "#{state_to_string(state)} - " <<
         "Unexpected token: #{byte.chr} (#{byte}) " <<
@@ -286,5 +389,6 @@ module CommunityExtensions
       end
 
     end # class Translator
+    
   end # module STL
 end # module CommunityExtensions

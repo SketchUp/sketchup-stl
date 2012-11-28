@@ -280,22 +280,11 @@ module CommunityExtensions
           dialog.update_value('lstUnits', current_unit)
           dialog.update_value('chkPreserveOrigin', preserve_origin)
           # Localize UI
-          dialog.update_text({
-            '#geometry legend' => STL.translate('Geometry'),
-            '#merge_coplanar span' => STL.translate('Merge coplanar faces'),
-            
-            '#scale legend' => STL.translate('Scale'),
-            '#units span' => STL.translate('Units:'),
-            '#lstUnits option[value="4"]' => STL.translate('Meters'),
-            '#lstUnits option[value="3"]' => STL.translate('Centimeters'),
-            '#lstUnits option[value="2"]' => STL.translate('Millimeters'),
-            '#lstUnits option[value="1"]' => STL.translate('Feet'),
-            '#lstUnits option[value="0"]' => STL.translate('Inches'),
-            '#preserve_origin span' => STL.translate('Preserve drawing origin'),
-            
-            '#btnAccept' => STL.translate('Accept'),
-            '#btnCancel' => STL.translate('Cancel')
-          })
+          ui_strings = window.parse_params(params)
+          translated_ui_strings = ui_strings.map { |string|
+            STL.translate(string)
+          }
+          window.call_function('UI.update_strings', translated_ui_strings)
         }
 
         window.add_action_callback('Event_Accept') { |dialog, params|

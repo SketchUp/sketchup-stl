@@ -60,6 +60,10 @@ module CommunityExtensions
         data = hash.map { |key, value| "#{key.inspect}: #{value.inspect}" }
         "{#{data.join(',')}}"
       end
+      
+      def parse_params(params)
+        params.split('|||')
+      end
 
     end # module WebDialogBridge
 

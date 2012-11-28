@@ -71,6 +71,14 @@ var UI = function() {
       if ( $element.attr('type') == 'checkbox' ) {
         $element.prop( 'checked', value );
       }
+    },
+    
+    // Set the text of the given elements. Argument is a hash with jQuery
+    // selectors and replacement text.
+    update_text : function(json) {
+      for (selector in json) {
+        $(selector).text( json[selector] );
+      }
     }
     
   };

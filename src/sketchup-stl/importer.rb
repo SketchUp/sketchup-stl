@@ -279,6 +279,23 @@ module CommunityExtensions
           dialog.update_value('chkMergeCoplanar', merge_faces)
           dialog.update_value('lstUnits', current_unit)
           dialog.update_value('chkPreserveOrigin', preserve_origin)
+          # Localize UI
+          dialog.update_text({
+            '#geometry legend' => STL.string('Geometry'),
+            '#merge_coplanar span' => STL.string('Merge coplanar faces'),
+            
+            '#scale legend' => STL.string('Scale'),
+            '#units span' => STL.string('Units:'),
+            '#lstUnits option[value="4"]' => STL.string('Meters'),
+            '#lstUnits option[value="3"]' => STL.string('Centimeters'),
+            '#lstUnits option[value="2"]' => STL.string('Millimeters'),
+            '#lstUnits option[value="1"]' => STL.string('Feet'),
+            '#lstUnits option[value="0"]' => STL.string('Inches'),
+            '#preserve_origin span' => STL.string('Preserve drawing origin'),
+            
+            '#btnAccept' => STL.string('Accept'),
+            '#btnCancel' => STL.string('Cancel')
+          })
         }
 
         window.add_action_callback('Event_Accept') { |dialog, params|

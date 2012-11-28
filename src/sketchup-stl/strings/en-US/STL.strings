@@ -31,7 +31,15 @@
 "Cleaning up geometry..." = "Cleaning up geometry..."
 "Importing STL done!" = "Importing STL done!"
 
+// Import Options
 "Import STL Options" = "Import STL Options"
+"Geometry" = "Geometry"
+"Merge coplanar faces" = "Merge coplanar faces"
+"Scale" = "Scale"
+"Units:" = "Units:"
+"Preserve drawing origin" = "Preserve drawing origin"
+"Accept" = "Accept"
+"Cancel" = "Cancel"
 
 // Binary Import
 "STL Importer (c) Jim Foltz

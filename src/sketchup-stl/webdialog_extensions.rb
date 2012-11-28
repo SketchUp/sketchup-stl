@@ -29,7 +29,13 @@ module CommunityExtensions
       # The remaining arguments are optionol and will be passed to the function.
       def call_function(function, *args)
         # Just a simple conversion, which ensures strings are escaped.
-        arguments = args.map { |value| value.inspect}.join(',')
+        arguments = args.map { |value|
+          if value.is_a?(Hash)
+            hash_to_json(value)
+          else
+            value.inspect
+          end
+        }.join(',')
         function = "#{function}(#{arguments});"
         execute_script(function)
       end
@@ -40,6 +46,19 @@ module CommunityExtensions
       # form element - without the `#` prefix.
       def update_value(element_id, value)
         call_function('UI.update_value', element_id, value)
+      end
+      
+      # (i) Assumes the WebDialog HTML includes `base.js`.
+      # 
+      # Updates the text of the given jQuery selector matches.
+      def update_text(hash)
+        call_function('UI.update_text', hash)
+      end
+      
+      # Returns a Javascript JSON object for the given Ruby Hash.
+      def hash_to_json(hash)
+        data = hash.map { |key, value| "#{key.inspect}: #{value.inspect}" }
+        "{#{data.join(',')}}"
       end
 
     end # module WebDialogBridge

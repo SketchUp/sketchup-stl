@@ -26,6 +26,7 @@ module CommunityExtensions
       TOKEN_EOL        = /\n|\r/
       TOKEN_COMMENT    = ?/
       TOKEN_ML_COMMENT = ?*
+      TOKEN_CONCAT     = ?+
       
       class ParseError < StandardError; end
 
@@ -135,7 +136,7 @@ module CommunityExtensions
               # Look for: " /
               if byte == TOKEN_QUOTE
                 state = STATE_IN_KEY
-                key_buffer = ''
+                #key_buffer = ''
               elsif byte == TOKEN_COMMENT
                 state_cache = state
                 state = STATE_EXPECT_COMMENT
@@ -156,6 +157,8 @@ module CommunityExtensions
               # Look for: = /
               if byte == TOKEN_EQUAL
                 state = STATE_EXPECT_VALUE
+              elsif byte == TOKEN_CONCAT
+                state = STATE_SEARCH
               elsif byte == TOKEN_COMMENT
                 state_cache = state
                 state = STATE_EXPECT_COMMENT
@@ -169,7 +172,6 @@ module CommunityExtensions
               # Look for: " /
               if byte == TOKEN_QUOTE
                 state = STATE_IN_VALUE
-                value_buffer = ''
               elsif byte == TOKEN_COMMENT
                 state_cache = state
                 state = STATE_EXPECT_COMMENT
@@ -191,12 +193,18 @@ module CommunityExtensions
               # Look for: ; /
               if byte == TOKEN_END
                 state = STATE_SEARCH
+                key_buffer = ''
+                value_buffer = ''
+              elsif byte == TOKEN_CONCAT
+                state = STATE_EXPECT_VALUE
               elsif byte == TOKEN_COMMENT
                 state_cache = state
                 state = STATE_EXPECT_COMMENT
               # (i) Enable this rule to accept EOL as substitute for ;
               elsif byte.chr =~ TOKEN_EOL
                 state = STATE_SEARCH
+                key_buffer = ''
+                value_buffer = ''
               elsif byte.chr =~ TOKEN_WHITESPACE
                 # Ignore.
               else

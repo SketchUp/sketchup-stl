@@ -70,12 +70,12 @@ module CommunityExtensions
         # SketchUp versions that did not feature the disable_ui argument.
         model = Sketchup.active_model
         if model.method(:start_operation).arity == 1
-          model.start_operation(STL.string('STL Import'))
+          model.start_operation(STL.translate('STL Import'))
         else
-          model.start_operation(STL.string('STL Import'), true)
+          model.start_operation(STL.translate('STL Import'), true)
         end
         # Import geometry.
-        Sketchup.status_text = STL.string('Importing geometry...')
+        Sketchup.status_text = STL.translate('Importing geometry...')
         if file_type[/solid/]
           entities = stl_ascii_import(filename)
         else
@@ -85,7 +85,7 @@ module CommunityExtensions
         # Verify that anything was imported.
         if entities.nil? || entities.length == 0
           model.abort_operation
-          UI.messagebox(STL.string('No geometry was imported.')) if entities
+          UI.messagebox(STL.translate('No geometry was imported.')) if entities
           Sketchup.status_text = '' # OSX doesn't reset the statusbar like Windows.
           return IMPORT_FAILED
         end
@@ -99,17 +99,17 @@ module CommunityExtensions
         # Check if the imported geometry is a solid. If not, attempt to
         # automatically repair it.
         unless is_solid?(group)
-          Sketchup.status_text = STL.string('Repairing geometry...')
+          Sketchup.status_text = STL.translate('Repairing geometry...')
           heal_geometry(entities)
         end
         # Focus camera on imported geometry.
         model.active_view.zoom(group)
         # Clean up geometry.
         if @stl_merge
-          Sketchup.status_text = STL.string('Cleaning up geometry...')
+          Sketchup.status_text = STL.translate('Cleaning up geometry...')
           cleanup_geometry(entities)
         end
-        Sketchup.status_text = STL.string('Importing STL done!')
+        Sketchup.status_text = STL.translate('Importing STL done!')
         model.commit_operation
         return IMPORT_SUCCESS
       end
@@ -141,7 +141,7 @@ module CommunityExtensions
         int_size = [42].pack('i').size
         float_size = [42.0].pack('f').size
         len = f.read(int_size).unpack('i')[0]
-        msg = STL.string("STL Importer (c) Jim Foltz\n\nSTL Binary Header:\n%s\n\nFound %i triangles. Continue?")
+        msg = STL.translate("STL Importer (c) Jim Foltz\n\nSTL Binary Header:\n%s\n\nFound %i triangles. Continue?")
         msg = sprintf(msg, header, len)
         if do_msg(msg) == IDNO
           f.close
@@ -202,7 +202,7 @@ module CommunityExtensions
             return stl_binary_import(filename, 2)
           end
         end
-        msg = STL.string("STL Importer (c) Jim Foltz\n\nSTL ASCII File\nFound %i polygons.\n\nContinue?")
+        msg = STL.translate("STL Importer (c) Jim Foltz\n\nSTL ASCII File\nFound %i polygons.\n\nContinue?")
         msg = sprintf(msg, polys.length)
         if do_msg(msg) == IDNO
           return IMPORT_CANCELLED
@@ -251,7 +251,7 @@ module CommunityExtensions
         html_source = File.join(PLUGIN_PATH, 'html', 'importer.html')
 
         window_options = {
-          :dialog_title     => STL.string('Import STL Options'),
+          :dialog_title     => STL.translate('Import STL Options'),
           :preferences_key  => false,
           :scrollable       => false,
           :resizable        => false,
@@ -281,20 +281,20 @@ module CommunityExtensions
           dialog.update_value('chkPreserveOrigin', preserve_origin)
           # Localize UI
           dialog.update_text({
-            '#geometry legend' => STL.string('Geometry'),
-            '#merge_coplanar span' => STL.string('Merge coplanar faces'),
+            '#geometry legend' => STL.translate('Geometry'),
+            '#merge_coplanar span' => STL.translate('Merge coplanar faces'),
             
-            '#scale legend' => STL.string('Scale'),
-            '#units span' => STL.string('Units:'),
-            '#lstUnits option[value="4"]' => STL.string('Meters'),
-            '#lstUnits option[value="3"]' => STL.string('Centimeters'),
-            '#lstUnits option[value="2"]' => STL.string('Millimeters'),
-            '#lstUnits option[value="1"]' => STL.string('Feet'),
-            '#lstUnits option[value="0"]' => STL.string('Inches'),
-            '#preserve_origin span' => STL.string('Preserve drawing origin'),
+            '#scale legend' => STL.translate('Scale'),
+            '#units span' => STL.translate('Units:'),
+            '#lstUnits option[value="4"]' => STL.translate('Meters'),
+            '#lstUnits option[value="3"]' => STL.translate('Centimeters'),
+            '#lstUnits option[value="2"]' => STL.translate('Millimeters'),
+            '#lstUnits option[value="1"]' => STL.translate('Feet'),
+            '#lstUnits option[value="0"]' => STL.translate('Inches'),
+            '#preserve_origin span' => STL.translate('Preserve drawing origin'),
             
-            '#btnAccept' => STL.string('Accept'),
-            '#btnCancel' => STL.string('Cancel')
+            '#btnAccept' => STL.translate('Accept'),
+            '#btnCancel' => STL.translate('Cancel')
           })
         }
 

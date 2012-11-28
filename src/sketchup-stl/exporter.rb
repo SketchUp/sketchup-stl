@@ -16,7 +16,7 @@ module CommunityExtensions
     def self.export_mesh_file
       model = Sketchup.active_model
       if model.active_entities.length == 0
-        return UI.messagebox(STL.string('Nothing to export.'))
+        return UI.messagebox(STL.translate('Nothing to export.'))
       end
       model_name = File.basename(model.path, '.skp')
       if model_name == ''
@@ -27,7 +27,7 @@ module CommunityExtensions
       @line_count = 0
       if model.selection.empty?
         answer = UI.messagebox(
-          STL.string('No objects selected. Export entire model?'),
+          STL.translate('No objects selected. Export entire model?'),
           MB_YESNO
         )
         if answer == IDYES
@@ -49,7 +49,7 @@ module CommunityExtensions
         @stl_type = options[1].downcase
 
         # Get exported file name and export.
-        description = STL.string('%s file location')
+        description = STL.translate('%s file location')
         out_name = UI.savepanel(sprintf(description, file_type.upcase), nil,
             "#{model_name}.#{file_type}")
         if out_name
@@ -63,7 +63,7 @@ module CommunityExtensions
           # Count "other" objects we can't parse.
           others = find_faces(0, export_ents, Geom::Transformation.new)
           write_footer(model_name)
-          message = STL.string("%i facets exported\n%i objects ignored")
+          message = STL.translate("%i facets exported\n%i objects ignored")
           UI.messagebox(sprintf(message, @face_count, others))
         end
       end
@@ -149,36 +149,36 @@ module CommunityExtensions
     def self.options_dialog
       case Sketchup.active_model.options['UnitsOptions']['LengthUnit']
       when UNIT_METERS
-        current_unit = STL.string('Meters')
+        current_unit = STL.translate('Meters')
       when UNIT_CENTIMETERS
-        current_unit = STL.string('Centimeters')
+        current_unit = STL.translate('Centimeters')
       when UNIT_MILLIMETERS
-        current_unit = STL.string('Millimeters')
+        current_unit = STL.translate('Millimeters')
       when UNIT_FEET
-        current_unit = STL.string('Feet')
+        current_unit = STL.translate('Feet')
       when UNIT_INCHES
-        current_unit = STL.string('Inches')
+        current_unit = STL.translate('Inches')
       end
       units_list = %w(Meters Centimeters Millimeters Inches Feet)
-      units_list.map! { |unit| STL.string(unit) }
-      prompts  = [STL.string('Export unit: '), STL.string('File Format ')]
+      units_list.map! { |unit| STL.translate(unit) }
+      prompts  = [STL.translate('Export unit: '), STL.translate('File Format ')]
       formats = %w(ASCII Binary)
-      formats_translated = formats.map { |format| STL.string(format) }
+      formats_translated = formats.map { |format| STL.translate(format) }
       choices  = [units_list.join('|'), formats_translated.join('|')]
-      defaults = [current_unit, STL.string('Binary')]
-      title = STL.string('STL Export Options')
+      defaults = [current_unit, STL.translate('Binary')]
+      title = STL.translate('STL Export Options')
       results = UI.inputbox(prompts, defaults, choices, title)
       return false if results == false
       case results[0]
-      when STL.string('Meters')
+      when STL.translate('Meters')
         stl_conv = 0.0254
-      when STL.string('Centimeters')
+      when STL.translate('Centimeters')
         stl_conv = 2.54
-      when STL.string('Millimeters')
+      when STL.translate('Millimeters')
         stl_conv = 25.4
-      when STL.string('Feet')
+      when STL.translate('Feet')
         stl_conv = 0.0833333333333333
-      when STL.string('Inches')
+      when STL.translate('Inches')
         stl_conv = 1
       end
       # (i) Important to get the English value back from the format as the
@@ -198,11 +198,11 @@ module CommunityExtensions
       end
       # (i) The menu_index argument isn't supported by older versions.
       if Sketchup::Menu.instance_method(:add_item).arity == 1
-        UI.menu('File').add_item(STL.string('Export STL...')) {
+        UI.menu('File').add_item(STL.translate('Export STL...')) {
           export_mesh_file
         }
       else
-        UI.menu('File').add_item(STL.string('Export STL...'), insert_index) {
+        UI.menu('File').add_item(STL.translate('Export STL...'), insert_index) {
           export_mesh_file
         }
       end

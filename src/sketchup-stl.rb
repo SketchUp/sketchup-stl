@@ -26,17 +26,17 @@ module CommunityExtensions
     # project.
     # 
     # @example
-    #   STL.string('Hello World')
-    def self.string(string)
+    #   STL.translate('Hello World')
+    def self.translate(string)
       @translator.get(string)
     end
   
     extension = SketchupExtension.new(
-      STL.string('STL Import & Export'),
+      STL.translate('STL Import & Export'),
       File.join(PLUGIN_PATH, 'loader.rb')
     )
     
-    extension.description = STL.string(
+    extension.description = STL.translate(
       'Adds STL file format import and export. ' <<
       'This is an open source project sponsored by the SketchUp team. More ' <<
       'info and updates at https://github.com/SketchUp/sketchup-stl'

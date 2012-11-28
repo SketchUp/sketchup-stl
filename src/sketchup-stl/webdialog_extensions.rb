@@ -26,7 +26,7 @@ module CommunityExtensions
       # 
       # `function` is a string with the JavaScript function name.
       # 
-      # The remaining arguments are optionol and will be passed to the function.
+      # The remaining arguments are optional and will be passed to the function.
       def call_function(function, *args)
         # Just a simple conversion, which ensures strings are escaped.
         arguments = args.map { |value|

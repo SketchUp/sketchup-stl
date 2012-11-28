@@ -139,7 +139,7 @@ module CommunityExtensions
         # If no path has been given it'll revert back to the Resource folder in
         # SketchUp, like LanguageHandler does.
         if custom_path
-          full_file_path = File.join(custom_path, Sketchup.get_locale, filename)
+          full_file_path = File.join(File.expand_path(custom_path), Sketchup.get_locale, filename)
         else
           full_file_path = Sketchup.get_resource_path(filename)
         end

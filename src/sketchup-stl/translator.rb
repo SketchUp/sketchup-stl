@@ -15,6 +15,8 @@ module CommunityExtensions
     # 
     # Strings must be placed in similar folder systems to SketchUp and the
     # naming of the folders much match what Sketchup.get_locale reports.
+    #
+    # Strings should be saved in UTF-8 encoded files, with or without BOM.
     # 
     # Enhanced features include:
     # * One-line comments can start anywhere.
@@ -37,16 +39,17 @@ module CommunityExtensions
     # https://github.com/SketchUp/sketchup-stl/issues/45#issuecomment-10819945
     class Translator
       
-      STATE_SEARCH             = 0 # Looking for " or /
-      STATE_IN_KEY             = 1 # Looking for "
-      STATE_EXPECT_EQUAL       = 2 # Looking for =
-      STATE_EXPECT_VALUE       = 3 # Looking for "
-      STATE_IN_VALUE           = 4 # Looking for "
-      STATE_EXPECT_END         = 5 # Looking for ;
-      STATE_EXPECT_COMMENT     = 6 # Found / - Expecting * or / next
-      STATE_IN_COMMENT_MULTI   = 7 # Found /* - Looking for */
-      STATE_EXPECT_COMMENT_END = 8 # Found * - Expecting / next
-      STATE_IN_COMMENT_SINGLE  = 9 # Found // - Looking for end of line
+      STATE_SEARCH             =  0 # Looking for " or /
+      STATE_IN_KEY             =  1 # Looking for "
+      STATE_EXPECT_EQUAL       =  2 # Looking for =
+      STATE_EXPECT_VALUE       =  3 # Looking for "
+      STATE_IN_VALUE           =  4 # Looking for "
+      STATE_EXPECT_END         =  5 # Looking for ;
+      STATE_EXPECT_COMMENT     =  6 # Found / - Expecting * or / next
+      STATE_IN_COMMENT_MULTI   =  7 # Found /* - Looking for */
+      STATE_EXPECT_COMMENT_END =  8 # Found * - Expecting / next
+      STATE_IN_COMMENT_SINGLE  =  9 # Found // - Looking for end of line
+      STATE_EXPECT_UTF8_BOM    = 10 # Looking for UTF-8 BOM
       
       TOKEN_WHITESPACE     = /\s/
       TOKEN_CONCAT         = ?+
@@ -173,7 +176,7 @@ module CommunityExtensions
         
         # File position statistics.
         last_line_break = nil
-        line_pos = 1
+        line_pos = 0
         
         File.open(full_file_path, 'r') { |file|
           file.lineno = 1 # Line numbers must be maually tracked.
@@ -190,10 +193,32 @@ module CommunityExtensions
               last_line_break = nil
             end
             
+            log_state(state, byte)
+            
+            # Check for UTF-8 BOM at the beginning of the file. (0xEF,0xBB,0xBF)
+            # This is done here before the rest of the parsing as these are
+            # special bytes that doesn't appear visible in editors.
+            if file.lineno == 1
+              if line_pos == 1 && byte == 0xEF
+                state = STATE_EXPECT_UTF8_BOM
+                next
+              elsif state == STATE_EXPECT_UTF8_BOM
+                if line_pos == 2 && byte == 0xBB
+                  next
+                elsif line_pos == 3 && byte == 0xBF
+                  # Reset line position tracker as the BOM is not visible in
+                  # editors and will give misleading references.
+                  line_pos = 0
+                  state = STATE_SEARCH
+                  next
+                end
+                raise ParseError, parse_error(file, state, byte, line_pos)
+              end
+            end
+            
             # Process the current byte.
             # Note that White-space and EOL matches are done with regex and
             # therefore last in evaluation.
-            log_state(state, byte)
             case state
             
             # Neutral state looking for the beginning of a key or comment.
@@ -347,7 +372,8 @@ module CommunityExtensions
           STATE_EXPECT_COMMENT      => 'STATE_EXPECT_COMMENT',
           STATE_IN_COMMENT_MULTI    => 'STATE_IN_COMMENT_MULTI',
           STATE_EXPECT_COMMENT_END  => 'STATE_EXPECT_COMMENT_END',
-          STATE_IN_COMMENT_SINGLE   => 'STATE_IN_COMMENT_SINGLE'
+          STATE_IN_COMMENT_SINGLE   => 'STATE_IN_COMMENT_SINGLE',
+          STATE_EXPECT_UTF8_BOM     => 'STATE_EXPECT_UTF8_BOM'
         }[state]
       end
       

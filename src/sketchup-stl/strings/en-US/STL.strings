@@ -1,4 +1,4 @@
-// path = CommunityExtensions::STL::PLUGIN_STRINGS_PATH
+﻿// path = CommunityExtensions::STL::PLUGIN_STRINGS_PATH
 // options = { :custom_path => path }
 // tr = CommunityExtensions::STL::Translator.new("STL.strings", options)
 

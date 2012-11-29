@@ -4,7 +4,7 @@
 
 
 // Extension Description ///////////////////////////////////////////////////////
-"STL Import & Export" = "STL Import & Export"
+"STL Import & Export" = "STL Import & Export";
 
 "Adds STL file format import and export. " +
 "This is an open source project sponsored by the SketchUp team. More " +
@@ -12,34 +12,34 @@
 =
 "Adds STL file format import and export. " +
 "This is an open source project sponsored by the SketchUp team. More " +
-"info and updates at https://github.com/SketchUp/sketchup-stl"
+"info and updates at https://github.com/SketchUp/sketchup-stl";
 
 
 // Common //////////////////////////////////////////////////////////////////////
-"Meters" = "Meters"
-"Centimeters" = "Centimeters"
-"Millimeters" = "Millimeters"
-"Feet" = "Feet"
-"Inches" = "Inches"
+"Meters" = "Meters";
+"Centimeters" = "Centimeters";
+"Millimeters" = "Millimeters";
+"Feet" = "Feet";
+"Inches" = "Inches";
 
 
 // Importer ////////////////////////////////////////////////////////////////////
-"STL Import" = "STL Import"
-"Importing geometry..." = "Importing geometry..."
-"No geometry was imported." = "No geometry was imported."
-"Repairing geometry..." = "Repairing geometry..."
-"Cleaning up geometry..." = "Cleaning up geometry..."
-"Importing STL done!" = "Importing STL done!"
+"STL Import" = "STL Import";
+"Importing geometry..." = "Importing geometry...";
+"No geometry was imported." = "No geometry was imported.";
+"Repairing geometry..." = "Repairing geometry...";
+"Cleaning up geometry..." = "Cleaning up geometry...";
+"Importing STL done!" = "Importing STL done!";
 
 // Import Options
-"Import STL Options" = "Import STL Options"
-"Geometry" = "Geometry"
-"Merge coplanar faces" = "Merge coplanar faces"
-"Scale" = "Scale"
-"Units:" = "Units:"
-"Preserve drawing origin" = "Preserve drawing origin"
-"Accept" = "Accept"
-"Cancel" = "Cancel"
+"Import STL Options" = "Import STL Options";
+"Geometry" = "Geometry";
+"Merge coplanar faces" = "Merge coplanar faces";
+"Scale" = "Scale";
+"Units:" = "Units:";
+"Preserve drawing origin" = "Preserve drawing origin";
+"Accept" = "Accept";
+"Cancel" = "Cancel";
 
 // Binary Import
 "STL Importer (c) Jim Foltz
@@ -54,7 +54,7 @@ Found %i triangles. Continue?"
 STL Binary Header:
 %s
 
-Found %i triangles. Continue?"
+Found %i triangles. Continue?";
 
 // ASCII Import
 "STL Importer (c) Jim Foltz
@@ -69,26 +69,26 @@ Continue?"
 STL ASCII File
 Found %i polygons.
 
-Continue?"
+Continue?";
 
 
 // Exporter ////////////////////////////////////////////////////////////////////
-"Nothing to export." = "Nothing to export."
-"No objects selected. Export entire model?" = "No objects selected. Export entire model?"
-"%s file location" = "%s file location"
+"Nothing to export." = "Nothing to export.";
+"No objects selected. Export entire model?" = "No objects selected. Export entire model?";
+"%s file location" = "%s file location";
 
 "%i facets exported
 %i objects ignored"
 =
 "%i facets exported
-%i objects ignored"
+%i objects ignored";
 
 // Export Options
-"STL Export Options" = "STL Export Options"
-"Export unit: " = "Export unit: "
-"File Format " = "File Format "
-"ASCII" = "ASCII"
-"Binary" = "Binary"
+"STL Export Options" = "STL Export Options";
+"Export unit: " = "Export unit: ";
+"File Format " = "File Format ";
+"ASCII" = "ASCII";
+"Binary" = "Binary";
 
 // Menu Item
-"Export STL..." = "Export STL..."
+"Export STL..." = "Export STL...";

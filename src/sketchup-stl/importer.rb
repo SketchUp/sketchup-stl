@@ -257,7 +257,7 @@ module CommunityExtensions
           :resizable        => false,
           :left             => 300,
           :top              => 200,
-          :width            => 350, # 315,
+          :width            => 330,
           :height           => 265
         }
 

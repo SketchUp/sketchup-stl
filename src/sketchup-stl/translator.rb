@@ -13,6 +13,9 @@ module CommunityExtensions
     # SketchUp (Current version 8M4). Existing .string files can be used and
     # methods are aliases so the class can be used as a drop in replacement.
     # 
+    # Strings must be placed in similar folder systems to SketchUp and the
+    # naming of the folders much match what Sketchup.get_locale reports.
+    # 
     # Enhanced features include:
     # * One-line comments can start anywhere.
     # * Multi-line comments can start and stop anywhere outside a string.
@@ -25,6 +28,13 @@ module CommunityExtensions
     #   escape-characters if needed.
     # 
     # See Tests folder for sample .strings files.
+    # 
+    # Locales can be tested by starting SketchUp with the following arguments:
+    #   sketchup.exe /lang de
+    # 
+    # Note that there must exist a folder with that locale in the SketchUp
+    # Resources folder.
+    # https://github.com/SketchUp/sketchup-stl/issues/45#issuecomment-10819945
     class Translator
       
       STATE_SEARCH             = 0 # Looking for " or /

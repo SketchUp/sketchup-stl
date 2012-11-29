@@ -144,15 +144,16 @@ module CommunityExtensions
           full_file_path = Sketchup.get_resource_path(filename)
         end
         
-        # Ensure the file is valid.
-        if full_file_path.nil? || !File.exist?(full_file_path)
-          raise ArgumentError, "Invalid file! #{full_file_path}"
-        end
-        
         # Define returned dictionary. Make a hash that will return the key given
         # if the key doesn't exist. That way, when a translation is missing for
         # a string it will be returned un-translated.
         strings = Hash.new { |hash, key| key }
+
+        # Ensure the file is valid.
+        if full_file_path.nil? || !File.exist?(full_file_path)
+          puts "Warning! Could not load dictionary: #{full_file_path}"
+          return strings
+        end
         
         # Read and process the content.
         state = STATE_SEARCH

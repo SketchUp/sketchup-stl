@@ -26,7 +26,7 @@ module CommunityExtensions
     # * Strings can cross multiple lines.
     # * Strict enforcement of the format ensures an error is raised instead of
     #   producing junk data.
-    # * Can be easily extened to include advanced features such as
+    # * Can be easily extended to include advanced features such as
     #   escape-characters if needed.
     # 
     # See Tests folder for sample .strings files.
@@ -63,12 +63,12 @@ module CommunityExtensions
       
       class ParseError < StandardError; end
       
-      # A second optional Hash argument can be used to spesify behaviour that
+      # A second optional Hash argument can be used to specify behaviour that
       # differ from LanguageHandler.
       # 
       # Option Keys:
       # * :custom_path - String pointing to a custom path where the localized
-      #                  strings are. If ommitted the Translator will look in
+      #                  strings are. If omitted the Translator will look in
       #                  SketchUp's Resource folder.
       # * :debug       - Set to true for a detailed trace of the parsing.
       #
@@ -179,7 +179,7 @@ module CommunityExtensions
         line_pos = 0
         
         File.open(full_file_path, 'r') { |file|
-          file.lineno = 1 # Line numbers must be maually tracked.
+          file.lineno = 1 # Line numbers must be manually tracked.
           file.each_byte { |byte|
             # Count line numbers and keep track of line position.
             if byte.chr =~ TOKEN_EOL # (?) Can we avoid regex? Is 10 & 13 enough?

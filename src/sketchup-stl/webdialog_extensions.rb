@@ -55,7 +55,7 @@ module CommunityExtensions
         call_function('UI.update_text', hash)
       end
       
-      # Returns a Javascript JSON object for the given Ruby Hash.
+      # Returns a JavaScript JSON object for the given Ruby Hash.
       def hash_to_json(hash)
         data = hash.map { |key, value| "#{key.inspect}: #{value.inspect}" }
         "{#{data.join(',')}}"

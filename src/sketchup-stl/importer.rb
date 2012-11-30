@@ -236,7 +236,7 @@ module CommunityExtensions
       private :get_unit_ratio
 
       def stl_dialog
-        # Since WebDialogs under OSX isn't truly modal wthere is a chance the user
+        # Since WebDialogs under OSX isn't truly modal there is a chance the user
         # can click the Options button while the window is already open. We then
         # just bring it to the front.
         # 
@@ -373,7 +373,7 @@ module CommunityExtensions
           # 
           # What does seem to work best is to first erase the edge we got from the
           # stack and then check the shared set of edges afterwards and erase them
-          # after we've verified they are not part of any faces anymore.
+          # after we've verified they are not part of any faces any more.
           shared_edges = face1.edges & face2.edges
           #shared_edges.each { |e| e.material = 'red' } # DEBUG
           edge.erase!

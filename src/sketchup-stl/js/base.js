@@ -12,8 +12,11 @@ var UI = function() {
       // Disable native browser functions to make the dialog appear more native.
       UI.disable_select();
       UI.disable_context_menu();
+      // Collect UI strings that need localization.
+      ui_strings = collect_ui_strings();
+      ui_strings_params = ui_strings.join('|||');
       // Ready Event
-      window.location = 'skp:Window_Ready';
+      window.location = 'skp:Window_Ready@' + ui_strings_params;
     },
     
     // Ensure links are opened in the default browser.
@@ -71,9 +74,35 @@ var UI = function() {
       if ( $element.attr('type') == 'checkbox' ) {
         $element.prop( 'checked', value );
       }
+    },
+    
+    // Set the text of the given elements. Argument is a hash with jQuery
+    // selectors and replacement text.
+    update_text : function(json) {
+      for (selector in json) {
+        $(selector).text( json[selector] );
+      }
+    },
+    
+    // Set the text of the given elements. Argument is a hash with jQuery
+    // selectors and replacement text.
+    update_strings : function(strings) {
+      var $ui_elements = $('.ui_string');
+      // (!) Check that size of ui_elements and strings match.
+      $ui_elements.each( function(index) {
+        $(this).text( strings[index] );
+      });
     }
     
   };
+
+  // Private Functions
+  
+  function collect_ui_strings() {
+    return $('.ui_string').map(function() {
+      return $.trim( $(this).text() );
+    }).get();
+  }
   
 }(); // UI
 

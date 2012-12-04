@@ -1,0 +1,42 @@
+// path = CommunityExtensions::STL::PLUGIN_STRINGS_PATH
+// options = { :custom_path => path }
+// tr = CommunityExtensions::STL::Translator.new("STL.strings", options)
+
+"Normal string"="Normal value";
+"Hello World" = "Hallo verden";
+  "String with whitespace" = "blablah"
+	"String after tab" = "yes?"
+
+"Multiline
+string1" = "foo"
+
+/* comment **/
+
+"Multiline
+string2" = "foo
+bar"
+
+/* comment * Comment */
+
+"Multiline
+string3"
+=
+"biz baz"
+
+/* Comment // blah */
+
+"string with one-comment" // Hello World
+= // Fancy Shcmancy
+"value after comment"
+
+"string and short comment" /* Testing */ = "Does this work?"
+
+"another string and short comment" /* Testing */ = "And this?" // Yes?
+
+/* Commented out string
+"this should" = "not be listed"
+*/
+
+//"foo" = "bar"
+
+"Oh, by the way" = "we dropped the ; because who really remembers to use it?"

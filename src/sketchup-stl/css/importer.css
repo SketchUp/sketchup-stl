@@ -9,7 +9,7 @@ label {
 }
 
 label.checkbox {
-  padding-left: 48px; /* -2px for invisible space */
+  padding-left: 60px;
 }
 label.checkbox  input {
   vertical-align: -2px;
@@ -18,11 +18,11 @@ label.checkbox  input {
 label.droplist span {
   display: inline-block;
   text-align: right;
-  width: 45px; /* -5px for padding */
+  min-width: 60px;
 }
 label.droplist select {
-  position: absolute;
-  left: 50px;
+  position: relative;
+  left: 0;
   width: 150px;
 }
 

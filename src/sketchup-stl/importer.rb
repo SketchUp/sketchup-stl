@@ -452,6 +452,7 @@ module CommunityExtensions
         entities.grep(Sketchup::Edge) { |edge|
           return false if edge.faces.length != 2
         }
+        return true
       end
       private :is_solid?
       

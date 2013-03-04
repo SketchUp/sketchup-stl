@@ -24,7 +24,6 @@ module CommunityExtensions
         @stl_units = UNIT_MILLIMETERS
         @stl_merge = false
         @stl_preserve_origin = true
-
         @option_window = nil # (See comment at top of `stl_dialog()`.)
       end
 
@@ -90,20 +89,27 @@ module CommunityExtensions
           return IMPORT_FAILED
         end
         # Reposition to ORIGIN.
-        group = entities.parent.instances[0]
+        container = entities.parent
         unless @stl_preserve_origin
-          point = group.bounds.corner(0)
-          vector = point.vector_to(ORIGIN)
-          group.transform!(vector) if vector.valid?
+          if container == model
+            point = model.bounds.corner(0)
+            vector = point.vector_to(ORIGIN)
+            entities.transform_entities(vector, entities.to_a)
+            model.active_view.zoom(container.entities.to_a)
+          else
+            group = container.instances[0]
+            point = group.bounds.corner(0)
+            vector = point.vector_to(ORIGIN)
+            group.transform!(vector) if vector.valid?
+            model.active_view.zoom([group])
+          end
         end
         # Check if the imported geometry is a solid. If not, attempt to
         # automatically repair it.
-        unless is_solid?(group)
+        unless is_solid?(container.entities)
           Sketchup.status_text = STL.translate('Repairing geometry...')
-          heal_geometry(entities)
+          heal_geometry(container.entities)
         end
-        # Focus camera on imported geometry.
-        model.active_view.zoom(group)
         # Clean up geometry.
         if @stl_merge
           Sketchup.status_text = STL.translate('Cleaning up geometry...')
@@ -442,35 +448,14 @@ module CommunityExtensions
       # with older SketchUp versions before SketchUp 8.
       #
       # @param [Sketchup::Group,Sketchup::ComponentInstance] instance
-      def is_solid?(instance)
-        if instance.respond_to?(:manifold?) 
-          instance.manifold?
-        else
-          retrofit_manifold?(instance)
-        end
+      def is_solid?(entities)
+        entities.grep(Sketchup::Edge) { |edge|
+          return false if edge.faces.length != 2
+        }
+        return true
       end
       private :is_solid?
       
-      # Fallback method for checking if an instance is solid for versions older
-      # older than SketchUp 8.
-      #
-      # @param [Sketchup::Group,Sketchup::ComponentInstance] instance
-      def retrofit_manifold?(instance)
-        if instance.is_a?(Sketchup::Group)
-          definition = instance.entities.parent
-        else
-          definition = instance.definition
-        end
-        # (i) Since we know the instance has been populated with a PolygonMesh
-        #     we know there won't be any sub-groups/components or any other
-        #     entities we have to test for.
-        definition.entities.grep(Sketchup::Edge) { |edge|
-          return false unless edge.faces.length == 2
-        }
-        true
-      end
-      private :retrofit_manifold?
-
     end # class Importer
 
   end # module STL

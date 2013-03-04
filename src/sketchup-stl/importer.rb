@@ -95,7 +95,7 @@ module CommunityExtensions
             point = model.bounds.corner(0)
             vector = point.vector_to(ORIGIN)
             entities.transform_entities(vector, entities.to_a)
-            model.active_view.zoom(container.entities.to_a)
+            model.active_view.zoom(entities.to_a)
           else
             group = container.instances[0]
             point = group.bounds.corner(0)

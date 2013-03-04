@@ -95,11 +95,13 @@ module CommunityExtensions
             point = model.bounds.corner(0)
             vector = point.vector_to(ORIGIN)
             entities.transform_entities(vector, entities.to_a)
+            model.active_view.zoom(container.entities.to_a)
           else
             group = container.instances[0]
             point = group.bounds.corner(0)
             vector = point.vector_to(ORIGIN)
             group.transform!(vector) if vector.valid?
+            model.active_view.zoom([group])
           end
         end
         # Check if the imported geometry is a solid. If not, attempt to
@@ -108,8 +110,6 @@ module CommunityExtensions
           Sketchup.status_text = STL.translate('Repairing geometry...')
           heal_geometry(container.entities)
         end
-        # Focus camera on imported geometry.
-        model.active_view.zoom(container.entities.to_a)
         # Clean up geometry.
         if @stl_merge
           Sketchup.status_text = STL.translate('Cleaning up geometry...')

@@ -14,6 +14,8 @@ module CommunityExtensions
     STL_BINARY = 'binary'.freeze
 
     PREF_KEY = 'CommunityExtensions\STL\Exporter'.freeze
+    @options = {}
+    @options[:type] = STL_ASCII
 
     def self.export_mesh_file
       model = Sketchup.active_model
@@ -210,6 +212,19 @@ module CommunityExtensions
       end
       file_loaded(__FILE__)
     end
+
+      # Wrapper to shorten the syntax and create a central place to modify in case
+      # preferences are stored differently in the future.
+      def read_setting(key, default)
+        Sketchup.read_default(PREF_KEY, key, default)
+      end
+      private :read_setting
+
+      # Wrapper to shorten the syntax and create a central place to modify in case
+      # preferences are stored differently in the future.
+      def write_setting(key, value)
+        Sketchup.write_default(PREF_KEY, key, value)
+      end
 
     end # module Exporter
   end # module STL

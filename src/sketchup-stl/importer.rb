@@ -8,7 +8,7 @@ require 'sketchup'
 
 module CommunityExtensions
   module STL
-    class Importer
+    class Importer < Sketchup::Importer
 
       Sketchup::require File.join(PLUGIN_PATH, 'webdialog_extensions')
 

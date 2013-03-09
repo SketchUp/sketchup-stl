@@ -13,6 +13,8 @@ module CommunityExtensions
     STL_ASCII  = 'ascii'.freeze
     STL_BINARY = 'binary'.freeze
 
+    PREF_KEY = 'CommunityExtensions\STL\Exporter'.freeze
+
     def self.export_mesh_file
       model = Sketchup.active_model
       if model.active_entities.length == 0

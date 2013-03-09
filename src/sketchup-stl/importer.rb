@@ -14,10 +14,10 @@ module CommunityExtensions
 
       PREF_KEY = 'CommunityExtensions\STL\Importer'.freeze
       
-      IMPORT_SUCCESS                        = 0
-      IMPORT_FAILED                         = 1
-      IMPORT_CANCELLED                      = 2
-      IMPORT_FILE_NOT_FOUND                 = 4
+      IMPORT_SUCCESS                        = ImportSuccess
+      IMPORT_FAILED                         = ImportFail
+      IMPORT_CANCELLED                      = ImportCanceled
+      IMPORT_FILE_NOT_FOUND                 = ImportFileNotFound
       IMPORT_SKETCHUP_VERSION_NOT_SUPPORTED = 5
 
       def initialize

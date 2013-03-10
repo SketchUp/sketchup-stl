@@ -176,8 +176,6 @@ module CommunityExtensions
       end
 
       def self.options_dialog
-        current_unit = model_units()
-        current_unit = read_setting('units', current_unit)
         formats = %w(ASCII Binary)
         units   = %w(Meters Centimeters Millimeters Inches Feet)
         formats_translated = formats.map { |format| STL.translate(format) }
@@ -191,7 +189,7 @@ module CommunityExtensions
           formats_translated.join('|')
         ]
         defaults = [
-          current_unit,
+          STL.translate(read_setting('units', model_units())),
           STL.translate(read_setting('stl_format', 'ASCII'))
         ]
         title = STL.translate('STL Export Options')
@@ -215,7 +213,7 @@ module CommunityExtensions
         #
         #  Also using the English unit name in the Registry.
         unit_index   = units_translated.index(results[0])
-        write_setting('units', units[unit_index])
+        write_setting('export_units', units[unit_index])
 
         format_index = formats_translated.index(results[1])
         write_setting('stl_format', formats[format_index])

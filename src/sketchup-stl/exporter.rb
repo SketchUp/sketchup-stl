@@ -160,26 +160,38 @@ module CommunityExtensions
         Sketchup.write_default(PREF_KEY, key, value)
       end
 
-      def self.options_dialog
+      def self.model_units
         case Sketchup.active_model.options['UnitsOptions']['LengthUnit']
         when UNIT_METERS
-          current_unit = STL.translate('Meters')
+          'Meters'
         when UNIT_CENTIMETERS
-          current_unit = STL.translate('Centimeters')
+          'Centimeters'
         when UNIT_MILLIMETERS
-          current_unit = STL.translate('Millimeters')
+          'Millimeters'
         when UNIT_FEET
-          current_unit = STL.translate('Feet')
+          'Feet'
         when UNIT_INCHES
-          current_unit = STL.translate('Inches')
+          'Inches'
         end
-        units_list = %w(Meters Centimeters Millimeters Inches Feet)
-        units_list.map! { |unit| STL.translate(unit) }
-        prompts  = [STL.translate('Export unit: '), STL.translate('File Format ')]
+      end
+
+      def self.options_dialog
+        current_unit = model_units()
+        current_unit = read_setting('units', current_unit)
         formats = %w(ASCII Binary)
+        units   = %w(Meters Centimeters Millimeters Inches Feet)
         formats_translated = formats.map { |format| STL.translate(format) }
-        choices  = [units_list.join('|'), formats_translated.join('|')]
-        defaults = [current_unit,
+        units_translated   = units.map   { |unit| STL.translate(unit) }
+        prompts  = [
+          STL.translate('Export unit: '),
+          STL.translate('File Format ')
+        ]
+        choices  = [
+          units_translated.join('|'),
+          formats_translated.join('|')
+        ]
+        defaults = [
+          current_unit,
           STL.translate(read_setting('stl_format', 'ASCII'))
         ]
         title = STL.translate('STL Export Options')
@@ -197,13 +209,19 @@ module CommunityExtensions
         when STL.translate('Inches')
           stl_conv = 1
         end
-        # (i) Important to get the English value back from the format as the
-        #     English string is expected and used for later processing of
-        #     the options.
-        i = formats_translated.index(results[1])
-        write_setting('stl_format', formats[i])
-        return [stl_conv, formats[i]]
-      end
+        #  Important to get the English value back from the format as the
+        #  English string is expected and used for later processing of
+        #  the options.
+        #
+        #  Also using the English unit name in the Registry.
+        unit_index   = units_translated.index(results[0])
+        write_setting('units', units[unit_index])
+
+        format_index = formats_translated.index(results[1])
+        write_setting('stl_format', formats[format_index])
+
+        return [stl_conv, formats[format_index]]
+      end # options_dialog()
 
       unless file_loaded?(__FILE__)
         # Pick menu indexes for where to insert the Export menu. These numbers

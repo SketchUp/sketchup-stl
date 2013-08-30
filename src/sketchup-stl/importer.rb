@@ -430,15 +430,15 @@ module CommunityExtensions
         # Create a temp group with a set of zero length edges for each vertex -
         # when exploded will trigger SketchUp's internal healing function.
         temp_group = entities.add_group
-        offset_reverse = Z_AXIS.reverse
-        vertices = []
-        vectors = []
+        offset_reverse = [Z_AXIS.reverse]
         for point in points
           temp_edge = temp_group.entities.add_line(point, point.offset(Z_AXIS))
-          vertices << temp_edge.end
-          vectors  << offset_reverse
+          # To prevent the temp edges to merging with each other they must be
+          # transformed to zero length edges immediately after creation.
+          # See Issue #77.
+          temp_group.entities.transform_by_vectors(
+            [temp_edge.end], offset_reverse)
         end
-        temp_group.entities.transform_by_vectors(vertices, vectors)
         temp_group.explode
         points.size
       end

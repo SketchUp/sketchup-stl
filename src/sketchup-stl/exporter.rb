@@ -177,7 +177,7 @@ module CommunityExtensions
 
       def self.options_dialog
         formats = %w(ASCII Binary)
-        units   = %w(Meters Centimeters Millimeters Inches Feet)
+        units   = ['Model Units', 'Meters', 'Centimeters', 'Millimeters', 'Inches', 'Feet']
         formats_translated = formats.map { |format| STL.translate(format) }
         units_translated   = units.map   { |unit| STL.translate(unit) }
         prompts  = [
@@ -189,13 +189,19 @@ module CommunityExtensions
           formats_translated.join('|')
         ]
         defaults = [
-          STL.translate(read_setting('units', model_units())),
+          #STL.translate(read_setting('export_units', model_units())),
+          STL.translate(read_setting('export_units', 'Model Units')),
           STL.translate(read_setting('stl_format', 'ASCII'))
         ]
         title = STL.translate('STL Export Options')
         results = UI.inputbox(prompts, defaults, choices, title)
         return false if results == false
-        case results[0]
+        if results[0] == STL.translate('Model Units')
+          selected_units = model_units()
+        else
+          selected_units = results[0]
+        end
+        case selected_units
         when STL.translate('Meters')
           stl_conv = 0.0254
         when STL.translate('Centimeters')

@@ -58,6 +58,9 @@ module CommunityExtensions
             @mesh_file = File.new(out_name , 'w')  
             if @stl_type == STL_BINARY
               @mesh_file.binmode
+              @write_face = method(:write_face_binary)
+            else
+              @write_face = method(:write_face_ascii)
             end
             write_header(model_name)
 
@@ -72,11 +75,9 @@ module CommunityExtensions
       end
 
       def self.find_faces(others, entities, tform)
-        entities.each { |entity|
-          #Face entity
+        entities.each do |entity|
           if entity.is_a?(Sketchup::Face)
             write_face(entity, tform)     
-            #Group & Componentinstanceentity
           elsif entity.is_a?(Sketchup::Group) ||
             entity.is_a?(Sketchup::ComponentInstance)
             if entity.is_a?(Sketchup::Group)
@@ -91,40 +92,50 @@ module CommunityExtensions
           else
             others = others + 1
           end
-        }
+        end # each
         others
+      end
+
+      def self.write_face_ascii(mesh)
+        polygons = mesh.polygons
+        polygons.each do |polygon|
+          if (polygon.length == 3)
+            norm = mesh.normal_at(polygon[0].abs)
+            @mesh_file.write("facet normal #{norm.x} #{norm.y} #{norm.z}\n")
+            @mesh_file.write("  outer loop\n")
+            for j in 0..2 do
+              pt = mesh.point_at(polygon[j].abs)
+              pt = pt.to_a.map{|e| e * @stl_conv}
+              @mesh_file.write("    vertex #{pt.x} #{pt.y} #{pt.z}\n")
+            end
+            @mesh_file.write( "  endloop\nendfacet\n")
+          end
+          @face_count+=1
+        end
+      end
+
+      def self.write_face_binary(mesh)
+        polygons = mesh.polygons
+        polygons.each do |polygon|
+          if (polygon.length == 3)
+            norm = mesh.normal_at(polygon[0].abs)
+            @mesh_file.write(norm.to_a.pack("e3"))
+            for j in 0..2 do
+              pt = mesh.point_at(polygon[j].abs)
+              pt = pt.to_a.map{|e| e * @stl_conv}
+              @mesh_file.write(pt.pack("e3"))
+            end
+            @mesh_file.write([0].pack("v"))
+          end
+          @face_count+=1
+        end
       end
 
       def self.write_face(face, tform)
         mesh = face.mesh(7)
         mesh.transform!(tform)
-        polygons = mesh.polygons
-        polygons.each { |polygon|
-          if polygon.length == 3
-            norm = mesh.normal_at(polygon[0].abs)
-            if @stl_type == STL_ASCII
-              @mesh_file.puts("facet normal #{norm.x} #{norm.y} #{norm.z}")
-              @mesh_file.puts('outer loop')
-            else
-              @mesh_file.write(norm.to_a.pack('e3'))
-            end
-            3.times { |j|
-              pt = mesh.point_at(polygon[j].abs)
-              pt = pt.to_a.map{ |e| e * @stl_conv }
-              if @stl_type == STL_ASCII
-                @mesh_file.puts("vertex #{pt.x} #{pt.y} #{pt.z}")
-              else
-                @mesh_file.write(pt.pack('e3'))
-              end
-            }
-            if @stl_type == STL_ASCII
-              @mesh_file.puts("endloop\nendfacet")
-            else
-              @mesh_file.write([0].pack('v'))
-            end
-          end
-          @face_count += 1
-        }
+        @write_face.call(mesh)
+        @face_count += 1
       end
 
       def self.write_header(model_name)
@@ -132,6 +143,8 @@ module CommunityExtensions
           @mesh_file.puts("solid #{model_name}")
         else
           @mesh_file.write(["SketchUp STL #{model_name}"].pack("A80"))
+          # 0xffffffff is a place-holder value. In the binary format,
+          # this value is updated in the write_footer method.
           @mesh_file.write([0xffffffff].pack('V'))
         end
       end

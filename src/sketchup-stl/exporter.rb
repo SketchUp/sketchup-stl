@@ -110,7 +110,6 @@ module CommunityExtensions
             end
             @mesh_file.write( "  endloop\nendfacet\n")
           end
-          @face_count+=1
         end
       end
 
@@ -127,7 +126,6 @@ module CommunityExtensions
             end
             @mesh_file.write([0].pack("v"))
           end
-          @face_count+=1
         end
       end
 

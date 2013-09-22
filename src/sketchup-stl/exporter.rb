@@ -189,7 +189,6 @@ module CommunityExtensions
           formats_translated.join('|')
         ]
         defaults = [
-          #STL.translate(read_setting('export_units', model_units())),
           STL.translate(read_setting('export_units', 'Model Units')),
           STL.translate(read_setting('stl_format', 'ASCII'))
         ]

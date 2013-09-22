@@ -138,7 +138,7 @@ module CommunityExtensions
 
       def self.write_header(model_name)
         if @stl_type == STL_ASCII
-          @mesh_file.puts("solid #{model_name}")
+          @mesh_file.write("solid #{model_name}\n")
         else
           @mesh_file.write(["SketchUp STL #{model_name}"].pack("A80"))
           # 0xffffffff is a place-holder value. In the binary format,
@@ -149,7 +149,7 @@ module CommunityExtensions
 
       def self.write_footer(model_name)
         if @stl_type == STL_ASCII
-          @mesh_file.puts("endsolid #{model_name}")
+          @mesh_file.write("endsolid #{model_name}\n")
         else
           # binary - update facet count
           @mesh_file.flush

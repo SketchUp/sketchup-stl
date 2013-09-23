@@ -185,7 +185,7 @@ module CommunityExtensions
           read_flags = 'r:BOM|UTF-8'
         end
 
-        File.open(full_file_path, 'r') { |file|
+        File.open(full_file_path, read_flags) { |file|
           file.lineno = 1 # Line numbers must be manually tracked.
           file.each_byte { |byte|
             # Count line numbers and keep track of line position.

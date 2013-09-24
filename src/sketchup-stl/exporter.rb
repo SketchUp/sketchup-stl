@@ -17,9 +17,6 @@ module CommunityExtensions
 
       def self.export_mesh_file
         model = Sketchup.active_model
-        if model.active_entities.length == 0
-          return UI.messagebox(STL.translate('Nothing to export.'))
-        end
         model_name = File.basename(model.path, '.skp')
         if model_name == ''
           model_name = 'untitled'
@@ -27,20 +24,10 @@ module CommunityExtensions
         @stl_conv = 1.0
         @face_count = 0
         @line_count = 0
-        if model.selection.empty?
-          answer = UI.messagebox(
-            STL.translate('No objects selected. Export entire model?'),
-            MB_YESNO
-          )
-          if answer == IDYES
-            export_ents = model.entities
-          else
-            export_ents = model.selection
-          end
-        else
-          export_ents = Sketchup.active_model.selection
-        end
-        if export_ents.length > 0
+        # Whether the Selection or the Model is exported will depend on a new
+        # option in the export dialog.
+        # For now, just export the entre model.
+        export_ents = Sketchup.active_model.entities
           # Get DXF export option.
           file_type='stl'
           # Get Export options.
@@ -71,7 +58,6 @@ module CommunityExtensions
             message = STL.translate("%i facets exported\n%i objects ignored")
             UI.messagebox(sprintf(message, @face_count, others))
           end
-        end
       end
 
       def self.find_faces(others, entities, tform)

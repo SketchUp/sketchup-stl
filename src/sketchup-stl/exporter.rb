@@ -247,13 +247,20 @@ module CommunityExtensions
         end
         # (i) The menu_index argument isn't supported by older versions.
         if Sketchup::Menu.instance_method(:add_item).arity == 1
-          UI.menu('File').add_item(STL.translate('Export STL...')) {
+          item = UI.menu('File').add_item(STL.translate('Export STL...')) {
             export_mesh_file
           }
         else
-          UI.menu('File').add_item(STL.translate('Export STL...'), insert_index) {
+          item = UI.menu('File').add_item(STL.translate('Export STL...'), insert_index) {
             export_mesh_file
           }
+        end
+        UI.menu('File').set_validation_proc(item) do
+          if Sketchup.active_model.entities.length == 0
+            MF_GRAYED
+          else
+            MF_ENABLED
+          end
         end
         file_loaded(__FILE__)
       end

@@ -42,8 +42,6 @@
 "Cancel" = "Annuleren";
 
 // Exporter ////////////////////////////////////////////////////////////////////
-"Nothing to export." = "Er is niets om te exporteren.";
-"No objects selected. Export entire model?" = "Geen objecten geselecteerd. Het gehele model exporteren?";
 "%s file location" = "%s bestandslocatie";
 
 "%i facets exported

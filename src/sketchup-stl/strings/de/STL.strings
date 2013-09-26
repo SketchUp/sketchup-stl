@@ -42,8 +42,6 @@
 "Cancel" = "Abbrechen";
 
 // Exporter ////////////////////////////////////////////////////////////////////
-"Nothing to export." = "Nichts zu exportieren.";
-"No objects selected. Export entire model?" = "Keine Objekte ausgewählt. Gesamtes Modell exportieren?";
 "%s file location" = "%s Dateispeicherort";
 
 "%i facets exported

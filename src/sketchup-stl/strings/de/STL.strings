@@ -41,37 +41,6 @@
 "Accept" = "Anwenden";
 "Cancel" = "Abbrechen";
 
-// Binary Import
-"STL Importer (c) Jim Foltz
-
-STL Binary Header:
-%s
-
-Found %i triangles. Continue?"
-=
-"STL-Importer (c) Jim Foltz
-
-STL-Binärdateikopf:
-%s
-
-%i Dreiecke gefunden. Fortfahren?";
-
-// ASCII Import
-"STL Importer (c) Jim Foltz
-
-STL ASCII File
-Found %i polygons.
-
-Continue?"
-=
-"STL Importer (c) Jim Foltz
-
-STL-ASCII-Datei
-%i Polygone gefunden.
-
-Fortfahren?";
-
-
 // Exporter ////////////////////////////////////////////////////////////////////
 "Nothing to export." = "Nichts zu exportieren.";
 "No objects selected. Export entire model?" = "Keine Objekte ausgewählt. Gesamtes Modell exportieren?";

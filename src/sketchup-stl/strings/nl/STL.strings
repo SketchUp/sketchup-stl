@@ -41,37 +41,6 @@
 "Accept" = "OK";
 "Cancel" = "Annuleren";
 
-// Binary Import
-"STL Importer (c) Jim Foltz
-
-STL Binary Header:
-%s
-
-Found %i triangles. Continue?"
-=
-"STL Importer (c) Jim Foltz
-
-STL Binaire Koptekst:
-%s
-
-%i driehoeken gevonden. Doorgaan?";
-
-// ASCII Import
-"STL Importer (c) Jim Foltz
-
-STL ASCII File
-Found %i polygons.
-
-Continue?"
-=
-"STL Importer (c) Jim Foltz
-
-STL ASCII File
-%i veelhoeken gevonden.
-
-Doorgaan?";
-
-
 // Exporter ////////////////////////////////////////////////////////////////////
 "Nothing to export." = "Er is niets om te exporteren.";
 "No objects selected. Export entire model?" = "Geen objecten geselecteerd. Het gehele model exporteren?";

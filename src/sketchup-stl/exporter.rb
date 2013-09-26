@@ -28,36 +28,36 @@ module CommunityExtensions
         # option in the export dialog.
         # For now, just export the entre model.
         export_ents = Sketchup.active_model.entities
-          # Get DXF export option.
-          file_type='stl'
-          # Get Export options.
-          options = options_dialog
-          return if options == false
+        # Get DXF export option.
+        file_type='stl'
+        # Get Export options.
+        options = options_dialog
+        return if options == false
 
-          @stl_conv = options[0]
-          @stl_type = options[1].downcase
+        @stl_conv = options[0]
+        @stl_type = options[1].downcase
 
-          # Get exported file name and export.
-          description = STL.translate('%s file location')
-          out_name = UI.savepanel(sprintf(description, file_type.upcase), nil,
-                                  "#{model_name}.#{file_type}")
-          if out_name
-            @mesh_file = File.new(out_name , 'w')  
-            if @stl_type == STL_BINARY
-              @mesh_file.binmode
-              @write_face = method(:write_face_binary)
-            else
-              @write_face = method(:write_face_ascii)
-            end
-            write_header(model_name)
-
-            # Recursively export faces and edges, exploding groups as we go.
-            # Count "other" objects we can't parse.
-            others = find_faces(0, export_ents, Geom::Transformation.new)
-            write_footer(model_name)
-            message = STL.translate("%i facets exported\n%i objects ignored")
-            UI.messagebox(sprintf(message, @face_count, others))
+        # Get exported file name and export.
+        description = STL.translate('%s file location')
+        out_name = UI.savepanel(sprintf(description, file_type.upcase), nil,
+                                "#{model_name}.#{file_type}")
+        if out_name
+          @mesh_file = File.new(out_name , 'w')  
+          if @stl_type == STL_BINARY
+            @mesh_file.binmode
+            @write_face = method(:write_face_binary)
+          else
+            @write_face = method(:write_face_ascii)
           end
+          write_header(model_name)
+
+          # Recursively export faces and edges, exploding groups as we go.
+          # Count "other" objects we can't parse.
+          others = find_faces(0, export_ents, Geom::Transformation.new)
+          write_footer(model_name)
+          message = STL.translate("%i facets exported\n%i objects ignored")
+          UI.messagebox(sprintf(message, @face_count, others))
+        end
       end
 
       def self.find_faces(others, entities, tform)

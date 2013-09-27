@@ -41,40 +41,7 @@
 "Accept" = "Accept";
 "Cancel" = "Cancel";
 
-// Binary Import
-"STL Importer (c) Jim Foltz
-
-STL Binary Header:
-%s
-
-Found %i triangles. Continue?"
-=
-"STL Importer (c) Jim Foltz
-
-STL Binary Header:
-%s
-
-Found %i triangles. Continue?";
-
-// ASCII Import
-"STL Importer (c) Jim Foltz
-
-STL ASCII File
-Found %i polygons.
-
-Continue?"
-=
-"STL Importer (c) Jim Foltz
-
-STL ASCII File
-Found %i polygons.
-
-Continue?";
-
-
 // Exporter ////////////////////////////////////////////////////////////////////
-"Nothing to export." = "Nothing to export.";
-"No objects selected. Export entire model?" = "No objects selected. Export entire model?";
 "%s file location" = "%s file location";
 
 "%i facets exported

@@ -52,8 +52,8 @@
 
 // Export Options
 "STL Export Options" = "STL Export Options";
-"Export unit: " = "Export unit: ";
-"File Format " = "File Format ";
+"Export unit:" = "Export unit:";
+"File format:" = "File format:";
 "ASCII" = "ASCII";
 "Binary" = "Binary";
 

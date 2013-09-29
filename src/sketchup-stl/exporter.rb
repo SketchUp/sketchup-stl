@@ -68,9 +68,9 @@ module CommunityExtensions
           elsif entity.is_a?(Sketchup::Group)
             # (!) Beware - Due to a SketchUp bug this can be incorrect.
             # Fix later.
-            find_faces(file, entity.entities.parent, scale, tform * entity.transformation)
+            find_faces(file, entity.entities.parent.entities, scale, tform * entity.transformation)
           elsif entity.is_a?(Sketchup::ComponentInstance)
-            find_faces(file, entity.definition, scale, tform * entity.transformation)
+            find_faces(file, entity.definition.entities, scale, tform * entity.transformation)
           end
         end
         face_count

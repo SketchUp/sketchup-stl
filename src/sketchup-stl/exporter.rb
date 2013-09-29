@@ -17,9 +17,6 @@ module CommunityExtensions
 
       def self.export_mesh_file
         model = Sketchup.active_model
-        if model.active_entities.length == 0
-          return UI.messagebox(STL.translate('Nothing to export.'))
-        end
         model_name = File.basename(model.path, '.skp')
         if model_name == ''
           model_name = 'untitled'
@@ -27,50 +24,39 @@ module CommunityExtensions
         @stl_conv = 1.0
         @face_count = 0
         @line_count = 0
-        if model.selection.empty?
-          answer = UI.messagebox(
-            STL.translate('No objects selected. Export entire model?'),
-            MB_YESNO
-          )
-          if answer == IDYES
-            export_ents = model.entities
+        # Whether the Selection or the Model is exported will depend on a new
+        # option in the export dialog.
+        # For now, just export the entre model.
+        export_ents = Sketchup.active_model.entities
+        # Get DXF export option.
+        file_type='stl'
+        # Get Export options.
+        options = options_dialog
+        return if options == false
+
+        @stl_conv = options[0]
+        @stl_type = options[1].downcase
+
+        # Get exported file name and export.
+        description = STL.translate('%s file location')
+        out_name = UI.savepanel(sprintf(description, file_type.upcase), nil,
+                                "#{model_name}.#{file_type}")
+        if out_name
+          @mesh_file = File.new(out_name , 'w')  
+          if @stl_type == STL_BINARY
+            @mesh_file.binmode
+            @write_face = method(:write_face_binary)
           else
-            export_ents = model.selection
+            @write_face = method(:write_face_ascii)
           end
-        else
-          export_ents = Sketchup.active_model.selection
-        end
-        if export_ents.length > 0
-          # Get DXF export option.
-          file_type='stl'
-          # Get Export options.
-          options = options_dialog
-          return if options == false
+          write_header(model_name)
 
-          @stl_conv = options[0]
-          @stl_type = options[1].downcase
-
-          # Get exported file name and export.
-          description = STL.translate('%s file location')
-          out_name = UI.savepanel(sprintf(description, file_type.upcase), nil,
-                                  "#{model_name}.#{file_type}")
-          if out_name
-            @mesh_file = File.new(out_name , 'w')  
-            if @stl_type == STL_BINARY
-              @mesh_file.binmode
-              @write_face = method(:write_face_binary)
-            else
-              @write_face = method(:write_face_ascii)
-            end
-            write_header(model_name)
-
-            # Recursively export faces and edges, exploding groups as we go.
-            # Count "other" objects we can't parse.
-            others = find_faces(0, export_ents, Geom::Transformation.new)
-            write_footer(model_name)
-            message = STL.translate("%i facets exported\n%i objects ignored")
-            UI.messagebox(sprintf(message, @face_count, others))
-          end
+          # Recursively export faces and edges, exploding groups as we go.
+          # Count "other" objects we can't parse.
+          others = find_faces(0, export_ents, Geom::Transformation.new)
+          write_footer(model_name)
+          message = STL.translate("%i facets exported\n%i objects ignored")
+          UI.messagebox(sprintf(message, @face_count, others))
         end
       end
 
@@ -247,13 +233,20 @@ module CommunityExtensions
         end
         # (i) The menu_index argument isn't supported by older versions.
         if Sketchup::Menu.instance_method(:add_item).arity == 1
-          UI.menu('File').add_item(STL.translate('Export STL...')) {
+          item = UI.menu('File').add_item(STL.translate('Export STL...')) {
             export_mesh_file
           }
         else
-          UI.menu('File').add_item(STL.translate('Export STL...'), insert_index) {
+          item = UI.menu('File').add_item(STL.translate('Export STL...'), insert_index) {
             export_mesh_file
           }
+        end
+        UI.menu('File').set_validation_proc(item) do
+          if Sketchup.active_model.entities.length == 0
+            MF_GRAYED
+          else
+            MF_ENABLED
+          end
         end
         file_loaded(__FILE__)
       end

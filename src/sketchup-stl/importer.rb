@@ -147,12 +147,6 @@ module CommunityExtensions
         int_size = [42].pack('i').size
         float_size = [42.0].pack('f').size
         len = f.read(int_size).unpack('i')[0]
-        msg = STL.translate("STL Importer (c) Jim Foltz\n\nSTL Binary Header:\n%s\n\nFound %i triangles. Continue?")
-        msg = sprintf(msg, header, len)
-        if do_msg(msg) == IDNO
-          f.close
-          return IMPORT_CANCELLED
-        end
 
         pts = []
         while !f.eof 
@@ -207,11 +201,6 @@ module CommunityExtensions
           if try == 1
             return stl_binary_import(filename, 2)
           end
-        end
-        msg = STL.translate("STL Importer (c) Jim Foltz\n\nSTL ASCII File\nFound %i polygons.\n\nContinue?")
-        msg = sprintf(msg, polys.length)
-        if do_msg(msg) == IDNO
-          return IMPORT_CANCELLED
         end
         mesh = Geom::PolygonMesh.new(3 * polys.length, polys.length)
         polys.each{ |poly| mesh.add_polygon(poly) }

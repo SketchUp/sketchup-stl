@@ -201,7 +201,7 @@ module CommunityExtensions
         units = ['Model Units', 'Meters', 'Centimeters', 'Millimeters', 'Inches', 'Feet']
         units_translated = units.map { |unit| STL.translate(unit) }
 
-        formats = %w(ASCII Binary)
+        formats = [STL_ASCII, STL_BINARY]
         formats_translated = formats.map { |format| STL.translate(format) }
 
         # Columns and Rows for control alignment

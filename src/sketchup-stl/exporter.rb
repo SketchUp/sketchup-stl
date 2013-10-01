@@ -189,7 +189,8 @@ module CommunityExtensions
       def self.do_options
         # Load SKUI lib
         unless defined?(SKUI)
-          load File.join(File.dirname(__FILE__), 'SKUI', 'core.rb')
+          load File.join(File.dirname(__FILE__), 'SKUI', 'embed_skui.rb')
+          ::SKUI.embed_in(self)
         end
 
         # Read last saved options

@@ -212,10 +212,10 @@ module CommunityExtensions
         window_options = {
           :title           => STL.translate('STL Export Options'),
           :preferences_key => PREF_KEY,
-          :height => 160,
-          :width  => 290
+          :height          => 160,
+          :width           => 290
         }
-        w = SKUI::Window.new(window_options)
+        window = SKUI::Window.new(window_options)
 
         # Row 1 Export Selected
         chk_selection = SKUI::Checkbox.new(
@@ -227,7 +227,7 @@ module CommunityExtensions
         chk_selection.on(:change) { |control|
           OPTIONS['selection_only'] = control.checked?
         }
-        w.add_control(chk_selection)
+        window.add_control(chk_selection)
 
         #
         # Row 2 Export Units
@@ -240,11 +240,11 @@ module CommunityExtensions
           unit_index = units_translated.index(value)
           OPTIONS['export_units'] = units[unit_index]
         }
-        w.add_control(lst_units)
+        window.add_control(lst_units)
 
         lbl_units = SKUI::Label.new(STL.translate('Export unit:'), lst_units)
         lbl_units.position(col[1], row[2])
-        w.add_control(lbl_units)
+        window.add_control(lbl_units)
 
         #
         # Row 3 File Format field
@@ -258,11 +258,11 @@ module CommunityExtensions
           format_index = formats_translated.index(value)
           OPTIONS['stl_format'] = formats[format_index]
         }
-        w.add_control(lst_format)
+        window.add_control(lst_format)
 
         lbl_type = SKUI::Label.new(STL.translate('File format:'), lst_format)
         lbl_type.position(col[1], row[3])
-        w.add_control(lbl_type)
+        window.add_control(lbl_type)
 
         #
         # Export and Cancel Buttons
@@ -280,16 +280,16 @@ module CommunityExtensions
         }
 
         btn_export.position(125, -5)
-        w.add_control(btn_export)
+        window.add_control(btn_export)
 
         btn_cancel = SKUI::Button.new('Cancel') { |control|
           control.window.close
         }
         btn_cancel.position(-5, -5)
-        w.add_control(btn_cancel)
+        window.add_control(btn_cancel)
 
-        w.default_button = btn_export
-        w.show
+        window.default_button = btn_export
+        window.show
       end # do_options
 
       unless file_loaded?(__FILE__)

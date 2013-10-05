@@ -75,7 +75,7 @@ module CommunityExtensions
         end
         # Import geometry.
         Sketchup.status_text = STL.translate('Importing geometry...')
-        if file_type[/solid/]
+        if file_type == :ascii
           entities = stl_ascii_import(filename)
         else
           entities = stl_binary_import(filename)
@@ -121,9 +121,22 @@ module CommunityExtensions
       end
       private :main
 
-      def detect_file_type(file)
-        first_line = File.open(file, 'r') { |f| f.read(80) }
-        return first_line
+      # We can calculate the expected file size of a binary STL file.
+      # So if our expected size == actual size, the file is binary.
+      def detect_file_type(file_name)
+        int_size   = [42].pack('i').size
+        float_size = [42.0].pack('f').size
+        file = File.new(file_name, 'r')
+        file.seek(80, IO::SEEK_SET)
+        face_count = file.read(int_size).unpack('i')[0]
+        file.close
+        expected_file_size = 80 + 4 + (12 * float_size + 2) * face_count
+        actual_file_size   = File.size(file_name)
+        if expected_file_size == actual_file_size
+          return :binary
+        else
+          return :ascii
+        end
       end
       private :detect_file_type
 

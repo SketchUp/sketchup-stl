@@ -203,11 +203,11 @@ module CommunityExtensions
         formats_translated = formats.map { |format| STL.translate(format) }
 
         # Columns and Rows for control alignment
-        c = [0, 10, 110]
+        col = [0, 10, 110]
         first_row = 7
         vspace = 30
-        r = (0..4).map{|e| e * vspace + first_row}
-        r.unshift(0)
+        row = (0..4).map{|e| e * vspace + first_row}
+        row.unshift(0)
 
         window_options = {
           :title           => STL.translate('STL Export Options'),
@@ -222,7 +222,7 @@ module CommunityExtensions
           'Export selected geometry only.',
           OPTIONS['selection_only']
         )
-        chk_selection.position(c[1], r[1])
+        chk_selection.position(col[1], row[1])
         chk_selection.check! if OPTIONS['selection_only']
         chk_selection.on(:change) { |control|
           OPTIONS['selection_only'] = control.checked?
@@ -233,7 +233,7 @@ module CommunityExtensions
         # Row 2 Export Units
         #
         lst_units = SKUI::Listbox.new(units_translated)
-        lst_units.position(c[2], r[2])
+        lst_units.position(col[2], row[2])
         lst_units.width = 169
         lst_units.value = STL.translate(OPTIONS['export_units'])
         lst_units.on( :change ) { |control, value|
@@ -243,7 +243,7 @@ module CommunityExtensions
         w.add_control(lst_units)
 
         lbl_units = SKUI::Label.new(STL.translate('Export unit:'), lst_units)
-        lbl_units.position(c[1], r[2])
+        lbl_units.position(col[1], row[2])
         w.add_control(lbl_units)
 
         #
@@ -251,7 +251,7 @@ module CommunityExtensions
         #
         lst_format = SKUI::Listbox.new(formats_translated)
         lst_format.value = lst_format.items.first
-        lst_format.position(c[2], r[3])
+        lst_format.position(col[2], row[3])
         lst_format.width = 169
         lst_format.value = STL.translate(OPTIONS['stl_format'])
         lst_format.on( :change ) { |control, value|
@@ -261,7 +261,7 @@ module CommunityExtensions
         w.add_control( lst_format )
 
         lbl_type = SKUI::Label.new(STL.translate('File format:'), lst_format)
-        lbl_type.position(c[1], r[3])
+        lbl_type.position(col[1], row[3])
         w.add_control(lbl_type)
 
         #

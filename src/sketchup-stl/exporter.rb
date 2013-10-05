@@ -188,10 +188,8 @@ module CommunityExtensions
 
       def self.do_options
         # Load SKUI lib
-        unless defined?(SKUI)
-          load File.join(File.dirname(__FILE__), 'SKUI', 'embed_skui.rb')
-          ::SKUI.embed_in(self)
-        end
+        load File.join(File.dirname(__FILE__), 'SKUI', 'embed_skui.rb')
+        ::SKUI.embed_in(self)
 
         # Read last saved options
         ['selection_only', 'stl_format', 'export_units'].each do |key|

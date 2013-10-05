@@ -94,7 +94,7 @@ module CommunityExtensions
               pt = pt.to_a.map{|e| e * scale}
               file.write("    vertex #{pt.x} #{pt.y} #{pt.z}\n")
             end
-            file.write( "  endloop\nendfacet\n")
+            file.write("  endloop\nendfacet\n")
           end
         end
       end
@@ -236,7 +236,7 @@ module CommunityExtensions
         lst_units.position(col[2], row[2])
         lst_units.width = 169
         lst_units.value = STL.translate(OPTIONS['export_units'])
-        lst_units.on( :change ) { |control, value|
+        lst_units.on(:change) { |control, value|
           unit_index = units_translated.index(value)
           OPTIONS['export_units'] = units[unit_index]
         }
@@ -254,11 +254,11 @@ module CommunityExtensions
         lst_format.position(col[2], row[3])
         lst_format.width = 169
         lst_format.value = STL.translate(OPTIONS['stl_format'])
-        lst_format.on( :change ) { |control, value|
+        lst_format.on(:change) { |control, value|
           format_index = formats_translated.index(value)
           OPTIONS['stl_format'] = formats[format_index]
         }
-        w.add_control( lst_format )
+        w.add_control(lst_format)
 
         lbl_type = SKUI::Label.new(STL.translate('File format:'), lst_format)
         lbl_type.position(col[1], row[3])
@@ -279,13 +279,13 @@ module CommunityExtensions
           control.window.close
         }
 
-        btn_export.position(125, -5 )
+        btn_export.position(125, -5)
         w.add_control(btn_export)
 
         btn_cancel = SKUI::Button.new('Cancel') { |control|
           control.window.close
         }
-        btn_cancel.position(-5, -5 )
+        btn_cancel.position(-5, -5)
         w.add_control(btn_cancel)
 
         w.default_button = btn_export

@@ -49,7 +49,6 @@ module CommunityExtensions
         end
         scale = scale_factor(options['export_units'])
         write_header(file, model_name(), options['stl_format'])
-        # Recursively export faces and edges, exploding groups as we go.
         if options['selection_only']
           export_ents = Sketchup.active_model.selection
         else

@@ -213,7 +213,8 @@ module CommunityExtensions
           :title           => STL.translate('STL Export Options'),
           :preferences_key => PREF_KEY,
           :height          => 160,
-          :width           => 290
+          :width           => 290,
+          :modal           => true
         }
         window = SKUI::Window.new(window_options)
 

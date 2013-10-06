@@ -20,7 +20,7 @@ module SKUI
 
   # Configure Debug mode.
   require File.join( PATH, 'debug.rb' )
-  Debug.enabled = true
+  Debug.enabled = false
 
 
   # Load the availible UI control classes.

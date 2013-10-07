@@ -141,7 +141,7 @@ module CommunityExtensions
         face_count = nil
         File.open(file_name, 'rb') {|file|
           file.seek(80, IO::SEEK_SET)
-          face_count = file.read(int_size).unpack('i')[0]
+          face_count = file.read(4).unpack('i')[0]
         }
         expected_file_size = 80 + 4 + 50 * face_count
         actual_file_size   = File.size(file_name)

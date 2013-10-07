@@ -1,6 +1,6 @@
 module CommunityExtensions
   module STL
-    module Cleanup
+    module Utils
       # Cleans up the geometry in the given +entities+ collection.
       #
       # @param [Sketchup::Entities] entities
@@ -117,6 +117,6 @@ module CommunityExtensions
       end
       private :is_solid?
 
-    end
-  end # mod STL
-end # mod CommunityExtensions
+    end # Utils
+  end # STL
+end # CommunityExtensions

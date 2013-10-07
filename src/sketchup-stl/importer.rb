@@ -10,10 +10,9 @@ module CommunityExtensions
   module STL
     class Importer < Sketchup::Importer
 
-      Sketchup::require File.join(PLUGIN_PATH, 'cleanup')
       Sketchup::require File.join(PLUGIN_PATH, 'webdialog_extensions')
 
-      include CommunityExtensions::STL::Cleanup
+      include CommunityExtensions::STL::Utils
 
       PREF_KEY = 'CommunityExtensions\STL\Importer'.freeze
 

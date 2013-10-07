@@ -22,14 +22,14 @@ module CommunityExtensions
           plane = Geom.fit_plane_to_points(points)
           next unless points.all? { |point| point.on_plane?(plane) }
           # In CleanUp the faces are checked to not be duplicate of each other -
-          # overlapping. But since can we assume the STL importer doesn't create
+          # overlapping. But can we assume the STL importer doesn't create
           # such messy geometry?
           # 
           # There is also a routine in CleanUp omitted here that checks if the
           # faces to be merged are degenerate - all edges are parallel.
           # 
           # These check have been omitted to save processing time - as they might
-          # not appear in a STL import? The checks where required in CleanUp due
+          # not appear in a STL import? The checks were required in CleanUp due
           # to the large amount of degenerate geometry it was fed.
           # 
           # 

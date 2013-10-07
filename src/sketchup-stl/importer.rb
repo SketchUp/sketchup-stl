@@ -121,22 +121,38 @@ module CommunityExtensions
       end
       private :main
 
+      #
       # We can calculate the expected file size of a binary STL file.
       # So if our expected size == actual size, the file is binary.
+      #
       def detect_file_type(file_name)
-        int_size   = [42].pack('i').size
-        float_size = [42.0].pack('f').size
-        file = File.new(file_name, 'r')
-        file.seek(80, IO::SEEK_SET)
-        face_count = file.read(int_size).unpack('i')[0]
-        file.close
-        expected_file_size = 80 + 4 + (12 * float_size + 2) * face_count
+        # http://orion.math.iastate.edu/burkardt/data/stl/stl.html
+        # A binary STL file has the following structure:
+        #
+        #  An 80 byte ASCII header that can be used as a title.
+        #  A 4 byte unsigned long integer, the number of facets.
+        #
+        #  For each facet, a facet record of 50 bytes:
+        #    The normal vector,        3 floating values of 4 bytes each;
+        #    Vertex 1 XYZ coordinates, 3 floating values of 4 bytes each;
+        #    Vertex 2 XYZ coordinates, 3 floating values of 4 bytes each;
+        #    Vertex 3 XYZ coordinates, 3 floating values of 4 bytes each;
+        #    An unsigned integer, of 2 bytes, that should be zero;
+        face_count = nil
+        File.open(file_name, 'rb') {|file|
+          file.seek(80, IO::SEEK_SET)
+          face_count = file.read(int_size).unpack('i')[0]
+        }
+        expected_file_size = 80 + 4 + 50 * face_count
         actual_file_size   = File.size(file_name)
         if expected_file_size == actual_file_size
           return :binary
         else
           return :ascii
         end
+      rescue => exception
+        UI.messagebox(exception.message << "\n\n" << exception.backtrace.join("\n"))
+        return nil
       end
       private :detect_file_type
 

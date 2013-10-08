@@ -16,6 +16,7 @@ module CommunityExtensions
     UNIT_FEET        = 1
     UNIT_INCHES      = 0
   
+    Sketchup::require File.join(PLUGIN_PATH, 'utils')
     Sketchup::require File.join(PLUGIN_PATH, 'importer')
     Sketchup::require File.join(PLUGIN_PATH, 'exporter')
 

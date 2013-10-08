@@ -1,0 +1,151 @@
+/*******************************************************************************
+ *
+ * $WINDOW
+ *
+ ******************************************************************************/
+
+
+body, body.platform-windows
+{
+  color: #ddd;
+  background: #444;
+}
+
+body
+{
+  scrollbar-face-color: #555;
+  scrollbar-highlight-color: #5f5f5f;
+  scrollbar-shadow-color: #505050;
+  scrollbar-3dlight-color: #777;
+  scrollbar-arrow-color: #ddd;
+  scrollbar-track-color: #4a4a4a;
+  scrollbar-darkshadow-color: #222;
+  /*
+   * (!) OSX
+   *     http://css-tricks.com/custom-scrollbars-in-webkit/
+   */
+}
+
+::selection
+{
+  color: #0c0;
+  background: #030;
+}
+
+html, input, select, textarea, button, legend
+{
+  font-family: 'Segoe UI', 'Tahoma', sans-serif;
+}
+
+
+/*******************************************************************************
+ *
+ * $BUTTON
+ *
+ ******************************************************************************/
+
+
+.control-button
+{
+  display: inline-block;
+  /*
+  (!) Using filter gradient makes IE ignore round corners.
+  Can an SVG image be used instead?
+
+  background: -webkit-gradient(linear, left top, left bottom, from(#333333), to(#222222));
+  filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#333333', endColorstr='#222222');
+  */
+  background: #222 url('../css/theme_graphite/fade-light_05.png') repeat-x top left;
+  border: 1px solid #111;
+  border-radius: 5px;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,.2),
+    inset 0px 0px 1px 0px rgba(255,255,255,.25)
+  ;
+  padding: 0;
+  text-align: center;
+  /*line-height: 22px;*/
+}
+
+.control-button:hover
+{
+  box-shadow:
+    0px 0px 4px 2px rgba(255,255,255,.5),
+    inset 0px 0px 1px 0px rgba(255,255,255,.25)
+  ;
+}
+
+.control-button.pressed
+{
+  background: #111 url('../css/theme_graphite/fade-light-inv.png') repeat-x bottom left;
+  padding: 1px 0 0 0;
+}
+
+
+/*******************************************************************************
+ *
+ * $GROUPBOX
+ *
+ ******************************************************************************/
+
+
+.control-groupbox
+{
+  border: 1px solid #222;
+  padding: 5px;
+}
+
+.control-groupbox legend
+{
+  color: #d88;
+  margin: 0 0 5px 0;
+}
+
+
+/*******************************************************************************
+ *
+ * $INPUT
+ *
+ ******************************************************************************/
+
+
+input[type=text], input[type=file], select, textarea
+{
+  background: #222;
+  border: 1px inset #666;
+}
+
+input[type=text]:hover, input[type=file]:hover, select:hover, textarea:hover
+{
+  box-shadow:
+    0px 0px 4px 2px rgba(255,255,255,.25)
+  ;
+}
+
+input[type=text]:focus, input[type=text].focus,
+input[type=file]:focus, input[type=file].focus,
+select:focus, select.focus,
+textarea:focus, textarea.focus
+{
+  box-shadow:
+    0px 0px 4px 2px rgba(255,255,255,.5)
+  ;
+}
+
+
+/*******************************************************************************
+ *
+ * $URL
+ *
+ ******************************************************************************/
+
+
+a[href]
+{
+  color: #6af;
+}
+
+a[href]:hover
+{
+  color: #fa6;
+}

@@ -1,0 +1,176 @@
+/*******************************************************************************
+ *
+ * $RESETS
+ *
+ ******************************************************************************/
+
+
+*
+{
+  cursor: default;
+  box-sizing: border-box;
+}
+
+input, select, textarea, a[href]
+{
+  cursor: auto;
+}
+
+html, input, select, textarea, button, legend
+{
+  font: caption;
+  color: inherit;
+}
+
+html, body
+{
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+html
+{
+  line-height: 1em;
+  overflow: hidden;
+}
+
+body
+{
+  /* (i) If background color was set for HTML the background color for BODY
+   * would not take effect. Not sure why this is. (Tested only in IE10.)
+   */
+  color: WindowText;
+  background: Window;
+}
+body.platform-windows
+{
+  background: ThreeDFace;
+}
+
+
+/*******************************************************************************
+ *
+ * $GENERIC
+ *
+ ******************************************************************************/
+
+
+.warning
+{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 10000;
+  padding: 0.5em;
+  color: #000;
+  background: #fec;
+  border-bottom: 1px solid #dca;
+}
+
+
+/*******************************************************************************
+ *
+ * $CONTROL
+ *
+ ******************************************************************************/
+
+
+.control
+{
+  position: absolute;
+}
+
+
+/*******************************************************************************
+ *
+ * $CONTAINER
+ *
+ ******************************************************************************/
+
+
+.container
+{
+  overflow: hidden;
+}
+
+
+/*******************************************************************************
+ *
+ * $CHECKBOX
+ *
+ ******************************************************************************/
+
+.control-checkbox
+{
+  line-height: 1em;
+}
+
+.control-checkbox input
+{
+  padding: 0;
+  margin: 0 0.3em 0 0;
+  vertical-align: bottom;
+}
+
+
+/*******************************************************************************
+ *
+ * $GROUPBOX
+ *
+ ******************************************************************************/
+
+
+.platform-osx .control-groupbox
+{
+  border-width: 1px;
+}
+
+
+/*******************************************************************************
+ *
+ * $LISTBOX
+ *
+ ******************************************************************************/
+
+
+.control-listbox select
+{
+  width: 100%;
+  height: 100%;
+}
+
+
+/*******************************************************************************
+ *
+ * $RADIOBUTTON
+ *
+ ******************************************************************************/
+
+.control-radiobutton
+{
+  line-height: 1em;
+}
+
+.control-radiobutton input
+{
+  padding: 0;
+  margin: 0 0.3em 0 0;
+  vertical-align: bottom;
+}
+
+
+/*******************************************************************************
+ *
+ * $TEXTBOX
+ *
+ ******************************************************************************/
+
+
+.control-textbox input,
+.control-textbox textarea
+{
+  width: 100%;
+  height: 100%;
+}

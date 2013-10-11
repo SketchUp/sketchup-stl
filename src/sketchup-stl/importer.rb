@@ -50,9 +50,9 @@ module CommunityExtensions
       def load_file(path,status)
         begin
           status = main(path)
-        rescue Exception => e
-          puts e.message
-          puts e.backtrace.join("\n")
+        rescue => exception
+          puts exception.message
+          puts exception.backtrace.join("\n")
           status = IMPORT_FAILED
         end
         return status
@@ -60,6 +60,7 @@ module CommunityExtensions
 
       def main(filename)
         file_type = detect_file_type(filename)
+        return IMPORT_FAILED if file_type.nil?
         #p file_type
         # Read import settings.
         @stl_merge           = read_setting('merge_faces',     @stl_merge)
@@ -122,27 +123,27 @@ module CommunityExtensions
       private :main
 
       #
-      # We can calculate the expected file size of a binary STL file.
-      # So if our expected size == actual size, the file is binary.
+      # A simple check for the word 'solid' to detect an ascii .stl file is
+      # not sufficient - some binary .stl files break convention by also
+      # starting with the word 'solid'.
       #
       def detect_file_type(file_name)
-        # http://orion.math.iastate.edu/burkardt/data/stl/stl.html
-        # A binary STL file has the following structure:
-        #
-        #  An 80 byte ASCII header that can be used as a title.
-        #  A 4 byte unsigned long integer, the number of facets.
-        #
-        #  For each facet, a facet record of 50 bytes:
-        #    The normal vector,        3 floating values of 4 bytes each;
-        #    Vertex 1 XYZ coordinates, 3 floating values of 4 bytes each;
-        #    Vertex 2 XYZ coordinates, 3 floating values of 4 bytes each;
-        #    Vertex 3 XYZ coordinates, 3 floating values of 4 bytes each;
-        #    An unsigned integer, of 2 bytes, that should be zero;
         face_count = nil
         File.open(file_name, 'rb') {|file|
           file.seek(80, IO::SEEK_SET)
           face_count = file.read(4).unpack('i')[0]
         }
+        # The source of the magic numbers 80, 4 and 50...
+        # http://orion.math.iastate.edu/burkardt/data/stl/stl.html
+        # A binary STL file has the following structure:
+        #   An 80 byte ASCII header that can be used as a title.
+        #   A 4 byte unsigned long integer, the number of facets.
+        #   A facet record of 50 bytes (for each facet)
+        #     The normal vector,        3 floating values of 4 bytes each;
+        #     Vertex 1 XYZ coordinates, 3 floating values of 4 bytes each;
+        #     Vertex 2 XYZ coordinates, 3 floating values of 4 bytes each;
+        #     Vertex 3 XYZ coordinates, 3 floating values of 4 bytes each;
+        #     An unsigned integer     , 2 bytes that should be zero;
         expected_file_size = 80 + 4 + 50 * face_count
         actual_file_size   = File.size(file_name)
         if expected_file_size == actual_file_size
@@ -151,7 +152,7 @@ module CommunityExtensions
           return :ascii
         end
       rescue => exception
-        UI.messagebox(exception.message << "\n\n" << exception.backtrace.join("\n"))
+        puts "#{exception.message}\n\n" + exception.backtrace.join("\n")
         return nil
       end
       private :detect_file_type

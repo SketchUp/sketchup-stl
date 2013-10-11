@@ -52,9 +52,9 @@ module CommunityExtensions
       def load_file(path,status)
         begin
           status = main(path)
-        rescue Exception => e
-          puts e.message
-          puts e.backtrace.join("\n")
+        rescue => exception
+          puts exception.message
+          puts exception.backtrace.join("\n")
           status = IMPORT_FAILED
         end
         return status
@@ -62,6 +62,7 @@ module CommunityExtensions
 
       def main(filename)
         file_type = detect_file_type(filename)
+        return IMPORT_FAILED if file_type.nil?
         #p file_type
         # Read import settings.
         @stl_merge           = read_setting('merge_faces',     @stl_merge)
@@ -77,7 +78,7 @@ module CommunityExtensions
         end
         # Import geometry.
         Sketchup.status_text = STL.translate('Importing geometry...')
-        if file_type[/solid/]
+        if file_type == :ascii
           entities = stl_ascii_import(filename)
         else
           entities = stl_binary_import(filename)
@@ -123,9 +124,38 @@ module CommunityExtensions
       end
       private :main
 
-      def detect_file_type(file)
-        first_line = File.open(file, 'r') { |f| f.read(80) }
-        return first_line
+      #
+      # A simple check for the word 'solid' to detect an ascii .stl file is
+      # not sufficient - some binary .stl files break convention by also
+      # starting with the word 'solid'.
+      #
+      def detect_file_type(file_name)
+        face_count = nil
+        File.open(file_name, 'rb') {|file|
+          file.seek(80, IO::SEEK_SET)
+          face_count = file.read(4).unpack('i')[0]
+        }
+        # The source of the magic numbers 80, 4 and 50...
+        # http://orion.math.iastate.edu/burkardt/data/stl/stl.html
+        # A binary STL file has the following structure:
+        #   An 80 byte ASCII header that can be used as a title.
+        #   A 4 byte unsigned long integer, the number of facets.
+        #   A facet record of 50 bytes (for each facet)
+        #     The normal vector,        3 floating values of 4 bytes each;
+        #     Vertex 1 XYZ coordinates, 3 floating values of 4 bytes each;
+        #     Vertex 2 XYZ coordinates, 3 floating values of 4 bytes each;
+        #     Vertex 3 XYZ coordinates, 3 floating values of 4 bytes each;
+        #     An unsigned integer     , 2 bytes that should be zero;
+        expected_file_size = 80 + 4 + 50 * face_count
+        actual_file_size   = File.size(file_name)
+        if expected_file_size == actual_file_size
+          return :binary
+        else
+          return :ascii
+        end
+      rescue => exception
+        puts "#{exception.message}\n\n" + exception.backtrace.join("\n")
+        return nil
       end
       private :detect_file_type
 

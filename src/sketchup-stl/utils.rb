@@ -123,7 +123,6 @@ module CommunityExtensions
       # @param [:definition, Sketchup::Group, Sketchup::Image] instance
       #
       # @return [Sketchup::ComponentDefinition,Mixed]
-      # @since 2.0.0
       def self.definition(instance)
         if instance.respond_to?(:definition)
           return instance.definition

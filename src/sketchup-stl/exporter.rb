@@ -68,9 +68,10 @@ module CommunityExtensions
           if entity.is_a?(Sketchup::Face)
             write_face(file, entity, scale, tform)     
             face_count += 1
-          elsif entity.is_a?(Sketchup::Group) or entity.is_a?(Sketchup::ComponentInstance)
-            defn = Utils.definition(entity)
-            find_faces(file, defn.entities, scale, tform * entity.transformation)
+          elsif entity.is_a?(Sketchup::Group) ||
+            entity.is_a?(Sketchup::ComponentInstance)
+            entity_definition = Utils.definition(entity)
+            find_faces(file, entity_definition.entities, scale, tform * entity.transformation)
           end
         end
         face_count

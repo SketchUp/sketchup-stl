@@ -1,4 +1,4 @@
-# Copyright 2012 Trimble Navigation Ltd.
+# Copyright 2013 Trimble Navigation Ltd.
 #
 # License: Apache License, Version 2.0
 #

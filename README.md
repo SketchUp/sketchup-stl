@@ -7,7 +7,7 @@ import and export.
 
 ## Installing
 
-The latest and greatest is available as an RBZ file. Download the file from this url:
+The latest and greatest is available as an RBZ file. Download the file from this URL:
 
 http://extensions.sketchup.com/content/sketchup-stl
 
@@ -15,9 +15,7 @@ Then inside SketchUp, select `Window → Preferences` (Microsoft Windows) or `Sk
 
 ## Contributing
 
-
-
-#### Members
+### Members
 
 If you're an owner of this repo, here are some steps.
 
@@ -32,13 +30,13 @@ Use your favorite editor to edit README.md. Then...
 	git commit -m "Editing our README"    // Records changes in the local branch.  
 	git push                              // Submits to repository. Yay!  
 
-#### Community 
+### Community 
 
 If you're a SketchUp Ruby community member, you need to fork this repo (If you don't know what that is, that's okay, we barely know ourselves. Go google some GitHub tutorials and give it a try. Please improve our README.md file with better instructions!)
 
-##### Steps
+#### Steps
 
-1. Fork this repo ([tut](https://help.github.com/articles/fork-a-repo)). Forking will create a copy of this repo under your GitHub user name.
+1. Fork this repo ([tutorial](https://help.github.com/articles/fork-a-repo)). Forking will create a copy of this repo under your GitHub user name.
 
 1. Clone your fork. For this you will need git installed on your personal computer. [GitHub for Windows](http://windows.github.com/) is a good choice.
 

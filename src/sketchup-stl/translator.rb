@@ -6,18 +6,18 @@ require 'sketchup'
 
 module CommunityExtensions
   module STL
-  
+
     # Class that handles string localizations.
-    # 
+    #
     # It is written to be able compatible with LanguageHandler which ships with
     # SketchUp (Current version 8M4). Existing .string files can be used and
     # methods are aliases so the class can be used as a drop in replacement.
-    # 
+    #
     # Strings must be placed in similar folder systems to SketchUp and the
     # naming of the folders much match what Sketchup.get_locale reports.
     #
     # Strings should be saved in UTF-8 encoded files, with or without BOM.
-    # 
+    #
     # Enhanced features include:
     # * One-line comments can start anywhere.
     # * Multi-line comments can start and stop anywhere outside a string.
@@ -28,17 +28,17 @@ module CommunityExtensions
     #   producing junk data.
     # * Can be easily extended to include advanced features such as
     #   escape-characters if needed.
-    # 
+    #
     # See Tests folder for sample .strings files.
-    # 
+    #
     # Locales can be tested by starting SketchUp with the following arguments:
     #   sketchup.exe /lang de
-    # 
+    #
     # Note that there must exist a folder with that locale in the SketchUp
     # Resources folder.
     # https://github.com/SketchUp/sketchup-stl/issues/45#issuecomment-10819945
     class Translator
-      
+
       STATE_SEARCH             =  0 # Looking for " or /
       STATE_IN_KEY             =  1 # Looking for "
       STATE_EXPECT_EQUAL       =  2 # Looking for =
@@ -50,7 +50,7 @@ module CommunityExtensions
       STATE_EXPECT_COMMENT_END =  8 # Found * - Expecting / next
       STATE_IN_COMMENT_SINGLE  =  9 # Found // - Looking for end of line
       STATE_EXPECT_UTF8_BOM    = 10 # Looking for UTF-8 BOM
-      
+
       TOKEN_WHITESPACE     = /\s/
       TOKEN_CONCAT         = 43 # +
       TOKEN_QUOTE          = 34 # "
@@ -60,12 +60,12 @@ module CommunityExtensions
       TOKEN_COMMENT_START  = 47 # /
       TOKEN_COMMENT_MULTI  = 42 # *
       TOKEN_COMMENT_SINGLE = 47 # /
-      
+
       class ParseError < StandardError; end
-      
+
       # A second optional Hash argument can be used to specify behaviour that
       # differ from LanguageHandler.
-      # 
+      #
       # Option Keys:
       # * :custom_path - String pointing to a custom path where the localized
       #                  strings are. If omitted the Translator will look in
@@ -86,7 +86,7 @@ module CommunityExtensions
         end
         @strings = parse(filename, @path)
       end
-      
+
       # If the requested string is not in the localization dictionary then the
       # original string is returned.
       #
@@ -116,7 +116,7 @@ module CommunityExtensions
         components = full_file_path.split(File::SEPARATOR)
         components[-2, 2].join(File::SEPARATOR)
       end
-      
+
       # Prints out the dictionary for visual inspection.
       #
       # @return [String]
@@ -130,7 +130,7 @@ module CommunityExtensions
         end
         puts output
       end
-      
+
       # @return [String]
       def inspect
         object_hex_id = "0x%x" % (self.object_id << 1)
@@ -138,9 +138,9 @@ module CommunityExtensions
         locale = Sketchup.get_locale
         "<#{self.class}::#{object_hex_id} - Strings:#{size} (#{locale})>"
       end
-      
+
       private
-      
+
       # Parses the given file and returns a Hash lookup.
       #
       # @param [String] filename
@@ -157,7 +157,7 @@ module CommunityExtensions
         else
           full_file_path = Sketchup.get_resource_path(filename)
         end
-        
+
         # Define returned dictionary. Make a hash that will return the key given
         # if the key doesn't exist. That way, when a translation is missing for
         # a string it will be returned un-translated.
@@ -168,17 +168,17 @@ module CommunityExtensions
           puts "Warning! Could not load dictionary: #{full_file_path}"
           return strings
         end
-        
+
         # Read and process the content.
         state = STATE_SEARCH
         key_buffer = ''
         value_buffer = ''
         state_cache = nil # Used when comments are exited.
-        
+
         # File position statistics.
         last_line_break = nil
         line_pos = 0
-        
+
         if Sketchup.version.split('.')[0].to_i < 14
           read_flags = 'r'
         else
@@ -199,9 +199,9 @@ module CommunityExtensions
               line_pos += 1
               last_line_break = nil
             end
-            
+
             log_state(state, byte)
-            
+
             # Check for UTF-8 BOM at the beginning of the file. (0xEF,0xBB,0xBF)
             # This is done here before the rest of the parsing as these are
             # special bytes that doesn't appear visible in editors.
@@ -222,12 +222,12 @@ module CommunityExtensions
                 raise ParseError, parse_error(file, state, byte, line_pos)
               end
             end
-            
+
             # Process the current byte.
             # Note that White-space and EOL matches are done with regex and
             # therefore last in evaluation.
             case state
-            
+
             # Neutral state looking for the beginning of a key or comment.
             when STATE_SEARCH
               if byte == TOKEN_QUOTE
@@ -240,7 +240,7 @@ module CommunityExtensions
               else
                 raise ParseError, parse_error(file, state, byte, line_pos)
               end
-            
+
             # Parser is inside a key string looking for end-quote.
             # All characters that are not the end-quote is considered part of
             # the string and is added to the buffer.
@@ -250,7 +250,7 @@ module CommunityExtensions
               else
                 key_buffer << byte
               end
-            
+
             # After a key the parser expects to find an equal token or a concat
             # token that will allow a string to be split up. Comments are
             # allowed.
@@ -269,7 +269,7 @@ module CommunityExtensions
               else
                 raise ParseError, parse_error(file, state, byte, line_pos)
               end
-            
+
             # After a key and equal-token is found the parser expects to find
             # a value string. Comments are allowed.
             when STATE_EXPECT_VALUE
@@ -283,7 +283,7 @@ module CommunityExtensions
               else
                 raise ParseError, parse_error(file, state, byte, line_pos)
               end
-            
+
             # Parser is inside a value string looking for end-quote.
             # All characters that are not the end-quote is considered part of
             # the string and is added to the buffer.
@@ -294,14 +294,14 @@ module CommunityExtensions
               else
                 value_buffer << byte
               end
-            
+
             # After a key and value pair has been found the parser expects to
             # find and end token or end of line. The end token is only required
             # if multiple statements are placed on the same line.
             #
             # A concat token will kick the parser back into looking for a value
             # string.
-            # 
+            #
             # Comments are allowed.
             when STATE_EXPECT_END
               if byte == TOKEN_END || byte.chr =~ TOKEN_EOL
@@ -318,7 +318,7 @@ module CommunityExtensions
               else
                 raise ParseError, parse_error(file, state, byte, line_pos)
               end
-            
+
             # The beginning of a comment is found. The next token is expected to
             # be a token for either singe-line or multi-line comment.
             when STATE_EXPECT_COMMENT
@@ -329,7 +329,7 @@ module CommunityExtensions
               else
                 raise ParseError, parse_error(file, state, byte, line_pos)
               end
-            
+
             # The parser is processing a multi-line comment. When it encounter a
             # multi-line token will look for an comment end-token next. All
             # other data is ignored.
@@ -337,7 +337,7 @@ module CommunityExtensions
               if byte == TOKEN_COMMENT_MULTI # Multiline Comment
                 state = STATE_EXPECT_COMMENT_END
               end
-            
+
             # The parser is processing a multi-line comment and the last token
             # was an indication for end of comment. If this token is not an
             # end-token it will resume to processing the comment.
@@ -347,7 +347,7 @@ module CommunityExtensions
               elsif byte != TOKEN_COMMENT_MULTI
                 state = STATE_IN_COMMENT_MULTI
               end
-            
+
             # The parser is processing a single-line comment. The comment ends
             # at the first end-of-line.
             when STATE_IN_COMMENT_SINGLE
@@ -361,7 +361,7 @@ module CommunityExtensions
         return strings
       end
       alias :ParseLangFile :parse
-      
+
       # Converts a state code into a readable string. For debugging and error
       # messages.
       #
@@ -383,7 +383,7 @@ module CommunityExtensions
           STATE_EXPECT_UTF8_BOM     => 'STATE_EXPECT_UTF8_BOM'
         }[state]
       end
-      
+
       # Prints out the current state of the parser if debugging is enabled.
       # Slows down the process a lot when enabled - but gives detailed insight
       # to what the parser is doing.
@@ -416,10 +416,10 @@ module CommunityExtensions
         puts "#{state_to_string(state)}\n #{token} (#{byte})"
         nil
       end
-      
+
       # Generates a formatted string with debug info - used when a ParseError
       # is raised.
-      # 
+      #
       # @param [File] file The File object being parsed.
       # @param [Integer] state The state of the parser.
       # @param [Integer] byte The current byte being read.
@@ -433,6 +433,6 @@ module CommunityExtensions
       end
 
     end # class Translator
-    
+
   end # module STL
 end # module CommunityExtensions

@@ -181,9 +181,9 @@ module CommunityExtensions
         len = f.read(int_size).unpack('i')[0]
 
         pts = []
-        while !f.eof 
+        while !f.eof
           normal = f.read(3 * float_size).unpack('fff')
-          v1 = f.read(3 * float_size).unpack('fff') 
+          v1 = f.read(3 * float_size).unpack('fff')
           v1.map!{|e| e * stl_conv}
           v2 = f.read(3 * float_size).unpack('fff')
           v2.map!{|e| e * stl_conv}
@@ -266,7 +266,7 @@ module CommunityExtensions
         # Since WebDialogs under OSX isn't truly modal there is a chance the user
         # can click the Options button while the window is already open. We then
         # just bring it to the front.
-        # 
+        #
         # The reference is being released when the window is closed so it's
         # easier to develop - make updates. Otherwise the WebDialog object would
         # have been cached. And it also should ensure it's garbage collected.

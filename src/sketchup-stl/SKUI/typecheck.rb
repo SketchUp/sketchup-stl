@@ -69,9 +69,17 @@ module SKUI
     # @since 1.0.0
     INTEGER = Proc.new { |value|
       unless value.respond_to?( :to_i )
-        raise( ArgumentError, 'Not an valid Integer value.' )
+        raise( ArgumentError, 'Not a valid Integer value.' )
       end
       value.to_i
+    }
+
+    # @since 1.0.0
+    TEXTALIGN = Proc.new { |value|
+      unless [:left, :center, :right].include?( value )
+        raise( ArgumentError, 'Not a valid alignment value.' )
+      end
+      value
     }
 
     # @since 1.0.0

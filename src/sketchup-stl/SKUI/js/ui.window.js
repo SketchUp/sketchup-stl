@@ -12,6 +12,7 @@ function Window( jquery_element ) {
   Control.call( this, jquery_element );
   this.cancel_button = null;
   this.default_button = null;
+  this.control.data( 'control_class', this.typename );
 }
 
 UI.Window = Window;
@@ -36,6 +37,18 @@ Window.init = function( properties ) {
       return false;
       break;
     }
+  });
+  // Catch when the window received and looses focus.
+  // (i) These events doesn't trigger correctly when Firebug Lite is active
+  //     because it introduces frames that interfere with the focus
+  //     notifications.
+  $(window).on( 'focus', function( event ) {
+    control = UI.get_control( 'body' );
+    control.callback( 'focus' );
+  });
+   $(window).on( 'blur', function( event ) {
+    control = UI.get_control( 'body' );
+    control.callback( 'blur' );
   });
   return;
 }

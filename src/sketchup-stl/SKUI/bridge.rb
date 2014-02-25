@@ -34,7 +34,7 @@ module SKUI
     #  return_value = window.bridge.call('alert', 'Hello World')
     #
     # @param [String] function Name of JavaScript function to call.
-    # @param [Mixed] *args List of arguments for the function call.
+    # @param [Mixed] args List of arguments for the function call.
     #
     # @return [Mixed]
     # @since 1.0.0

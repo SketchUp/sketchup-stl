@@ -2,15 +2,12 @@ module SKUI
   # Mix-in module for the Control class. Simplifies the definition of properties
   # with getter and setter methods that access the +@properties+ stack.
   #
-  # @todo Make YARD document there properties:
-  #       http://yardoc.org/guides/extending-yard/writing-handlers.html#Creating_a_Simple_DSL_Handler
-  #
   # @since 1.0.0
   module Properties
 
     private
 
-    # @param [Symbol] *symbols
+    # @param [Symbol] symbols
     #
     # @return [Nil]
     # @since 1.0.0
@@ -21,7 +18,7 @@ module SKUI
     end
     alias :prop_accessor :prop
 
-    # @param [Symbol] *symbols
+    # @param [Symbol] symbols
     #
     # @return [Nil]
     # @since 1.0.0
@@ -31,7 +28,7 @@ module SKUI
       nil
     end
 
-    # @param [Symbol] *symbols
+    # @param [Symbol] symbols
     #
     # @return [Nil]
     # @since 1.0.0
@@ -50,7 +47,7 @@ module SKUI
       nil
     end
 
-    # @param [Symbol] *symbols
+    # @param [Symbol] symbols
     #
     # @return [Nil]
     # @since 1.0.0
@@ -70,7 +67,7 @@ module SKUI
     # block is given one argument, the new value of the property. Use this to
     # add argument validation to the property.
     #
-    # @param [Symbol] *symbols
+    # @param [Symbol] symbols
     #
     # @return [Nil]
     # @since 1.0.0

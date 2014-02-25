@@ -7,7 +7,7 @@
 
 *
 {
-  cursor: default;
+  cursor: inherit;
   box-sizing: border-box;
 }
 
@@ -27,6 +27,7 @@ html, body
   border: 0;
   padding: 0;
   margin: 0;
+  cursor: default;
 }
 
 html
@@ -46,6 +47,20 @@ body
 body.platform-windows
 {
   background: ThreeDFace;
+}
+
+/* Windows 8.1 (Or IE11?), or setting text scaling will cause text ir appear
+ * too big under Windows. Setting explicit size in points appear to make things
+ * better.
+ */
+.platform-windows,
+.platform-windows input,
+.platform-windows select,
+.platform-windows textarea,
+.platform-windows button,
+.platform-windows legend
+{
+  font-size: 9pt;
 }
 
 
@@ -125,6 +140,21 @@ body.platform-windows
 .platform-osx .control-groupbox
 {
   border-width: 1px;
+}
+
+
+/*******************************************************************************
+ *
+ * $LABEL
+ *
+ ******************************************************************************/
+
+
+.control-label a
+{
+  display: inline-block;
+  width: 100%;
+  height: 100%;
 }
 
 

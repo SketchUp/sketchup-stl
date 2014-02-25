@@ -9,10 +9,10 @@ module SKUI
     # @return [Array<String>]
     # @since 1.0.0
     prop_reader( :items )
-    
+
     # @return [Boolean]
     # @since 1.0.0
-    prop_bool( :multiple, &TypeCheck::BOOLEAN )
+    prop_reader_bool( :multiple, &TypeCheck::BOOLEAN )
 
     # @return [Integer]
     # @since 1.0.0
@@ -20,9 +20,8 @@ module SKUI
 
     # @since 1.0.0
     define_event( :change )
-    
+
     # @param [Array<String>] list
-    # @param [Proc] on_click
     #
     # @since 1.0.0
     def initialize( list = [] )
@@ -32,8 +31,9 @@ module SKUI
       # (?) Check for String content? Convert to strings? Accept #to_a objects?
       super()
        # (?) Should the :items list be a Hash instead? To allow key/value pairs.
-      @properties[ :items ] = list
-      @properties[ :multiple ] = false
+      @properties[ :items ] = list.dup
+      @properties[ :multiple ] = false # Select multiple.
+      @properties[ :size ] = 1 # Makes no sense!
     end
 
     # @overload add_item(string, ...)
@@ -108,6 +108,21 @@ module SKUI
       true
     end
 
+    # @param [Boolean] value
+    #
+    # @return [Boolean]
+    # @since 1.0.0
+    def multiple=( value )
+      value = TypeCheck::BOOLEAN.call( value )
+      if value && self.size < 2
+        raise( ArgumentError,
+          'Can only select multiple when size is greater than 1.' )
+      end
+      @properties[ :multiple ] = value
+      update_properties( :multiple )
+      value
+    end
+
     # @overload remove_item(string)
     #   @param [String] string
     #
@@ -122,8 +137,10 @@ module SKUI
         unless index
           raise( ArgumentError, 'Invalid item.' )
         end
-      else
+      elsif arg.is_a?( Integer )
         index = arg
+      else
+        raise( ArgumentError, 'Invalid argument.' )
       end
       if index < 0 || index >= @properties[ :items ].length
         raise( ArgumentError, 'Index out of range.' )
@@ -133,6 +150,23 @@ module SKUI
       nil
     end
 
+    # @param [Integer] value
+    #
+    # @return [Integer]
+    # @since 1.0.0
+    def size=( value )
+      value = TypeCheck::INTEGER.call( value )
+      if value < 2
+        @properties[ :size ] = value
+        @properties[ :multiple ] = false
+        update_properties( :size, :multiple )
+      else
+        @properties[ :size ] = value
+        update_properties( :size )
+      end
+      value
+    end
+
     # @return [String]
     # @since 1.0.0
     def value
@@ -140,18 +174,42 @@ module SKUI
       @properties[ :value ] = data
       data
     end
-    
-    # @param [String] string
+
+    # @overload value=(string)
+    #   @param [String] string
+    #   @return [String]
     #
-    # @return [String]
+    # @overload value=(string,...)
+    #   @param [String] string
+    #   @return [Array<String>]
+    #
+    # @overload value=(strings)
+    #   @param [Array<String>] strings
+    #   @return [Array<String>]
     # @since 1.0.0
-    def value=( string )
-      unless @properties[ :items ].include?( string )
-        raise( ArgumentError, "'#{string}' not a valid value in list." )
+    def value=( *args )
+      if args.size == 1 && args[0].is_a?( Array )
+        #return self.value=( *args[0] )
+        return send( :value=, *args[0] )
       end
-      @properties[ :value ] = string
+
+      unless args.all? { |item| item.is_a?( String ) }
+        raise( ArgumentError, 'Arguments must be strings.' )
+      end
+
+      if !self.multiple? && args.size > 1
+        raise( ArgumentError, 'Not configured to select multiple items.' )
+      end
+
+      items = @properties[ :items ]
+      unless (items | args).length == items.length
+        not_in_list = (args - items).join(', ')
+        raise( ArgumentError, "'#{not_in_list}' not valid values in list." )
+      end
+
+      @properties[ :value ] = args.dup
       update_properties( :value )
-      string
+      args
     end
 
   end # class

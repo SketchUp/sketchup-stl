@@ -4,8 +4,10 @@ module SKUI
 
     attr_accessor( :name, :size, :bold, :italic )
     
-    # @param [String] caption
-    # @param [Control] control Control which focus of forwarded to.
+    # @param [String] name
+    # @param [Integer, Nil] size
+    # @param [Boolean, Nil] bold
+    # @param [Boolean, Nil] italic
     #
     # @since 1.0.0
     def initialize( name, size = nil, bold = nil, italic = nil )

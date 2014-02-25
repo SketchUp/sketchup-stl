@@ -19,6 +19,7 @@ body {
  */
 html, input, textarea, select, button {
   font: caption; /* Use native UI fonts */
+  font-size: 9pt;
 }
 
 

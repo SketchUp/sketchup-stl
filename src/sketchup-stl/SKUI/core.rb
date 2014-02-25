@@ -3,9 +3,6 @@ require 'sketchup.rb'
 
 # @since 1.0.0
 module SKUI
-   
-  # @since 1.0.0
-  VERSION = '0.1.0'.freeze
 
   # @since 1.0.0
   PATH      = File.dirname( __FILE__ ).freeze
@@ -17,6 +14,8 @@ module SKUI
   PLATFORM_IS_OSX     = ( Object::RUBY_PLATFORM =~ /darwin/i ) ? true : false
   PLATFORM_IS_WINDOWS = !PLATFORM_IS_OSX
 
+  # Version and release information.
+  require File.join( PATH, 'version.rb' )
 
   # Configure Debug mode.
   require File.join( PATH, 'debug.rb' )

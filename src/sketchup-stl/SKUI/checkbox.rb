@@ -12,12 +12,12 @@ module SKUI
 
     # @return [Boolean]
     # @since 1.0.0
-    prop_reader_bool( :checked, &TypeCheck::BOOLEAN )
+    prop_writer( :checked, &TypeCheck::BOOLEAN )
 
     # @since 1.0.0
     define_event( :change )
     define_event( :click )
-    
+
     # @param [String] label
     # @param [Boolean] checked
     #
@@ -30,26 +30,26 @@ module SKUI
 
     # @return [Boolean]
     # @since 1.0.0
-    def check!
-      checked = true
+    def check
+      self.checked = true
     end
 
     # @return [Boolean]
     # @since 1.0.0
     def checked?
-      checked = window.bridge.get_checkbox_state( ui_id )
+      self.checked = window.bridge.get_checkbox_state( ui_id )
     end
 
     # @return [Boolean]
     # @since 1.0.0
-    def toggle!
-      checked = !checked?
+    def toggle
+      self.checked = !checked?
     end
-    
+
     # @return [Boolean]
     # @since 1.0.0
-    def uncheck!
-      checked = false
+    def uncheck
+      self.checked = false
     end
 
   end # class

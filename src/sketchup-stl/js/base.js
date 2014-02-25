@@ -1,11 +1,11 @@
 /* UI namespace */
 var UI = function() {
-  
+
   var KEYCODE_ENTER = 13;
   var KEYCODE_ESC   = 27;
-  
+
   return {
-  
+
     init : function() {
       UI.activate_key_shortcuts();
       UI.sync_checkbox_values();
@@ -18,7 +18,7 @@ var UI = function() {
       // Ready Event
       window.location = 'skp:Window_Ready@' + ui_strings_params;
     },
-    
+
     // Ensure links are opened in the default browser.
     activate_key_shortcuts : function() {
       $(document).on('keyup', function(event) {
@@ -32,7 +32,7 @@ var UI = function() {
         }
       });
     },
-    
+
     // Ensure links are opened in the default browser.
     disable_select : function() {
       $(document).on('mousedown selectstart', function(event) {
@@ -42,14 +42,14 @@ var UI = function() {
       // right click on text.
       $(':not(input, textarea, select, option)').css('user-select', 'none');
     },
-    
+
     // Ensure links are opened in the default browser.
     disable_context_menu : function() {
       $(document).on('contextmenu', function(event) {
         return $(event.target).is('input[type=text], textarea');
       });
     },
-    
+
     /* Update the value attribute of checkbox elements as it's state changes.
      * This way the value can be pulled from WebDialog.get_element_value from
      * Ruby side.
@@ -66,7 +66,7 @@ var UI = function() {
         $checkbox.val( $checkbox.prop('checked') );
       });
     },
-    
+
     // Set the value of the given element.
     update_value : function(element_id, value) {
       $element = $('#' + element_id);
@@ -75,7 +75,7 @@ var UI = function() {
         $element.prop( 'checked', value );
       }
     },
-    
+
     // Set the text of the given elements. Argument is a hash with jQuery
     // selectors and replacement text.
     update_text : function(json) {
@@ -83,7 +83,7 @@ var UI = function() {
         $(selector).text( json[selector] );
       }
     },
-    
+
     // Set the text of the given elements. Argument is a hash with jQuery
     // selectors and replacement text.
     update_strings : function(strings) {
@@ -93,17 +93,17 @@ var UI = function() {
         $(this).text( strings[index] );
       });
     }
-    
+
   };
 
   // Private Functions
-  
+
   function collect_ui_strings() {
     return $('.ui_string').map(function() {
       return $.trim( $(this).text() );
     }).get();
   }
-  
+
 }(); // UI
 
 $(document).ready( UI.init );

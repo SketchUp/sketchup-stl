@@ -22,6 +22,26 @@ module CommunityExtensions
       IMPORT_FILE_NOT_FOUND                 = ImportFileNotFound
       IMPORT_SKETCHUP_VERSION_NOT_SUPPORTED = 5
 
+      # Ruby #pack / #unpack directives:
+      # http://www.ruby-doc.org/core-2.0.0/String.html#method-i-unpack
+      UINT16 = 'v'.freeze
+      UINT32 = 'V'.freeze
+      REAL32 = 'e'.freeze
+
+      UINT16_BYTE_SIZE = 2 # 16 bits
+      UINT32_BYTE_SIZE = 4 # 32 bits
+      REAL32_BYTE_SIZE = 4 # 32 bits
+
+      BINARY_HEADER_SIZE = 80 # UINT8[80]
+      BINARY_POINT3D_SIZE = REAL32_BYTE_SIZE * 3
+      BINARY_VECTOR3D_SIZE = REAL32_BYTE_SIZE * 3
+
+      BINARY_POINT3D = (REAL32 * 3).freeze
+      BINARY_VECTOR3D = (REAL32 * 3).freeze
+
+      MESH_NO_SOFTEN_OR_SMOOTH = 0
+
+
       def initialize
         @stl_units = UNIT_MILLIMETERS
         @stl_merge = false
@@ -165,48 +185,60 @@ module CommunityExtensions
       private :do_msg
 
       def stl_binary_import(filename, try = 1)
-        stl_conv = get_unit_ratio(@stl_units)
-        f = File.new(filename, 'rb')
-        # Header
-        header = ''
-        80.times {
-          c = f.read(1).unpack('c')[0]
-          if c <= 32 or c > 126 or c.nil?
-            c = ?.
-          end
-          header << c
-        }
-        int_size = [42].pack('i').size
-        float_size = [42.0].pack('f').size
-        len = f.read(int_size).unpack('i')[0]
+        unit_ratio_scale = get_unit_ratio(@stl_units)
+        number_of_triangles = 0
+        points = []
 
-        pts = []
-        while !f.eof 
-          normal = f.read(3 * float_size).unpack('fff')
-          v1 = f.read(3 * float_size).unpack('fff') 
-          v1.map!{|e| e * stl_conv}
-          v2 = f.read(3 * float_size).unpack('fff')
-          v2.map!{|e| e * stl_conv}
-          v3 = f.read(3 * float_size).unpack('fff')
-          v3.map!{|e| e * stl_conv}
-          # UINT16 Attribute byte count? (STL format spec)
-          abc = f.read(2)
-          pts << [v1, v2, v3]
-        end # while
-        f.close
+        # Ensure to open the file in binary mode with no encoding.
+        filemode = 'rb'
+        if RUBY_VERSION.to_f > 1.8
+          filemode << ':ASCII-8BIT'
+        end
+        File.open(filename, 'rb') { |file|
+          # Skip the header block because we don't need it. There doesn't appear
+          # to be anyone implementing any data into this.
+          file.seek(BINARY_HEADER_SIZE, IO::SEEK_SET)
 
-        n_triangles = pts.length
-        mesh = Geom::PolygonMesh.new(3 * n_triangles, n_triangles)
-        pts.each { |poly| mesh.add_polygon(poly) }
+          # Read how many triangles there are should be.
+          number_of_triangles = file.read(UINT32_BYTE_SIZE).unpack(UINT32)[0]
 
-        # add faces
+          # Read geometry data.
+          number_of_triangles.times { |i|
+            normal = file.read(BINARY_VECTOR3D_SIZE).unpack(BINARY_VECTOR3D)
+
+            vertex1 = file.read(BINARY_POINT3D_SIZE).unpack(BINARY_POINT3D)
+            vertex1.map!{ |value| value * unit_ratio_scale }
+
+            vertex2 = file.read(BINARY_POINT3D_SIZE).unpack(BINARY_POINT3D)
+            vertex2.map!{ |value| value * unit_ratio_scale }
+
+            vertex3 = file.read(BINARY_POINT3D_SIZE).unpack(BINARY_POINT3D)
+            vertex3.map!{ |value| value * unit_ratio_scale }
+
+            # Read attribute data.
+            attributes_byte_size = file.read(UINT16_BYTE_SIZE).unpack(UINT16)[0]
+            # NOTE: This value appear to be junk value in some files. Files can
+            # have non-zero attribute-byte-size values, yet there is no extra
+            # data following this data chunk. Therefore this value is ignored.
+            #file.seek(attributes_byte_size, IO::SEEK_CUR)
+
+            points << [vertex1, vertex2, vertex3]
+          }
+        } # File.open
+
+        # Generate a PolygonMesh from the parsed STL data.
+        number_of_points = 3 * number_of_triangles
+        mesh = Geom::PolygonMesh.new(number_of_points, number_of_triangles)
+        points.each { |triangle| mesh.add_polygon(triangle) }
+
+        # Create SketchUp entities from the PolygonMesh.
         entities = Sketchup.active_model.entities
         if entities.length > 0
-          grp = entities.add_group
-          entities = grp.entities
+          group = entities.add_group
+          entities = group.entities
         end
-        st = entities.fill_from_mesh(mesh, false, 0)
-        return entities
+        entities.fill_from_mesh(mesh, false, MESH_NO_SOFTEN_OR_SMOOTH)
+        entities
       end
       private :stl_binary_import
 
@@ -266,7 +298,7 @@ module CommunityExtensions
         # Since WebDialogs under OSX isn't truly modal there is a chance the user
         # can click the Options button while the window is already open. We then
         # just bring it to the front.
-        # 
+        #
         # The reference is being released when the window is closed so it's
         # easier to develop - make updates. Otherwise the WebDialog object would
         # have been cached. And it also should ensure it's garbage collected.

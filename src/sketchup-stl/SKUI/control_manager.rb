@@ -30,6 +30,9 @@ module SKUI
       # Add to Webdialog
       if self.window && self.window.visible?
         self.window.bridge.add_control( control )
+        if control.is_a?(ControlManager)
+          self.window.bridge.add_container( control )
+        end
         return true
       end
       false
@@ -40,6 +43,7 @@ module SKUI
     # @return [Control,Nil]
     # @since 1.0.0
     def find_control_by_ui_id( ui_id )
+      return self if self.ui_id == ui_id
       for control in @controls
         return control if control.ui_id == ui_id
         if control.is_a?( ControlManager )

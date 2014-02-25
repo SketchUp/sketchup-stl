@@ -44,7 +44,7 @@ module CommunityExtensions
       end
 
       def self.export(path, options = OPTIONS)
-        file = File.new(path , 'w')  
+        file = File.new(path , 'w')
         if options['stl_format'] == STL_BINARY
           file.binmode
           @write_face = method(:write_face_binary)
@@ -66,7 +66,7 @@ module CommunityExtensions
         face_count = 0
         entities.each do |entity|
           if entity.is_a?(Sketchup::Face)
-            write_face(file, entity, scale, tform)     
+            write_face(file, entity, scale, tform)
             face_count += 1
           elsif entity.is_a?(Sketchup::Group) ||
             entity.is_a?(Sketchup::ComponentInstance)

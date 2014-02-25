@@ -159,7 +159,7 @@ var UI = function() {
       var control_class_string = $control.data( 'control_class' );
       var control_class = eval( control_class_string );
       var control = new control_class( $control );
-      return control
+      return control;
     },
 
 

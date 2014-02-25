@@ -109,7 +109,7 @@ var Bridge = function() {
         message = messages.shift();
         if ( message ) {
           busy = true;
-          uri_message = encodeURIComponent( message );
+          uri_message = encodeURIComponent( message.add_slashes() );
           window.location = 'skp:SKUI_Callback@' + uri_message;
           return true;
         } else {

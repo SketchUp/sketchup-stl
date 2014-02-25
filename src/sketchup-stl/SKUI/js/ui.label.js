@@ -26,6 +26,13 @@ Label.add = function( properties ) {
   return control;
 }
 
+Label.prototype.set_align = function( value ) {
+  // `value` is a Symbol in Ruby and becomes a string like ":left" in JS.
+  var css_value = value.substring( 1, value.length );
+  this.control.css('text-align', css_value);
+  return value;
+};
+
 Label.prototype.set_caption = function( value ) {
   $a = this.control.children('a');
   $a.text( value );

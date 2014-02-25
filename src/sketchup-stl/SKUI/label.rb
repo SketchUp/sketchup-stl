@@ -6,6 +6,10 @@ module SKUI
   # @since 1.0.0
   class Label < Control
 
+    # @return [Control]
+    # @since 1.0.0
+    prop( :align, &TypeCheck::TEXTALIGN )
+
     # @return [String]
     # @since 1.0.0
     prop( :caption, &TypeCheck::STRING )
@@ -28,6 +32,7 @@ module SKUI
     def initialize( caption, control = nil )
       super()
 
+      @properties[ :align ]   = :left
       @properties[ :caption ] = caption
       @properties[ :control ] = control
 

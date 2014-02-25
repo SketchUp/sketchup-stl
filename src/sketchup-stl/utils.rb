@@ -5,7 +5,7 @@ module CommunityExtensions
       # Cleans up the geometry in the given +entities+ collection.
       #
       # @param [Sketchup::Entities] entities
-      # 
+      #
       # @return [Nil]
       def cleanup_geometry(entities)
         stack = entities.select { |e| e.is_a?(Sketchup::Edge) }
@@ -25,20 +25,20 @@ module CommunityExtensions
           # In CleanUp the faces are checked to not be duplicate of each other -
           # overlapping. But can we assume the STL importer doesn't create
           # such messy geometry?
-          # 
+          #
           # There is also a routine in CleanUp omitted here that checks if the
           # faces to be merged are degenerate - all edges are parallel.
-          # 
+          #
           # These check have been omitted to save processing time - as they might
           # not appear in a STL import? The checks were required in CleanUp due
           # to the large amount of degenerate geometry it was fed.
-          # 
-          # 
+          #
+          #
           # Erasing the shared edges is tricky. Often things get messed up if we
           # try to erase them all at once. When colouring the result of
           # shared_edges it appear that edges between non-planar faces are
           # returned. Not sure why this is.
-          # 
+          #
           # What does seem to work best is to first erase the edge we got from the
           # stack and then check the shared set of edges afterwards and erase them
           # after we've verified they are not part of any faces any more.
@@ -71,7 +71,7 @@ module CommunityExtensions
       # Should there be a number of cases where healing is required and this
       # method doesn't cut it, then it can be replaced with the alternative
       # version. But until we have a set of real world cases I want to use this
-      # one. 
+      # one.
       #
       # -ThomThom
       #

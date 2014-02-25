@@ -29,6 +29,15 @@ module SKUI
     define_event( :ready )
 
     # @since 1.0.0
+    define_event( :close )
+
+    # @since 1.0.0
+    define_event( :focus, :blur )
+
+    # @since 1.0.0
+    define_event( :scripts_loaded )
+
+    # @since 1.0.0
     THEME_DEFAULT  = nil
     THEME_GRAPHITE = File.join( PATH_CSS, 'theme_graphite.css' ).freeze
 
@@ -69,6 +78,9 @@ module SKUI
 
       @properties[:theme] = @options[:theme]
 
+      @scripts = []
+      @loaded_scripts = []
+
       # Create a dummy WebDialog here in order for the Bridge to respond in a
       # more sensible manner other than being `nil`. The WebDialog is recreated
       # right before the window is displayed due to a SketchUp bug.
@@ -77,12 +89,25 @@ module SKUI
       @bridge = Bridge.new( self, @webdialog )
     end
 
+    # Adds the given JavaScript. This allow custom solutions outside of SKUI's
+    # Ruby class wrappers.
+    #
+    # @return [Nil]
+    # @since 1.0.0
+    def add_script(script_file)
+      unless File.exist?(script_file)
+        raise ArgumentError, "File not found: #{script_file}"
+      end
+      @scripts << script_file
+      nil
+    end
+
     # Returns an array with the width and height of the client area.
     #
     # @return [Array(Integer,Integer)]
     # @since 1.0.0
     def client_size
-      @bridge.call( 'Webdialog.get_client_size' )
+      @bridge.call( 'WebDialog.get_client_size' )
     end
 
     # Adjusts the window so the client area fits the given +width+ and +height+.
@@ -99,7 +124,7 @@ module SKUI
       end
       # (!) Cache size difference.
       @webdialog.set_size( width, height )
-      client_width, client_height = get_client_size()
+      client_width, client_height = client_size()
       adjust_width  = width  - client_width
       adjust_height = height - client_height
       unless adjust_width == 0 && adjust_height == 0
@@ -185,6 +210,16 @@ module SKUI
     # @since 1.0.0
     def title
       @options[:title].dup
+    end
+
+    # @return [Nil]
+    # @since 1.0.0
+    def toggle
+      if visible?
+        close()
+      else
+        show()
+      end
     end
 
     # @return [Boolean]
@@ -276,6 +311,8 @@ module SKUI
         event_open_url( arguments[0] )
       when 'SKUI::Window.on_ready'
         event_window_ready( webdialog )
+      when 'SKUI::Window.on_script_loaded'
+        event_script_loaded( arguments[0] )
       end
     ensure
       # Inform the Webdialog the message was received so it can process any
@@ -293,6 +330,10 @@ module SKUI
     def event_window_ready( webdialog )
       Debug.puts( '>> Dialog Ready' )
       @bridge.call( 'Bridge.set_window_id', ui_id )
+      unless @scripts.empty?
+        @loaded_scripts.clear
+        @bridge.call( 'WebDialog.add_scripts', @scripts )
+      end
       update_properties( *@properties.keys )
       @bridge.add_container( self )
       trigger_event( :ready )
@@ -327,6 +368,20 @@ module SKUI
       nil
     end
 
+
+    # @param [String] script
+    #
+    # @return [Nil]
+    # @since 1.0.0
+    def event_script_loaded( script )
+      #Debug.puts( "SKUI::Window.event_script_loaded(#{script})" )
+      @loaded_scripts << script
+      if @loaded_scripts.sort == @scripts.sort
+        trigger_event( :scripts_loaded )
+      end
+      nil
+    end
+
     # @○param [Hash] options Same as #initialize
     #
     # @return [UI::WebDialog]
@@ -355,6 +410,28 @@ module SKUI
       # Ensure the size for fixed windows is set - otherwise SketchUp will use
       # the last saved properties.
       unless options[:resizable]
+        # OSX has a bug where it ignores the resize flag and let the user resize
+        # the window. Setting the min and max values for width and height works
+        # around this issue.
+        #
+        # To make things worse, OSX sets the client size with the min/max
+        # methods - causing the window to grow if you set the min size to the
+        # desired target size. To account for this we set the min sizes to be
+        # a little less that the desired width. The size should be larger than
+        # the titlebar height.
+        #
+        # All this has to be done before we set the size in order to restore the
+        # desired size because the min/max methods will transpose the external
+        # size to content size.
+        #
+        # The result is that the height is adjustable a little bit, but at least
+        # it's restrained to be close to the desired size. Lesser evil until
+        # this is fixed in SketchUp.
+        webdialog.min_width = options[:width]
+        webdialog.max_width = options[:width]
+        webdialog.min_height = options[:height] - 30
+        webdialog.max_height = options[:height]
+
         webdialog.set_size( options[:width], options[:height] )
       end
       # Limit the size of the window. The limits can be either an Integer for
@@ -385,6 +462,10 @@ module SKUI
       #     then the WebDialog instance will not GC. Call a wrapper that
       #     prevents this.
       add_callback( webdialog, 'SKUI_Callback', :callback_handler )
+      # Hook up events to capture when the window closes.
+      webdialog.set_on_close {
+        trigger_event( :close )
+      }
       # (i) There appear to be differences between OS when the HTML content
       #     is prepared. OSX loads HTML on #set_file? Inspect this.
       html_file = File.join( PATH_HTML, 'window.html' )

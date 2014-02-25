@@ -99,7 +99,7 @@ module SKUI
     # Call this method whenever a control property changes, spesifying which
     # properties changed. This is sent to the WebDialog for syncing.
     #
-    # @param [Symbol] *properties
+    # @param [Symbol] properties
     #
     # @return [Boolean]
     # @since 1.0.0

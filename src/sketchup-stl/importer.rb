@@ -194,7 +194,7 @@ module CommunityExtensions
         if RUBY_VERSION.to_f > 1.8
           filemode << ':ASCII-8BIT'
         end
-        File.open(filename, 'rb') { |file|
+        File.open(filename, filemode) { |file|
           # Skip the header block because we don't need it. There doesn't appear
           # to be anyone implementing any data into this.
           file.seek(BINARY_HEADER_SIZE, IO::SEEK_SET)

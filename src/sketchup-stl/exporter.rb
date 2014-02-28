@@ -227,7 +227,7 @@ module CommunityExtensions
           OPTIONS['selection_only']
         )
         chk_selection.position(col[1], row[1])
-        chk_selection.check! if OPTIONS['selection_only']
+        chk_selection.check if OPTIONS['selection_only']
         chk_selection.on(:change) { |control|
           OPTIONS['selection_only'] = control.checked?
         }

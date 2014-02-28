@@ -151,7 +151,12 @@ module CommunityExtensions
       #
       def detect_file_type(file_name)
         face_count = nil
-        File.open(file_name, 'rb') {|file|
+        # Ensure to open the file in binary mode with no encoding.
+        filemode = 'rb'
+        if RUBY_VERSION.to_f > 1.8
+          filemode << ':ASCII-8BIT'
+        end
+        File.open(file_name, filemode) {|file|
           file.seek(80, IO::SEEK_SET)
           face_count = file.read(4).unpack('i')[0]
         }

@@ -243,38 +243,47 @@ module CommunityExtensions
       private :stl_binary_import
 
       def stl_ascii_import(filename, try = 1)
-        stl_conv = get_unit_ratio(@stl_units)
-        polys = []
-        poly = []
-        vcnt = 0
-        IO.foreach(filename) do |line|
-          line.chomp!
-          if line[/vertex/]
-            vcnt += 1
-            c, *pts = line.split
-            pts.map! { |pt| pt.to_f * stl_conv }
-            poly << pts
-            if vcnt == 3
-              polys.push(poly.dup)# if vcnt > 0
-              poly = []
-              vcnt = 0
+        unit_ratio_scale = get_unit_ratio(@stl_units)
+        polygons = []
+        triangle = []
+        num_vertices = 0
+        # Ensure to open the file in with no encoding.
+        filemode = 'r'
+        if RUBY_VERSION.to_f > 1.8
+          filemode << ':ASCII-8BIT'
+        end
+        # TODO(thomthom): This is currently making a lot of assumptions and no
+        # validation check of the format. It'd be good to improve this.
+        File.open(filename, filemode) { |file|
+          file.each_line { |line|
+            line.chomp!
+            if line[/vertex/]
+              num_vertices += 1
+              entity_type, *point = line.split
+              point.map! { |value| value.to_f * unit_ratio_scale }
+              triangle << point
+              if num_vertices == 3
+                polygons.push(triangle.dup)
+                triangle = []
+                num_vertices = 0
+              end
             end
-          end
-        end #loop
-        if polys.length == 0
+          }
+        }
+        if polygons.length == 0
           if try == 1
             return stl_binary_import(filename, 2)
           end
         end
-        mesh = Geom::PolygonMesh.new(3 * polys.length, polys.length)
-        polys.each{ |poly| mesh.add_polygon(poly) }
+        mesh = Geom::PolygonMesh.new(3 * polygons.length, polygons.length)
+        polygons.each{ |triangle| mesh.add_polygon(triangle) }
         entities = Sketchup.active_model.entities
         if entities.length > 0
-          grp = entities.add_group
-          entities = grp.entities
+          group = entities.add_group
+          entities = group.entities
         end
-        st = entities.fill_from_mesh(mesh, false, 0)
-        return entities
+        entities.fill_from_mesh(mesh, false, MESH_NO_SOFTEN_OR_SMOOTH)
+        entities
       end
 
       # Returns conversion ratio based on unit type.

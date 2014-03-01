@@ -44,7 +44,11 @@ module CommunityExtensions
       end
 
       def self.export(path, options = OPTIONS)
-        file = File.new(path , 'w')
+        filemode = 'w'
+        if RUBY_VERSION.to_f > 1.8
+          filemode << ':ASCII-8BIT'
+        end
+        file = File.new(path , filemode)
         if options['stl_format'] == STL_BINARY
           file.binmode
           @write_face = method(:write_face_binary)

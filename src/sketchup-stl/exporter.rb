@@ -75,7 +75,7 @@ module CommunityExtensions
           elsif entity.is_a?(Sketchup::Group) ||
             entity.is_a?(Sketchup::ComponentInstance)
             entity_definition = Utils.definition(entity)
-            find_faces(
+            face_count += find_faces(
               file,
               entity_definition.entities,
               scale,

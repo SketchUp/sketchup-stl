@@ -68,6 +68,7 @@ module CommunityExtensions
 
       def self.find_faces(file, entities, facet_count, scale, tform)
         entities.each do |entity|
+          next if entity.hidden? || !entity.layer.visible?
           if entity.is_a?(Sketchup::Face)
             facet_count += write_face(file, entity, scale, tform)
           elsif entity.is_a?(Sketchup::Group) ||

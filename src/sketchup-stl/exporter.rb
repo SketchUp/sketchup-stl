@@ -10,10 +10,6 @@ module CommunityExtensions
   module STL
     module Exporter
 
-      # Load SKUI lib
-      load File.join(File.dirname(__FILE__), 'SKUI', 'embed_skui.rb')
-      ::SKUI.embed_in(self)
-
       STL_ASCII  = 'ASCII'.freeze
       STL_BINARY = 'Binary'.freeze
 

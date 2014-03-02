@@ -10,6 +10,10 @@ require 'extensions.rb'
 
 module CommunityExtensions
   module STL
+      # Load SKUI lib
+      load File.join(File.dirname(__FILE__), 'sketchup-stl', 'SKUI',
+       'embed_skui.rb')
+      ::SKUI.embed_in(self)
 
     PLUGIN_ROOT_PATH    = File.dirname(__FILE__)
     PLUGIN_PATH         = File.join(PLUGIN_ROOT_PATH, 'sketchup-stl')

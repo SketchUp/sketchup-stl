@@ -10,7 +10,12 @@ module CommunityExtensions
   module STL
     class Importer < Sketchup::Importer
 
-      Sketchup::require File.join(PLUGIN_PATH, 'webdialog_extensions')
+      # Load SKUI lib
+      load File.join(File.dirname(__FILE__), 'SKUI', 'embed_skui.rb')
+      ::SKUI.embed_in(self)
+
+
+      #Sketchup::require File.join(PLUGIN_PATH, 'webdialog_extensions')
 
       include CommunityExtensions::STL::Utils
 
@@ -66,7 +71,8 @@ module CommunityExtensions
       end
 
       def do_options
-        stl_dialog
+        #stl_dialog
+        skui_dialog
       end
 
       def load_file(path,status)
@@ -307,6 +313,17 @@ module CommunityExtensions
         end
       end
       private :get_unit_ratio
+
+      def skui_dialog
+        window_options = {
+          :title => STL.translate('STL Import Options'),
+          :preferences_key => PREF_KEY,
+          :modal => true
+        }
+        window = SKUI::Window.new(window_options)
+
+        window.show
+      end
 
       def stl_dialog
         # Since WebDialogs under OSX isn't truly modal there is a chance the user

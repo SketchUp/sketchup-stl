@@ -10,11 +10,6 @@ module CommunityExtensions
   module STL
     class Importer < Sketchup::Importer
 
-      # Load SKUI lib
-      load File.join(File.dirname(__FILE__), 'SKUI', 'embed_skui.rb')
-      ::SKUI.embed_in(self)
-
-
       #Sketchup::require File.join(PLUGIN_PATH, 'webdialog_extensions')
 
       include CommunityExtensions::STL::Utils
@@ -321,6 +316,19 @@ module CommunityExtensions
           :modal => true
         }
         window = SKUI::Window.new(window_options)
+        grp_Geometry = SKUI::Groupbox.new('Geometry')
+        grp_Geometry.position(5, 5)
+        grp_Geometry.right = 5
+        # grp_Geometry.height = 100
+        window.add_control(grp_Geometry)
+
+        chk_MergeCoplanar = SKUI::Checkbox.new('Merge coplanar face')
+        grp_Geometry.add_control(chk_MergeCoplanar)
+
+        grp_Scale = SKUI::Groupbox.new('Scale')
+        grp_Scale.position(5, 35)
+        grp_Scale.right = 5
+        window.add_control(grp_Scale)
 
         window.show
       end

@@ -62,37 +62,38 @@ module CommunityExtensions
         else
           export_ents = Sketchup.active_model.active_entities
         end
-        face_count = find_faces(file, export_ents, scale, Geom::Transformation.new)
-        write_footer(file, face_count, model_name(), options['stl_format'])
+        facet_count = find_faces(file, export_ents, 0, scale, Geom::Transformation.new)
+        write_footer(file, facet_count, model_name(), options['stl_format'])
       end
 
-      def self.find_faces(file, entities, scale, tform)
-        face_count = 0
+      def self.find_faces(file, entities, facet_count, scale, tform)
         entities.each do |entity|
           if entity.is_a?(Sketchup::Face)
-            write_face(file, entity, scale, tform)
-            face_count += 1
+            facet_count += write_face(file, entity, scale, tform)
           elsif entity.is_a?(Sketchup::Group) ||
             entity.is_a?(Sketchup::ComponentInstance)
             entity_definition = Utils.definition(entity)
-            face_count += find_faces(
+            facet_count += find_faces(
               file,
               entity_definition.entities,
+              0,
               scale,
               tform * entity.transformation
             )
           end
         end
-        face_count
+        facet_count
       end
 
       def self.write_face(file, face, scale, tform)
         mesh = face.mesh(7)
         mesh.transform!(tform)
-        @write_face.call(file, scale, mesh)
+        facets_written = @write_face.call(file, scale, mesh)
+        return(facets_written)
       end
 
       def self.write_face_ascii(file, scale, mesh)
+        facets_written = 0
         polygons = mesh.polygons
         polygons.each do |polygon|
           if (polygon.length == 3)
@@ -105,11 +106,14 @@ module CommunityExtensions
               file.write("    vertex #{pt.x} #{pt.y} #{pt.z}\n")
             end
             file.write("  endloop\nendfacet\n")
+            facets_written += 1
           end
         end
+        return(facets_written)
       end
 
       def self.write_face_binary(file, scale, mesh)
+        facets_written = 0
         polygons = mesh.polygons
         polygons.each do |polygon|
           if (polygon.length == 3)
@@ -121,8 +125,10 @@ module CommunityExtensions
               file.write(pt.pack("e3"))
             end
             file.write([0].pack("v"))
+            facets_written += 1
           end
         end
+        return(facets_written)
       end
 
       def self.write_header(file, model_name, format)
@@ -136,14 +142,14 @@ module CommunityExtensions
         end
       end
 
-      def self.write_footer(file, face_count, model_name, format)
+      def self.write_footer(file, facet_count, model_name, format)
         if format == STL_ASCII
           file.write("endsolid #{model_name}\n")
         else
           # binary - update facet count
           file.flush
           file.seek(80)
-          file.write([face_count].pack('V'))
+          file.write([facet_count].pack('V'))
         end
         file.close
       end

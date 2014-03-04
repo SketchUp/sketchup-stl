@@ -313,22 +313,42 @@ module CommunityExtensions
         window_options = {
           :title => STL.translate('STL Import Options'),
           :preferences_key => PREF_KEY,
+          :width => 290,
           :modal => true
         }
         window = SKUI::Window.new(window_options)
         grp_Geometry = SKUI::Groupbox.new('Geometry')
         grp_Geometry.position(5, 5)
         grp_Geometry.right = 5
-        # grp_Geometry.height = 100
+        grp_Geometry.height = 60
         window.add_control(grp_Geometry)
 
-        chk_MergeCoplanar = SKUI::Checkbox.new('Merge coplanar face')
+        chk_MergeCoplanar = SKUI::Checkbox.new(
+          'Merge coplanar face')
         grp_Geometry.add_control(chk_MergeCoplanar)
 
         grp_Scale = SKUI::Groupbox.new('Scale')
-        grp_Scale.position(5, 35)
+        grp_Scale.position(5, 65)
         grp_Scale.right = 5
+        grp_Scale.height = 60
         window.add_control(grp_Scale)
+
+        units = ['Model Units', 'Meters', 'Centimeters', 'Millimeters', 'Inches', 'Feet']
+        units_translated = units.map { |unit| STL.translate(unit) }
+
+        lbl_Units = SKUI::Label.new('Units:')
+        lbl_Units.position(5, 135)
+        grp_Scale.add_control(lbl_Units)
+
+        lst_Units = SKUI::Listbox.new(units_translated)
+        lst_Units.position(50, 135)
+        grp_Scale.add_control(lst_Units)
+
+        btn_cancel = SKUI::Button.new('Cancel') { |control|
+          control.window.close
+        }
+        btn_cancel.position(-5, -5)
+        window.add_control(btn_cancel)
 
         window.show
       end

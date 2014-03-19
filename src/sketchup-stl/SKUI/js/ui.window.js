@@ -46,9 +46,15 @@ Window.init = function( properties ) {
     control = UI.get_control( 'body' );
     control.callback( 'focus' );
   });
-   $(window).on( 'blur', function( event ) {
+  $(window).on( 'blur', function( event ) {
     control = UI.get_control( 'body' );
     control.callback( 'blur' );
+  });
+  $(window).resize( function( event ) {
+    var width = $( window ).width();
+    var height = $( window ).height();
+    control = UI.get_control( 'body' );
+    control.callback( 'resize', [width, height] );
   });
   return;
 }

@@ -51,10 +51,10 @@ module SKUI
       get_rect[ 'height' ]
     end
 
-    # @see Base#release!
+    # @see Base#release
     # @return [Nil]
     # @since 1.0.0
-    def release!
+    def release
       @control = nil
       nil
     end

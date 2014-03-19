@@ -1,6 +1,3 @@
-require 'sketchup.rb'
-
-
 # @since 1.0.0
 module SKUI
 

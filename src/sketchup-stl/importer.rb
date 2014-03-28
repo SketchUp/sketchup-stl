@@ -12,6 +12,7 @@ module CommunityExtensions
 
       #Sketchup::require File.join(PLUGIN_PATH, 'webdialog_extensions')
 
+      #Sketchup.require(File.join(PLUGIN_PATH, 'skui_dialog.rb'))
       include CommunityExtensions::STL::Utils
 
       PREF_KEY = 'CommunityExtensions\STL\Importer'.freeze
@@ -313,36 +314,43 @@ module CommunityExtensions
         window_options = {
           :title => STL.translate('STL Import Options'),
           :preferences_key => PREF_KEY,
-          :width => 290,
-          :modal => true
+          :width => 300,
+          :height => 250,
+          :modal => false
         }
         window = SKUI::Window.new(window_options)
         grp_Geometry = SKUI::Groupbox.new('Geometry')
         grp_Geometry.position(5, 5)
         grp_Geometry.right = 5
-        grp_Geometry.height = 60
+        grp_Geometry.height = 70
         window.add_control(grp_Geometry)
 
-        chk_MergeCoplanar = SKUI::Checkbox.new(
-          'Merge coplanar face')
+        chk_MergeCoplanar = SKUI::Checkbox.new('Merge coplanar face')
+        chk_MergeCoplanar.top = 25
+        chk_MergeCoplanar.left = 50
         grp_Geometry.add_control(chk_MergeCoplanar)
 
         grp_Scale = SKUI::Groupbox.new('Scale')
         grp_Scale.position(5, 65)
         grp_Scale.right = 5
-        grp_Scale.height = 60
+        grp_Scale.height = 100 
         window.add_control(grp_Scale)
 
         units = ['Model Units', 'Meters', 'Centimeters', 'Millimeters', 'Inches', 'Feet']
         units_translated = units.map { |unit| STL.translate(unit) }
 
         lbl_Units = SKUI::Label.new('Units:')
-        lbl_Units.position(5, 135)
+        #lbl_Units.position(5, 135)
         grp_Scale.add_control(lbl_Units)
 
         lst_Units = SKUI::Listbox.new(units_translated)
-        lst_Units.position(50, 135)
+        lst_Units.left = 50
         grp_Scale.add_control(lst_Units)
+
+        chk_origin = SKUI::Checkbox.new('Preserve drawing origin')
+        chk_origin.top = 50
+        chk_origin.left = 50
+        grp_Scale.add_control(chk_origin)
 
         btn_cancel = SKUI::Button.new('Cancel') { |control|
           control.window.close

@@ -21,6 +21,11 @@ module SKUI
     Object.send( :remove_const, :SKUI )
     # Load SKUI for this SKUI implementation.
     path = File.dirname( __FILE__ )
+    # In SU2014, with Ruby 2.0 the __FILE__ constant return an UTF-8 string with
+    # incorrect encoding label which will cause load errors when the file path
+    # contain multi-byte characters. This happens when the user has non-english
+    # characters in their username.
+    path.force_encoding( "UTF-8" ) if path.respond_to?( :force_encoding )
     core = File.join( path, 'core.rb' )
     loaded = require( core )
     # One can only embed SKUI into one context per SKUI installation. This is

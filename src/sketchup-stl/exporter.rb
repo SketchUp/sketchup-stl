@@ -11,7 +11,7 @@ module CommunityExtensions
     module Exporter
 
       # Load SKUI lib
-      load File.join(File.dirname(__FILE__), 'SKUI', 'embed_skui.rb')
+      load File.join(PLUGIN_PATH, 'SKUI', 'embed_skui.rb')
       ::SKUI.embed_in(self)
 
       STL_ASCII  = 'ASCII'.freeze

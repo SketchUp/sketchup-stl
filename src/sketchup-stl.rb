@@ -11,9 +11,18 @@ require 'extensions.rb'
 module CommunityExtensions
   module STL
 
-    PLUGIN_ROOT_PATH    = File.dirname(__FILE__)
-    PLUGIN_PATH         = File.join(PLUGIN_ROOT_PATH, 'sketchup-stl')
-    PLUGIN_STRINGS_PATH = File.join(PLUGIN_PATH, 'strings')
+    # In SU2014, with Ruby 2.0 the __FILE__ constant return an UTF-8 string with
+    # incorrect encoding label which will cause load errors when the file path
+    # contain multi-byte characters. This happens when the user has non-english
+    # characters in their username.
+    current_path = File.dirname(__FILE__)
+    if current_path.respond_to?(:force_encoding)
+      current_path.force_encoding("UTF-8")
+    end
+
+    PLUGIN_ROOT_PATH    = current_path.freeze
+    PLUGIN_PATH         = File.join(PLUGIN_ROOT_PATH, 'sketchup-stl').freeze
+    PLUGIN_STRINGS_PATH = File.join(PLUGIN_PATH, 'strings').freeze
 
     Sketchup::require File.join(PLUGIN_PATH, 'translator')
     options = {
@@ -41,7 +50,7 @@ module CommunityExtensions
       'This is an open source project sponsored by the SketchUp team. More ' <<
       'info and updates at https://github.com/SketchUp/sketchup-stl'
     )
-    extension.version = '2.1.3'
+    extension.version = '2.1.4'
     extension.copyright = '2012-2014 Trimble Navigation, ' <<
       'released under Apache 2.0'
     extension.creator = 'J. Foltz, N. Bromham, K. Shroeder, SketchUp Team'

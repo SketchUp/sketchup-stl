@@ -1,8 +1,17 @@
 # @since 1.0.0
 module SKUI
 
+  # In SU2014, with Ruby 2.0 the __FILE__ constant return an UTF-8 string with
+  # incorrect encoding label which will cause load errors when the file path
+  # contain multi-byte characters. This happens when the user has non-english
+  # characters in their username.
+  current_path = File.dirname( __FILE__ )
+  if current_path.respond_to?( :force_encoding )
+    current_path.force_encoding( "UTF-8" )
+  end
+
   # @since 1.0.0
-  PATH      = File.dirname( __FILE__ ).freeze
+  PATH      = current_path.freeze
   PATH_JS   = File.join( PATH, 'js' ).freeze
   PATH_CSS  = File.join( PATH, 'css' ).freeze
   PATH_HTML = File.join( PATH, 'html' ).freeze

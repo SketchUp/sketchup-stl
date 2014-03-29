@@ -76,20 +76,20 @@ module CommunityExtensions
         preserve_origin = read_setting('preserve_origin', @stl_preserve_origin)
 
         window = SKUI::Window.new(window_options)
-        grp_geometry = SKUI::Groupbox.new('Geometry')
+        grp_geometry = SKUI::Groupbox.new(STL.translate('Geometry'))
         grp_geometry.position(5, 5)
         grp_geometry.right  = 5
         grp_geometry.height = 75
         window.add_control(grp_geometry)
 
-        chk_merge_coplanar = SKUI::Checkbox.new('Merge coplanar face')
+        chk_merge_coplanar = SKUI::Checkbox.new(STL.translate('Merge coplanar face'))
         chk_merge_coplanar.name    = :stl_merge
         chk_merge_coplanar.checked = merge_faces
         chk_merge_coplanar.top     = 25
         chk_merge_coplanar.left    = 50
         grp_geometry.add_control(chk_merge_coplanar)
 
-        grp_scale                 = SKUI::Groupbox.new('Scale')
+        grp_scale                 = SKUI::Groupbox.new(STL.translate('Scale'))
         grp_scale.position(5, 65)
         grp_scale.right           = 5
         grp_scale.height          = 100
@@ -98,7 +98,7 @@ module CommunityExtensions
         units = ['Model Units', 'Meters', 'Centimeters', 'Millimeters', 'Inches', 'Feet']
         units_translated = units.map { |unit| STL.translate(unit) }
 
-        lbl_units      = SKUI::Label.new('Units:')
+        lbl_units      = SKUI::Label.new(STL.translate('Units:'))
         lbl_units.left = 10
         grp_scale.add_control(lbl_units)
 
@@ -108,20 +108,20 @@ module CommunityExtensions
         lst_units.left  = 50
         grp_scale.add_control(lst_units)
 
-        chk_origin = SKUI::Checkbox.new('Preserve drawing origin')
+        chk_origin = SKUI::Checkbox.new(STL.translate('Preserve drawing origin'))
         chk_origin.name    = :stl_preserve_origin
         chk_origin.checked = preserve_origin
         chk_origin.top     = 50
         chk_origin.left    = 50
         grp_scale.add_control(chk_origin)
 
-        btn_cancel = SKUI::Button.new('Cancel') { |control|
+        btn_cancel = SKUI::Button.new(STL.translate('Cancel')) { |control|
           control.window.close
         }
         btn_cancel.position(-5, -5)
         window.add_control(btn_cancel)
 
-        btn_import = SKUI::Button.new("Accept") { |control|
+        btn_import = SKUI::Button.new(STL.translate("Accept")) { |control|
           @stl_merge           = control.window[:stl_merge].checked?
           @stl_preserve_origin = control.window[:stl_preserve_origin].checked?
           @stl_units           = control.window[:stl_units].value

@@ -41,7 +41,7 @@ module CommunityExtensions
 
 
       def initialize
-        @stl_units           = UNIT_MILLIMETERS
+        @stl_units           = "Model Units"
         @stl_merge           = false
         @stl_preserve_origin = true
         @option_window       = nil # (See comment at top of `stl_dialog()`.)

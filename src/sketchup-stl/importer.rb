@@ -10,9 +10,6 @@ module CommunityExtensions
   module STL
     class Importer < Sketchup::Importer
 
-      #Sketchup::require File.join(PLUGIN_PATH, 'webdialog_extensions')
-
-      #Sketchup.require(File.join(PLUGIN_PATH, 'skui_dialog.rb'))
       include CommunityExtensions::STL::Utils
 
       PREF_KEY = 'CommunityExtensions\STL\Importer'.freeze
@@ -67,8 +64,76 @@ module CommunityExtensions
       end
 
       def do_options
-        #stl_dialog
-        skui_dialog
+        window_options = {
+          :title => STL.translate('STL Import Options'),
+          :preferences_key => PREF_KEY,
+          :width => 300,
+          :height => 225,
+          :modal => false
+        }
+        merge_faces     = read_setting('merge_faces',     @stl_merge)
+        current_unit    = read_setting('import_units',    @stl_units)
+        preserve_origin = read_setting('preserve_origin', @stl_preserve_origin)
+
+        window = SKUI::Window.new(window_options)
+        grp_Geometry = SKUI::Groupbox.new('Geometry')
+        grp_Geometry.position(5, 5)
+        grp_Geometry.right = 5
+        grp_Geometry.height = 75
+        window.add_control(grp_Geometry)
+
+        chk_MergeCoplanar = SKUI::Checkbox.new('Merge coplanar face')
+        chk_MergeCoplanar.name = :stl_merge
+        chk_MergeCoplanar.checked = merge_faces
+        chk_MergeCoplanar.top = 25
+        chk_MergeCoplanar.left = 50
+        grp_Geometry.add_control(chk_MergeCoplanar)
+
+        grp_Scale = SKUI::Groupbox.new('Scale')
+        grp_Scale.position(5, 65)
+        grp_Scale.right = 5
+        grp_Scale.height = 100 
+        window.add_control(grp_Scale)
+
+        units = ['Model Units', 'Meters', 'Centimeters', 'Millimeters', 'Inches', 'Feet']
+        units_translated = units.map { |unit| STL.translate(unit) }
+
+        lbl_Units = SKUI::Label.new('Units:')
+        lbl_Units.left = 10
+        grp_Scale.add_control(lbl_Units)
+
+        lst_Units = SKUI::Listbox.new(units_translated)
+        lst_Units.name = :stl_units
+        lst_Units.value = current_unit
+        lst_Units.left = 50
+        grp_Scale.add_control(lst_Units)
+
+        chk_origin = SKUI::Checkbox.new('Preserve drawing origin')
+        chk_origin.name = :stl_preserve_origin
+        chk_origin.checked = preserve_origin
+        chk_origin.top = 50
+        chk_origin.left = 50
+        grp_Scale.add_control(chk_origin)
+
+        btn_cancel = SKUI::Button.new('Cancel') { |control|
+          control.window.close
+        }
+        btn_cancel.position(-5, -5)
+        window.add_control(btn_cancel)
+
+        btn_import = SKUI::Button.new("Accept") {|control|
+          @stl_merge           = control.window[:stl_merge].checked?
+          @stl_preserve_origin = control.window[:stl_preserve_origin].checked?
+          @stl_units           = control.window[:stl_units].value
+          write_setting('merge_faces',     @stl_merge)
+          write_setting('import_units',    @stl_units)
+          write_setting('preserve_origin', @stl_preserve_origin)
+          control.window.close
+        }
+        btn_import.position(-85, -5)
+        window.add_control(btn_import)
+
+        window.show
       end
 
       def load_file(path,status)
@@ -85,11 +150,12 @@ module CommunityExtensions
       def main(filename)
         file_type = detect_file_type(filename)
         return IMPORT_FAILED if file_type.nil?
-        #p file_type
+
         # Read import settings.
         @stl_merge           = read_setting('merge_faces',     @stl_merge)
         @stl_units           = read_setting('import_units',    @stl_units)
         @stl_preserve_origin = read_setting('preserve_origin', @stl_preserve_origin)
+
         # Wrap everything into one operation, ensuring compatibility with older
         # SketchUp versions that did not feature the disable_ui argument.
         model = Sketchup.active_model
@@ -294,186 +360,6 @@ module CommunityExtensions
         entities
       end
 
-      # Returns conversion ratio based on unit type.
-      #def get_unit_ratio(unit_type)
-      #  case unit_type
-      #  when UNIT_METERS
-      #    100.0 / 2.54
-      #  when UNIT_CENTIMETERS
-      #    1.0 / 2.54
-      #  when UNIT_MILLIMETERS
-      #    0.1 / 2.54
-      #  when UNIT_FEET
-      #    12.0
-      #  when UNIT_INCHES
-      #    1
-      #  end
-      #end
-      #private :get_unit_ratio
-
-      def skui_dialog
-        window_options = {
-          :title => STL.translate('STL Import Options'),
-          :preferences_key => PREF_KEY,
-          :width => 300,
-          :height => 225,
-          :modal => false
-        }
-        merge_faces     = read_setting('merge_faces',     @stl_merge)
-        current_unit    = read_setting('import_units',    @stl_units)
-        preserve_origin = read_setting('preserve_origin', @stl_preserve_origin)
-
-        window = SKUI::Window.new(window_options)
-        grp_Geometry = SKUI::Groupbox.new('Geometry')
-        grp_Geometry.position(5, 5)
-        grp_Geometry.right = 5
-        grp_Geometry.height = 70
-        window.add_control(grp_Geometry)
-
-        chk_MergeCoplanar = SKUI::Checkbox.new('Merge coplanar face')
-        chk_MergeCoplanar.name = :stl_merge
-        chk_MergeCoplanar.checked = merge_faces
-        chk_MergeCoplanar.on( :change ) { |control|
-          @stl_merge = control.checked?
-        }
-        chk_MergeCoplanar.top = 25
-        chk_MergeCoplanar.left = 50
-        grp_Geometry.add_control(chk_MergeCoplanar)
-
-        grp_Scale = SKUI::Groupbox.new('Scale')
-        grp_Scale.position(5, 65)
-        grp_Scale.right = 5
-        grp_Scale.height = 100 
-        window.add_control(grp_Scale)
-
-        units = ['Model Units', 'Meters', 'Centimeters', 'Millimeters', 'Inches', 'Feet']
-        units_translated = units.map { |unit| STL.translate(unit) }
-
-        lbl_Units = SKUI::Label.new('Units:')
-        #lbl_Units.position(5, 135)
-        grp_Scale.add_control(lbl_Units)
-
-        lst_Units = SKUI::Listbox.new(units_translated)
-        lst_Units.name = :stl_units
-        lst_Units.value = current_unit
-        lst_Units.left = 50
-        grp_Scale.add_control(lst_Units)
-
-        chk_origin = SKUI::Checkbox.new('Preserve drawing origin')
-        chk_origin.name = :stl_preserve_origin
-        chk_origin.checked = preserve_origin
-        chk_origin.on( :change ) { |control|
-          @stl_preserve_origin = control.checked?
-        }
-        chk_origin.top = 50
-        chk_origin.left = 50
-        grp_Scale.add_control(chk_origin)
-
-        btn_cancel = SKUI::Button.new('Cancel') { |control|
-          control.window.close
-        }
-        btn_cancel.position(-5, -5)
-        window.add_control(btn_cancel)
-
-        btn_import = SKUI::Button.new("Accept") {|control|
-          @stl_merge           = control.window[:stl_merge].checked?,
-          @stl_preserve_origin = control.window[:stl_preserve_origin].checked?,
-          @stl_units           = control.window[:stl_units].value,
-          write_setting('merge_faces',     @stl_merge)
-          write_setting('import_units',    @stl_units)
-          write_setting('preserve_origin', @stl_preserve_origin)
-          control.window.close
-        }
-        btn_import.position(-85, -5)
-        window.add_control(btn_import)
-
-        window.show
-      end
-
-      #def stl_dialog
-      #  # Since WebDialogs under OSX isn't truly modal there is a chance the user
-      #  # can click the Options button while the window is already open. We then
-      #  # just bring it to the front.
-      #  #
-      #  # The reference is being released when the window is closed so it's
-      #  # easier to develop - make updates. Otherwise the WebDialog object would
-      #  # have been cached. And it also should ensure it's garbage collected.
-      #  if @option_window && @option_window.visible?
-      #    @option_window.bring_to_front
-      #    return false
-      #  end
-
-      #  html_source = File.join(PLUGIN_PATH, 'html', 'importer.html')
-
-      #  window_options = {
-      #    :dialog_title     => STL.translate('Import STL Options'),
-      #    :preferences_key  => false,
-      #    :scrollable       => false,
-      #    :resizable        => false,
-      #    :left             => 300,
-      #    :top              => 200,
-      #    :width            => 330,
-      #    :height           => 265
-      #  }
-
-      #  window = UI::WebDialog.new(window_options)
-      #  window.extend(WebDialogExtensions)
-      #  window.set_size(window_options[:width], window_options[:height])
-      #  window.navigation_buttons_enabled = false
-
-      #  window.add_action_callback('Window_Ready') { |dialog, params|
-      #    # Read import settings.
-      #    merge_faces     = read_setting('merge_faces',     @stl_merge)
-      #    current_unit    = read_setting('import_units',    @stl_units)
-      #    preserve_origin = read_setting('preserve_origin', @stl_preserve_origin)
-      #    # Ensure they are in proper format. (Recovers from old settings)
-      #    merge_faces     = ( merge_faces == true )
-      #    current_unit    = current_unit.to_i
-      #    preserve_origin = ( preserve_origin == true )
-      #    # Update webdialog values.
-      #    dialog.update_value('chkMergeCoplanar', merge_faces)
-      #    dialog.update_value('lstUnits', current_unit)
-      #    dialog.update_value('chkPreserveOrigin', preserve_origin)
-      #    # Localize UI
-      #    ui_strings = window.parse_params(params)
-      #    translated_ui_strings = ui_strings.map { |string|
-      #      STL.translate(string)
-      #    }
-      #    window.call_function('UI.update_strings', translated_ui_strings)
-      #  }
-
-      #  window.add_action_callback('Event_Accept') { |dialog, params|
-      #    # Get data from webdialog.
-      #    options = {
-      #      :merge_coplanar   => dialog.get_element_value('chkMergeCoplanar'),
-      #      :units            => dialog.get_element_value('lstUnits'),
-      #      :preserve_origin  => dialog.get_element_value('chkPreserveOrigin')
-      #    }
-      #    dialog.close
-      #    #p options # DEBUG
-      #    # Convert to Ruby values.
-      #    @stl_merge            = (options[:merge_coplanar] == 'true')
-      #    @stl_preserve_origin  = (options[:preserve_origin] == 'true')
-      #    @stl_units            = options[:units].to_i
-      #    # Store last used preferences.
-      #    write_setting('merge_faces',     @stl_merge)
-      #    write_setting('import_units',    @stl_units)
-      #    write_setting('preserve_origin', @stl_preserve_origin)
-      #  }
-
-      #  window.add_action_callback('Event_Cancel') { |dialog, params|
-      #    dialog.close
-      #  }
-      #  window.set_on_close {
-      #    @option_window = nil # (See comment at beginning of method.)
-      #  }
-
-      #  window.set_file( html_source )
-      #  window.show_modal
-      #  @option_window = window # (See comment at beginning of method.)
-      #  true
-      #end
-      #private :stl_dialog
 
       # Wrapper to shorten the syntax and create a central place to modify in case
       # preferences are stored differently in the future.

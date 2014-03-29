@@ -315,7 +315,7 @@ module CommunityExtensions
           :title => STL.translate('STL Import Options'),
           :preferences_key => PREF_KEY,
           :width => 300,
-          :height => 250,
+          :height => 225,
           :modal => false
         }
         window = SKUI::Window.new(window_options)
@@ -357,6 +357,11 @@ module CommunityExtensions
         }
         btn_cancel.position(-5, -5)
         window.add_control(btn_cancel)
+
+        btn_import = SKUI::Button.new("Import") {|control|
+        }
+        btn_import.position(-85, -5)
+        window.add_control(btn_import)
 
         window.show
       end

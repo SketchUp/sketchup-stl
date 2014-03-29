@@ -134,7 +134,7 @@ module CommunityExtensions
         window.add_control(btn_import)
 
         window.show
-      end
+      end # do_options
 
       def load_file(path,status)
         begin

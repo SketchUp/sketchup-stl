@@ -65,11 +65,11 @@ module CommunityExtensions
 
       def do_options
         window_options = {
-          :title => STL.translate('STL Import Options'),
+          :title           => STL.translate('STL Import Options'),
           :preferences_key => PREF_KEY,
-          :width => 300,
-          :height => 225,
-          :modal => false
+          :width           => 300,
+          :height          => 225,
+          :modal           => false
         }
         merge_faces     = read_setting('merge_faces',     @stl_merge)
         current_unit    = read_setting('import_units',    @stl_units)
@@ -78,21 +78,21 @@ module CommunityExtensions
         window = SKUI::Window.new(window_options)
         grp_Geometry = SKUI::Groupbox.new('Geometry')
         grp_Geometry.position(5, 5)
-        grp_Geometry.right = 5
+        grp_Geometry.right  = 5
         grp_Geometry.height = 75
         window.add_control(grp_Geometry)
 
         chk_MergeCoplanar = SKUI::Checkbox.new('Merge coplanar face')
-        chk_MergeCoplanar.name = :stl_merge
+        chk_MergeCoplanar.name    = :stl_merge
         chk_MergeCoplanar.checked = merge_faces
-        chk_MergeCoplanar.top = 25
-        chk_MergeCoplanar.left = 50
+        chk_MergeCoplanar.top     = 25
+        chk_MergeCoplanar.left    = 50
         grp_Geometry.add_control(chk_MergeCoplanar)
 
         grp_Scale = SKUI::Groupbox.new('Scale')
         grp_Scale.position(5, 65)
-        grp_Scale.right = 5
-        grp_Scale.height = 100 
+        grp_Scale.right  = 5
+        grp_Scale.height = 100
         window.add_control(grp_Scale)
 
         units = ['Model Units', 'Meters', 'Centimeters', 'Millimeters', 'Inches', 'Feet']
@@ -103,16 +103,16 @@ module CommunityExtensions
         grp_Scale.add_control(lbl_Units)
 
         lst_Units = SKUI::Listbox.new(units_translated)
-        lst_Units.name = :stl_units
+        lst_Units.name  = :stl_units
         lst_Units.value = current_unit
-        lst_Units.left = 50
+        lst_Units.left  = 50
         grp_Scale.add_control(lst_Units)
 
         chk_origin = SKUI::Checkbox.new('Preserve drawing origin')
-        chk_origin.name = :stl_preserve_origin
+        chk_origin.name    = :stl_preserve_origin
         chk_origin.checked = preserve_origin
-        chk_origin.top = 50
-        chk_origin.left = 50
+        chk_origin.top     = 50
+        chk_origin.left    = 50
         grp_Scale.add_control(chk_origin)
 
         btn_cancel = SKUI::Button.new('Cancel') { |control|
@@ -121,13 +121,13 @@ module CommunityExtensions
         btn_cancel.position(-5, -5)
         window.add_control(btn_cancel)
 
-        btn_import = SKUI::Button.new("Accept") {|control|
+        btn_import = SKUI::Button.new("Accept") { |control|
           @stl_merge           = control.window[:stl_merge].checked?
           @stl_preserve_origin = control.window[:stl_preserve_origin].checked?
           @stl_units           = control.window[:stl_units].value
-          write_setting('merge_faces',     @stl_merge)
-          write_setting('import_units',    @stl_units)
-          write_setting('preserve_origin', @stl_preserve_origin)
+          write_setting('merge_faces'     , @stl_merge)
+          write_setting('import_units'    , @stl_units)
+          write_setting('preserve_origin' , @stl_preserve_origin)
           control.window.close
         }
         btn_import.position(-85, -5)

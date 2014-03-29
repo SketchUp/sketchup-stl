@@ -69,7 +69,7 @@ module CommunityExtensions
           :preferences_key => PREF_KEY,
           :width           => 300,
           :height          => 225,
-          :modal           => false
+          :modal           => true
         }
         merge_faces     = read_setting('merge_faces',     @stl_merge)
         current_unit    = read_setting('import_units',    @stl_units)

@@ -76,44 +76,44 @@ module CommunityExtensions
         preserve_origin = read_setting('preserve_origin', @stl_preserve_origin)
 
         window = SKUI::Window.new(window_options)
-        grp_Geometry = SKUI::Groupbox.new('Geometry')
-        grp_Geometry.position(5, 5)
-        grp_Geometry.right  = 5
-        grp_Geometry.height = 75
-        window.add_control(grp_Geometry)
+        grp_geometry = SKUI::Groupbox.new('Geometry')
+        grp_geometry.position(5, 5)
+        grp_geometry.right  = 5
+        grp_geometry.height = 75
+        window.add_control(grp_geometry)
 
-        chk_MergeCoplanar = SKUI::Checkbox.new('Merge coplanar face')
-        chk_MergeCoplanar.name    = :stl_merge
-        chk_MergeCoplanar.checked = merge_faces
-        chk_MergeCoplanar.top     = 25
-        chk_MergeCoplanar.left    = 50
-        grp_Geometry.add_control(chk_MergeCoplanar)
+        chk_merge_coplanar = SKUI::Checkbox.new('Merge coplanar face')
+        chk_merge_coplanar.name    = :stl_merge
+        chk_merge_coplanar.checked = merge_faces
+        chk_merge_coplanar.top     = 25
+        chk_merge_coplanar.left    = 50
+        grp_geometry.add_control(chk_merge_coplanar)
 
-        grp_Scale                 = SKUI::Groupbox.new('Scale')
-        grp_Scale.position(5, 65)
-        grp_Scale.right           = 5
-        grp_Scale.height          = 100
-        window.add_control(grp_Scale)
+        grp_scale                 = SKUI::Groupbox.new('Scale')
+        grp_scale.position(5, 65)
+        grp_scale.right           = 5
+        grp_scale.height          = 100
+        window.add_control(grp_scale)
 
         units = ['Model Units', 'Meters', 'Centimeters', 'Millimeters', 'Inches', 'Feet']
         units_translated = units.map { |unit| STL.translate(unit) }
 
-        lbl_Units      = SKUI::Label.new('Units:')
-        lbl_Units.left = 10
-        grp_Scale.add_control(lbl_Units)
+        lbl_units      = SKUI::Label.new('Units:')
+        lbl_units.left = 10
+        grp_scale.add_control(lbl_units)
 
-        lst_Units       = SKUI::Listbox.new(units_translated)
-        lst_Units.name  = :stl_units
-        lst_Units.value = current_unit
-        lst_Units.left  = 50
-        grp_Scale.add_control(lst_Units)
+        lst_units       = SKUI::Listbox.new(units_translated)
+        lst_units.name  = :stl_units
+        lst_units.value = current_unit
+        lst_units.left  = 50
+        grp_scale.add_control(lst_units)
 
         chk_origin = SKUI::Checkbox.new('Preserve drawing origin')
         chk_origin.name    = :stl_preserve_origin
         chk_origin.checked = preserve_origin
         chk_origin.top     = 50
         chk_origin.left    = 50
-        grp_Scale.add_control(chk_origin)
+        grp_scale.add_control(chk_origin)
 
         btn_cancel = SKUI::Button.new('Cancel') { |control|
           control.window.close

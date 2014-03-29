@@ -82,7 +82,7 @@ module CommunityExtensions
         grp_geometry.height = 75
         window.add_control(grp_geometry)
 
-        chk_merge_coplanar = SKUI::Checkbox.new(STL.translate('Merge coplanar face'))
+        chk_merge_coplanar = SKUI::Checkbox.new(STL.translate('Merge coplanar faces'))
         chk_merge_coplanar.name    = :stl_merge
         chk_merge_coplanar.checked = merge_faces
         chk_merge_coplanar.top     = 25

@@ -30,21 +30,21 @@ module CommunityExtensions
       UINT32_BYTE_SIZE = 4 # 32 bits
       REAL32_BYTE_SIZE = 4 # 32 bits
 
-      BINARY_HEADER_SIZE = 80 # UINT8[80]
-      BINARY_POINT3D_SIZE = REAL32_BYTE_SIZE * 3
+      BINARY_HEADER_SIZE   = 80 # UINT8[80]
+      BINARY_POINT3D_SIZE  = REAL32_BYTE_SIZE * 3
       BINARY_VECTOR3D_SIZE = REAL32_BYTE_SIZE * 3
 
-      BINARY_POINT3D = (REAL32 * 3).freeze
+      BINARY_POINT3D  = (REAL32 * 3).freeze
       BINARY_VECTOR3D = (REAL32 * 3).freeze
 
       MESH_NO_SOFTEN_OR_SMOOTH = 0
 
 
       def initialize
-        @stl_units = UNIT_MILLIMETERS
-        @stl_merge = false
+        @stl_units           = UNIT_MILLIMETERS
+        @stl_merge           = false
         @stl_preserve_origin = true
-        @option_window = nil # (See comment at top of `stl_dialog()`.)
+        @option_window       = nil # (See comment at top of `stl_dialog()`.)
       end
 
       def description
@@ -89,20 +89,20 @@ module CommunityExtensions
         chk_MergeCoplanar.left    = 50
         grp_Geometry.add_control(chk_MergeCoplanar)
 
-        grp_Scale = SKUI::Groupbox.new('Scale')
+        grp_Scale                 = SKUI::Groupbox.new('Scale')
         grp_Scale.position(5, 65)
-        grp_Scale.right  = 5
-        grp_Scale.height = 100
+        grp_Scale.right           = 5
+        grp_Scale.height          = 100
         window.add_control(grp_Scale)
 
         units = ['Model Units', 'Meters', 'Centimeters', 'Millimeters', 'Inches', 'Feet']
         units_translated = units.map { |unit| STL.translate(unit) }
 
-        lbl_Units = SKUI::Label.new('Units:')
+        lbl_Units      = SKUI::Label.new('Units:')
         lbl_Units.left = 10
         grp_Scale.add_control(lbl_Units)
 
-        lst_Units = SKUI::Listbox.new(units_translated)
+        lst_Units       = SKUI::Listbox.new(units_translated)
         lst_Units.name  = :stl_units
         lst_Units.value = current_unit
         lst_Units.left  = 50
@@ -318,9 +318,9 @@ module CommunityExtensions
 
       def stl_ascii_import(filename, try = 1)
         unit_ratio_scale = scale_factor(@stl_units)
-        polygons = []
-        triangle = []
-        num_vertices = 0
+        polygons         = []
+        triangle         = []
+        num_vertices     = 0
         # Ensure to open the file in with no encoding.
         filemode = 'r'
         if RUBY_VERSION.to_f > 1.8
@@ -353,7 +353,7 @@ module CommunityExtensions
         polygons.each{ |triangle| mesh.add_polygon(triangle) }
         entities = Sketchup.active_model.entities
         if entities.length > 0
-          group = entities.add_group
+          group    = entities.add_group
           entities = group.entities
         end
         entities.fill_from_mesh(mesh, false, MESH_NO_SOFTEN_OR_SMOOTH)

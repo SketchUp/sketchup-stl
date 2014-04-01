@@ -70,10 +70,10 @@ module SKUI
     end
     alias :[] :find_control_by_name
 
-    # @see Control#release!
+    # @see Control#release
     # @return [Nil]
     # @since 1.0.0
-    def release!
+    def release
       for control in @controls
         remove_control( control )
       end
@@ -90,7 +90,7 @@ module SKUI
       raise( IndexError, 'Control not found' ) unless controls.include?( control )
       @controls.delete( control )
       control_ui_id = control.ui_id
-      control.release!
+      control.release
       if self.window && self.window.visible?
         self.window.bridge.call( 'UI.remove_control', control_ui_id )
         return true

@@ -71,12 +71,11 @@ module SKUI
     #
     # @return [Nil]
     # @since 1.0.0
-    def release!
+    def release
       release_events()
       @properties.clear
       @properties = nil
       @parent = nil
-      @window = nil
       nil
     end
 
@@ -84,6 +83,18 @@ module SKUI
     # @since 1.0.0
     def typename
       self.class.to_s.split( '::' ).last
+    end
+
+    # @return [Window|Nil]
+    # @since 1.0.0
+    def window
+      control = self
+      until control.parent.nil?
+        control = control.parent
+      end
+      # Unless the root element is a Window then the control hasn't been added
+      # to the window yet.
+      ( control.is_a?( Window ) ) ? control : nil
     end
 
     private

@@ -4,7 +4,7 @@ module SKUI
   require File.join( PATH, 'control_manager.rb' )
   require File.join( PATH, 'json.rb' )
 
-  
+
   # Handles the communication between Ruby and the WebDialog.
   #
   # @since 1.0.0
@@ -48,7 +48,7 @@ module SKUI
       @webdialog.execute_script( 'Bridge.reset()' )
       # (!) SU-0415
       # Reports of .execute_script might have a hard limit - possibly under OSX
-      # only. Windows does seem unaffected. 
+      # only. Windows does seem unaffected.
       # Test case:
       #  w.execute_script("alert('#{'x'*10000000}'.length);")
       arguments = args.map { |arg| JSON.object_to_js( arg ) }.join(',')
@@ -123,7 +123,7 @@ module SKUI
     def get_checked_state( selector )
       call( 'Bridge.get_checked_state', selector )
     end
-    
+
     # @param [String] selector jQuery selector
     #
     # @return [String] Returns the text content for the given jQuery selector.
@@ -162,7 +162,7 @@ module SKUI
 
     # @return [Nil]
     # @since 1.0.0
-    def release!
+    def release
       @window = nil
       @webdialog = nil
       nil

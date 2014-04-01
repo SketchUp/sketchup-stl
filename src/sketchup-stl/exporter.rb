@@ -10,10 +10,6 @@ module CommunityExtensions
   module STL
     module Exporter
 
-      # Load SKUI lib
-      load File.join(File.dirname(__FILE__), 'SKUI', 'embed_skui.rb')
-      ::SKUI.embed_in(self)
-
       STL_ASCII  = 'ASCII'.freeze
       STL_BINARY = 'Binary'.freeze
 
@@ -36,11 +32,16 @@ module CommunityExtensions
       end
 
       def self.select_export_file
-        template  = STL.translate('%s file location')
-        file_name = "#{model_name()}.#{file_extension()}"
-        dlg_title = sprintf(template, file_name)
+        title_template  = STL.translate('%s file location')
+        default_filename = "#{model_name()}.#{file_extension()}"
+        dialog_title = sprintf(title_template, default_filename)
         directory = nil
-        path = UI.savepanel(dlg_title, directory, file_name)
+        filename = UI.savepanel(dialog_title, directory, default_filename)
+        # Ensure the file has a file extensions if the user omitted it.
+        if File.extname(filename).empty?
+          filename = "#{filename}.#{file_extension()}"
+        end
+        filename
       end
 
       def self.export(path, options = OPTIONS)

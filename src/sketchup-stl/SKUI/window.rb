@@ -35,6 +35,9 @@ module SKUI
     define_event( :focus, :blur )
 
     # @since 1.0.0
+    define_event( :resize )
+
+    # @since 1.0.0
     define_event( :scripts_loaded )
 
     # @since 1.0.0
@@ -73,7 +76,6 @@ module SKUI
       }
       active_options = defaults.merge( options )
 
-      @window = self
       @options = active_options
 
       @properties[:theme] = @options[:theme]
@@ -147,13 +149,13 @@ module SKUI
       @webdialog.close
     end
 
-    # @see Base#release!
+    # @see Base#release
     # @return [Nil]
     # @since 1.0.0
-    def release!
+    def release
       @webdialog.close if @webdialog.visible?
       super
-      @bridge.release!
+      @bridge.release
       @bridge = nil
       @options.clear
       @options = nil

@@ -258,7 +258,6 @@ module CommunityExtensions
       private :do_msg
 
       def stl_binary_import(filename, try = 1)
-        #unit_ratio_scale = get_unit_ratio(@stl_units)
         unit_ratio_scale = scale_factor(@stl_units)
         number_of_triangles = 0
         points = []

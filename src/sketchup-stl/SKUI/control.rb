@@ -90,12 +90,12 @@ module SKUI
       [ x, y ]
     end
 
-    # @see Base#release!
+    # @see Base#release
     # @return [Nil]
     # @since 1.0.0
-    def release!
+    def release
       super
-      @rect.release!
+      @rect.release
       @rect = nil
       nil
     end

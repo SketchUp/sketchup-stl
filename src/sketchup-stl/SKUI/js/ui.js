@@ -31,19 +31,61 @@ var UI = function() {
       Sketchup.callback('SKUI::Window.on_ready')
     },
 
-    /* Ensure links are opened in the default browser. This ensures that the
-     * WebDialog doesn't replace the content with the target URL.
+    /* Checks for old versions of the browser engine and warns users of older
+     * versions that their browser is not supported.
+     * This isn't using feature testing because the requirements is based on
+     * CSS support, not HTML or JS support.
      */
     check_environment : function() {
       // Safari don't include a version number. So we cannot test that. But most
       // likely it'll be more up to date and compatible than IE.
-      var pattern = /msie\s+(\d+\.\d+)/i
-      var result = pattern.exec( navigator.userAgent );
-      if ( result && parseFloat(result[1]) < UI.MIN_IE_VERSION ) {
+      //
+      // IE11 changed the user-agent string. The MSDN docs says 'msie' has been
+      // dropped, but in the SketchUp webdialog it still appear:
+      // https://github.com/thomthom/SKUI/issues/92#issuecomment-37624654
+      // However, the version number is missing, so we try to pick that from
+      // the document mode instead.
+      // I haven't found any info to how the embedded IE engines behaves - all I
+      // know is that it has different rules for compatibility.
+      var version = 0.0;
+      var is_IE = false;
+      if ( document.documentMode ) {
+        // Internet Explorer 8+.
+        version = document.documentMode;
+        is_IE = true;
+        // Check that documentMode matches with the Trident token  just in case
+        // there is a way for the user to force some compatibility mode.
+        // In which case a different message should be displayed.
+        // IE8  => Trident/4.0
+        // IE9  => Trident/5.0
+        // IE10 => Trident/6.0
+        // IE11 => Trident/7.0
+        var trident_pattern = /\sTrident\/(\d+\.\d+)/;
+        var trident = trident_pattern.exec( navigator.userAgent );
+        var real_version =  parseFloat(trident[1]) + 4; // Bold assumption?
+        if ( version < UI.MIN_IE_VERSION && version != real_version ) {
+          var $warning = $('<div class="warning"/>');
+          $warning.text( 'Internet Explorer (' + real_version + ') has been ' +
+            'forced into compatibility mode (' + version + ') which prevents ' +
+            'SKUI from functioning properly.' );
+          $warning.appendTo( $('body') );
+          return;
+        }
+      } else {
+        // Internet Explorer before version 8.
+        var ie_pattern = /msie\s+(\d+\.\d+)/i;
+        var ie_result = ie_pattern.exec( navigator.userAgent );
+        if (ie_result) {
+          version = parseFloat(ie_result[1]);
+          is_IE = true;
+        }
+      }
+      if ( is_IE && version < UI.MIN_IE_VERSION ) {
         var $warning = $('<div class="warning"/>');
-        var app = navigator.appName;
-        $warning.text( 'A newer version of ' + app + 'is required for SKUI to' +
-          ' function properly.' );
+        // In IE11 navigator.appName now returns "Netscape". Oh joy!
+        $warning.text( 'Detected Internet Explorer ' + version + '. At least ' +
+          'version ' + UI.MIN_IE_VERSION + ' is required for SKUI to ' +
+          'function properly.' );
         $warning.appendTo( $('body') );
       }
     },

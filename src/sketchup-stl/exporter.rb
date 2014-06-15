@@ -92,21 +92,30 @@ module CommunityExtensions
       end
 
       def self.write_face(file, face, scale, tform)
+        normal = face.normal
+        normal.transform!(tform)
+        normal.normalize!
         mesh = face.mesh(7)
         mesh.transform!(tform)
-        facets_written = @write_face.call(file, scale, mesh)
+        facets_written = @write_face.call(file, scale, mesh, normal)
         return(facets_written)
       end
 
-      def self.write_face_ascii(file, scale, mesh)
+      def self.write_face_ascii(file, scale, mesh, normal)
+        pts = mesh.points
+        n = (pts[1] - pts[0]).cross( (pts[2] - pts[0]) ).normalize
+        order = [0, 1, 2]
+        if n.normalize != normal
+          order = [0, 2, 1]
+        end
         facets_written = 0
         polygons = mesh.polygons
         polygons.each do |polygon|
           if (polygon.length == 3)
-            norm = mesh.normal_at(polygon[0].abs)
-            file.write("facet normal #{norm.x} #{norm.y} #{norm.z}\n")
+            #norm = mesh.normal_at(polygon[0].abs).normalize
+            file.write("facet normal #{normal.x} #{normal.y} #{normal.z}\n")
             file.write("  outer loop\n")
-            for j in 0..2 do
+            for j in order do
               pt = mesh.point_at(polygon[j].abs)
               pt = pt.to_a.map{|e| e * scale}
               file.write("    vertex #{pt.x} #{pt.y} #{pt.z}\n")

@@ -95,19 +95,14 @@ module CommunityExtensions
         normal = face.normal
         normal.transform!(tform)
         normal.normalize!
-        mesh = face.mesh(7)
+        mesh = face.mesh(0)
         mesh.transform!(tform)
         facets_written = @write_face.call(file, scale, mesh, normal)
         return(facets_written)
       end
 
       def self.write_face_ascii(file, scale, mesh, normal)
-        pts = mesh.points
-        n = (pts[1] - pts[0]).cross( (pts[2] - pts[0]) ).normalize
-        order = [0, 1, 2]
-        if n.normalize != normal
-          order = [0, 2, 1]
-        end
+        vertex_order = get_vertex_order(mesh.points, normal)
         facets_written = 0
         polygons = mesh.polygons
         polygons.each do |polygon|
@@ -115,7 +110,7 @@ module CommunityExtensions
             #norm = mesh.normal_at(polygon[0].abs).normalize
             file.write("facet normal #{normal.x} #{normal.y} #{normal.z}\n")
             file.write("  outer loop\n")
-            for j in order do
+            for j in vertex_order do
               pt = mesh.point_at(polygon[j].abs)
               pt = pt.to_a.map{|e| e * scale}
               file.write("    vertex #{pt.x} #{pt.y} #{pt.z}\n")
@@ -127,14 +122,15 @@ module CommunityExtensions
         return(facets_written)
       end
 
-      def self.write_face_binary(file, scale, mesh)
+      def self.write_face_binary(file, scale, mesh, normal)
+        vertex_order = get_vertex_order(mesh.points, normal)
         facets_written = 0
         polygons = mesh.polygons
         polygons.each do |polygon|
           if (polygon.length == 3)
             norm = mesh.normal_at(polygon[0].abs)
             file.write(norm.to_a.pack("e3"))
-            for j in 0..2 do
+            for j in vertex_order do
               pt = mesh.point_at(polygon[j].abs)
               pt = pt.to_a.map{|e| e * scale}
               file.write(pt.pack("e3"))
@@ -215,6 +211,16 @@ module CommunityExtensions
           factor = 1.0
         end
         factor
+      end
+
+      def self.get_vertex_order(vertices, normal)
+        n = (vertices[1] - vertices[0]).cross( (vertices[2] - vertices[0]) )
+        n.normalize!
+        order = [0, 1, 2]
+        if n != normal
+          order = [0, 2, 1]
+        end
+        return order
       end
 
       def self.do_options

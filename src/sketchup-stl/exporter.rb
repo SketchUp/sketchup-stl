@@ -107,7 +107,6 @@ module CommunityExtensions
         polygons = mesh.polygons
         polygons.each do |polygon|
           if (polygon.length == 3)
-            #norm = mesh.normal_at(polygon[0].abs).normalize
             file.write("facet normal #{normal.x} #{normal.y} #{normal.z}\n")
             file.write("  outer loop\n")
             for j in vertex_order do

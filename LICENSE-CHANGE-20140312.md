@@ -23,6 +23,7 @@ Best Regards!
 
 ## Responses
 
+### Brian Brown
 
 Brian Brown <bbrown@google.com> Mon, Mar 10, 2014 at 9:05 AM
 
@@ -30,7 +31,7 @@ To: Bryce Stout <bryce@sketchup.com>
 
 I give permission to change the license to the MIT license.
 
-
+### Konrad Schroder
 
 Konrad Schroder <perseant@hitl.washington.edu> Mon, Mar 10, 2014 at 9:32 AM
 
@@ -50,7 +51,7 @@ UW College of Engineering Seattle, WA, 98195, USA
 
 On 03/10/2014 07:46 AM, Bryce Stout wrote:
 
-
+### Andreas Eisenbarth
 
 Andreas Eisenbarth <andreas.eisenbarth@gmail.com> Mon, Mar 10, 2014 at 1:29 PM
 
@@ -64,8 +65,7 @@ regards,
 
 Andreas
 
-
-
+### Jim Foltz
 
 Jim <jim.foltz@gmail.com> Mon, Mar 10, 2014 at 2:04 PM
 
@@ -76,7 +76,7 @@ I, Jim Foltz, authorize the change to the MIT license for the SketchUp STL proje
 On Mon, Mar 10, 2014 at 10:46 AM, Bryce Stout <bryce@sketchup.com> wrote:
 
 
-
+### Nathan Bromham
 
 Nathan <nathan@guitar­list.com> Tue, Mar 11, 2014 at 1:36 AM
 
@@ -89,7 +89,7 @@ I give my permission for the change of the SketchUp STL project license to the M
 Nathan Bromham
 
 
-
+## Confirmation
 
 Bryce Stout <bryce@sketchup.com> Tue, Mar 11, 2014 at 8:58 AM
 

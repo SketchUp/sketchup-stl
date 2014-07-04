@@ -212,13 +212,16 @@ module CommunityExtensions
         factor
       end
 
-      def self.get_vertex_order(vertices, normal)
-        n = (vertices[1] - vertices[0]).cross( (vertices[2] - vertices[0]) )
-        n.normalize!
+      # Flipped insances in SketchUp may not follow the right-hand rule,
+      # but the STL format expects vertices ordered by the right-hand rule.
+      # If the SketchUp::Face normal does not match the normal calculated
+      # using the right-hand rule, then reverse the vertex order written
+      # to the .stl file.
+      def self.get_vertex_order(positions, face_normal)
+        calculated_normal = (positions[1] - positions[0]).cross( (positions[2] - positions[0]) )
+        calculated_normal.normalize!
         order = [0, 1, 2]
-        if n != normal
-          order = [0, 2, 1]
-        end
+        order.reverse! if calculated_normal != face_normal
         return order
       end
 

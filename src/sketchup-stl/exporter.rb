@@ -219,10 +219,9 @@ module CommunityExtensions
       # to the .stl file.
       def self.get_vertex_order(positions, face_normal)
         calculated_normal = (positions[1] - positions[0]).cross( (positions[2] - positions[0]) )
-        calculated_normal.normalize!
         order = [0, 1, 2]
-        order.reverse! if calculated_normal != face_normal
-        return order
+        order.reverse! if !calculated_normal.samedirection?(face_normal)
+        order
       end
 
       def self.do_options

@@ -220,7 +220,7 @@ module CommunityExtensions
       def self.get_vertex_order(positions, face_normal)
         calculated_normal = (positions[1] - positions[0]).cross( (positions[2] - positions[0]) )
         order = [0, 1, 2]
-        order.reverse! if !calculated_normal.samedirection?(face_normal)
+        order.reverse! if calculated_normal.dot(face_normal) < 0
         order
       end
 

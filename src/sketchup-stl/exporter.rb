@@ -42,7 +42,7 @@ module CommunityExtensions
         directory = nil
         filename = UI.savepanel(dialog_title, directory, default_filename)
         # Ensure the file has a file extensions if the user omitted it.
-        if iflename && File.extname(filename).empty?
+        if filename && File.extname(filename).empty?
           filename = "#{filename}.#{file_extension()}"
         end
         filename

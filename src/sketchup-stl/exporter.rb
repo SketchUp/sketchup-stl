@@ -92,21 +92,24 @@ module CommunityExtensions
       end
 
       def self.write_face(file, face, scale, tform)
-        mesh = face.mesh(7)
+        normal = face.normal
+        normal.transform!(tform)
+        normal.normalize!
+        mesh = face.mesh(0)
         mesh.transform!(tform)
-        facets_written = @write_face.call(file, scale, mesh)
+        facets_written = @write_face.call(file, scale, mesh, normal)
         return(facets_written)
       end
 
-      def self.write_face_ascii(file, scale, mesh)
+      def self.write_face_ascii(file, scale, mesh, normal)
+        vertex_order = get_vertex_order(mesh.points, normal)
         facets_written = 0
         polygons = mesh.polygons
         polygons.each do |polygon|
           if (polygon.length == 3)
-            norm = mesh.normal_at(polygon[0].abs)
-            file.write("facet normal #{norm.x} #{norm.y} #{norm.z}\n")
+            file.write("facet normal #{normal.x} #{normal.y} #{normal.z}\n")
             file.write("  outer loop\n")
-            for j in 0..2 do
+            for j in vertex_order do
               pt = mesh.point_at(polygon[j].abs)
               pt = pt.to_a.map{|e| e * scale}
               file.write("    vertex #{pt.x} #{pt.y} #{pt.z}\n")
@@ -118,14 +121,15 @@ module CommunityExtensions
         return(facets_written)
       end
 
-      def self.write_face_binary(file, scale, mesh)
+      def self.write_face_binary(file, scale, mesh, normal)
+        vertex_order = get_vertex_order(mesh.points, normal)
         facets_written = 0
         polygons = mesh.polygons
         polygons.each do |polygon|
           if (polygon.length == 3)
             norm = mesh.normal_at(polygon[0].abs)
             file.write(norm.to_a.pack("e3"))
-            for j in 0..2 do
+            for j in vertex_order do
               pt = mesh.point_at(polygon[j].abs)
               pt = pt.to_a.map{|e| e * scale}
               file.write(pt.pack("e3"))
@@ -206,6 +210,18 @@ module CommunityExtensions
           factor = 1.0
         end
         factor
+      end
+
+      # Flipped insances in SketchUp may not follow the right-hand rule,
+      # but the STL format expects vertices ordered by the right-hand rule.
+      # If the SketchUp::Face normal does not match the normal calculated
+      # using the right-hand rule, then reverse the vertex order written
+      # to the .stl file.
+      def self.get_vertex_order(positions, face_normal)
+        calculated_normal = (positions[1] - positions[0]).cross( (positions[2] - positions[0]) )
+        order = [0, 1, 2]
+        order.reverse! if calculated_normal.dot(face_normal) < 0
+        order
       end
 
       def self.do_options

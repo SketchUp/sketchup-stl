@@ -1,6 +1,11 @@
-# Translator - the class formerly known as LanguageHandler2
+# Copyright 2012-2015 Trimble Navigation Ltd.
 #
-# License: Apache License, Version 2.0
+# License: The MIT License (MIT)
+#
+# A SketchUp Ruby Extension that adds STL (STereoLithography) file format
+# import and export. More info at https://github.com/SketchUp/sketchup-stl
+#
+# Translator - the class formerly known as LanguageHandler2
 
 require 'sketchup'
 

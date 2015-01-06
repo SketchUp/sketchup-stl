@@ -1,12 +1,14 @@
-# Copyright 2012-2014 Trimble Navigation Ltd.
+# Copyright 2012-2015 Trimble Navigation Ltd.
 #
 # License: The MIT License (MIT)
 #
 # A SketchUp Ruby Extension that adds STL (STereoLithography) file format
 # import and export. More info at https://github.com/SketchUp/sketchup-stl
+#
+# Sketchup-stl Extension
 
-require 'sketchup.rb'
-require 'extensions.rb'
+require 'sketchup'
+require 'extensions'
 
 module CommunityExtensions
   module STL

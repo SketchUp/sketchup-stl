@@ -1,8 +1,11 @@
-# jf_stl_importer.rb - Imports ascii and binary .stl file in SketchUp
+# Copyright 2012-2015 Trimble Navigation Ltd.
 #
-# Copyright (C) 2010 Jim Foltz (jim.foltz@gmail.com)
+# License: The MIT License (MIT)
 #
-# License: Apache License, Version 2.0
+# A SketchUp Ruby Extension that adds STL (STereoLithography) file format
+# import and export. More info at https://github.com/SketchUp/sketchup-stl
+#
+# Importer
 
 require 'sketchup'
 

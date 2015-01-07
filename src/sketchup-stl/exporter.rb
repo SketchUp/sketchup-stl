@@ -1,10 +1,13 @@
-# SketchUp to DXF STL Converter
-# Last edited: February 18, 2011
-# Authors: Nathan Bromham, Konrad Shroeder (http://www.guitar-list.com/)
+# Copyright 2012-2015 Trimble Navigation Ltd.
 #
-# License: Apache License, Version 2.0
+# License: The MIT License (MIT)
+#
+# A SketchUp Ruby Extension that adds STL (STereoLithography) file format
+# import and export. More info at https://github.com/SketchUp/sketchup-stl
+#
+# Exporter
 
-require 'sketchup.rb'
+require 'sketchup'
 
 module CommunityExtensions
   module STL

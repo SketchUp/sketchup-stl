@@ -415,7 +415,7 @@ module CommunityExtensions
   end # module STL
 end # module CommunityExtensions
 
-unless file_loaded?(__FILE__)
+unless file_loaded?('sketchup-stl/importer')
   Sketchup.register_importer(CommunityExtensions::STL::Importer.new)
-  file_loaded(__FILE__)
+  file_loaded('sketchup-stl/importer')
 end

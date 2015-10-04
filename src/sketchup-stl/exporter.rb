@@ -331,7 +331,7 @@ module CommunityExtensions
         window.show
       end # do_options
 
-      unless file_loaded?(__FILE__)
+      unless file_loaded?('sketchup-stl/exporter')
         # Pick menu indexes for where to insert the Export menu. These numbers
         # where picked when SketchUp 8 M4 was the latest version.
         if IS_OSX
@@ -356,7 +356,7 @@ module CommunityExtensions
             MF_ENABLED
           end
         end
-        file_loaded(__FILE__)
+        file_loaded('sketchup-stl/exporter')
       end
 
     end # module Exporter

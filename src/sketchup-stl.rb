@@ -17,10 +17,11 @@ module CommunityExtensions
     # incorrect encoding label which will cause load errors when the file path
     # contain multi-byte characters. This happens when the user has non-english
     # characters in their username.
-    current_path = File.dirname(__FILE__)
-    if current_path.respond_to?(:force_encoding)
-      current_path.force_encoding("UTF-8")
+    file = __FILE__
+    if file.respond_to?(:force_encoding)
+      file.force_encoding("UTF-8")
     end
+    current_path = File.dirname(file)
 
     PLUGIN_ROOT_PATH    = current_path.freeze
     PLUGIN_PATH         = File.join(PLUGIN_ROOT_PATH, 'sketchup-stl').freeze

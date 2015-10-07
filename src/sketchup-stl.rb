@@ -52,7 +52,7 @@ module CommunityExtensions
       'This is an open source project sponsored by the SketchUp team. More ' <<
       'info and updates at https://github.com/SketchUp/sketchup-stl'
     )
-    extension.version = '2.1.5'
+    extension.version = '2.1.6'
     extension.copyright = '2012-2015 Trimble Navigation, ' <<
       'released under the MIT License'
     extension.creator = 'J. Foltz, N. Bromham, K. Shroeder, SketchUp Team'

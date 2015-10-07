@@ -410,12 +410,11 @@ module CommunityExtensions
       end
       private :write_setting
 
-    end # class Importer
+      unless file_loaded?(self.name)
+        Sketchup.register_importer(CommunityExtensions::STL::Importer.new)
+        file_loaded(self.name)
+      end
 
+    end # class Importer
   end # module STL
 end # module CommunityExtensions
-
-unless file_loaded?(__FILE__)
-  Sketchup.register_importer(CommunityExtensions::STL::Importer.new)
-  file_loaded(__FILE__)
-end

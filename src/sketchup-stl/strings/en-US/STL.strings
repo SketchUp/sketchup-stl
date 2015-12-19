@@ -59,3 +59,5 @@
 
 // Menu Item
 "Export STL..." = "Export STL...";
+
+"There is nothing to export. Either the model or the selection is empty."="There is nothing to export. Either the model or the selection is empty.";

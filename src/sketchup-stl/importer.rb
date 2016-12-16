@@ -49,6 +49,7 @@ module CommunityExtensions
         @stl_units = UNIT_MILLIMETERS
         @stl_merge = false
         @stl_preserve_origin = true
+        @stl_repair = true
         @option_window = nil # (See comment at top of `stl_dialog()`.)
       end
 
@@ -72,9 +73,13 @@ module CommunityExtensions
         stl_dialog
       end
 
-      def load_file(path,status)
+      def load_file(path, status)
         begin
+          start = Time.now
           status = main(path)
+          milli = (Time.now - start) * 1000.0
+          puts File.basename(path)
+          puts "Import took #{milli} ms"
         rescue => exception
           puts exception.message
           puts exception.backtrace.join("\n")
@@ -91,6 +96,7 @@ module CommunityExtensions
         @stl_merge           = read_setting('merge_faces',     @stl_merge)
         @stl_units           = read_setting('import_units',    @stl_units)
         @stl_preserve_origin = read_setting('preserve_origin', @stl_preserve_origin)
+        @stl_repair          = read_setting('repair',          @stl_repair)
         # Wrap everything into one operation, ensuring compatibility with older
         # SketchUp versions that did not feature the disable_ui argument.
         model = Sketchup.active_model
@@ -132,8 +138,9 @@ module CommunityExtensions
         end
         # Check if the imported geometry is a solid. If not, attempt to
         # automatically repair it.
-        unless is_solid?(container.entities)
+        if @stl_repair && !is_solid?(container.entities)
           Sketchup.status_text = STL.translate('Repairing geometry...')
+          puts 'Repairing...' # TODO(thomthom): Temp debug! Remove!
           heal_geometry(container.entities)
         end
         # Clean up geometry.
@@ -334,7 +341,7 @@ module CommunityExtensions
           :left             => 300,
           :top              => 200,
           :width            => 330,
-          :height           => 265
+          :height           => 300
         }
 
         window = UI::WebDialog.new(window_options)
@@ -347,14 +354,17 @@ module CommunityExtensions
           merge_faces     = read_setting('merge_faces',     @stl_merge)
           current_unit    = read_setting('import_units',    @stl_units)
           preserve_origin = read_setting('preserve_origin', @stl_preserve_origin)
+          stl_repair      = read_setting('repair',          @stl_stl_repair)
           # Ensure they are in proper format. (Recovers from old settings)
           merge_faces     = ( merge_faces == true )
           current_unit    = current_unit.to_i
           preserve_origin = ( preserve_origin == true )
+          stl_repair      = ( stl_repair == true )
           # Update webdialog values.
           dialog.update_value('chkMergeCoplanar', merge_faces)
           dialog.update_value('lstUnits', current_unit)
           dialog.update_value('chkPreserveOrigin', preserve_origin)
+          dialog.update_value('chkRepair', stl_repair)
           # Localize UI
           ui_strings = window.parse_params(params)
           translated_ui_strings = ui_strings.map { |string|
@@ -368,7 +378,8 @@ module CommunityExtensions
           options = {
             :merge_coplanar   => dialog.get_element_value('chkMergeCoplanar'),
             :units            => dialog.get_element_value('lstUnits'),
-            :preserve_origin  => dialog.get_element_value('chkPreserveOrigin')
+            :preserve_origin  => dialog.get_element_value('chkPreserveOrigin'),
+            :repair           => dialog.get_element_value('chkRepair')
           }
           dialog.close
           #p options # DEBUG
@@ -376,10 +387,12 @@ module CommunityExtensions
           @stl_merge            = (options[:merge_coplanar] == 'true')
           @stl_preserve_origin  = (options[:preserve_origin] == 'true')
           @stl_units            = options[:units].to_i
+          @stl_stl_repair       = (options[:repair] == 'true')
           # Store last used preferences.
           write_setting('merge_faces',     @stl_merge)
           write_setting('import_units',    @stl_units)
           write_setting('preserve_origin', @stl_preserve_origin)
+          write_setting('repair',          @stl_stl_repair)
         }
 
         window.add_action_callback('Event_Cancel') { |dialog, params|

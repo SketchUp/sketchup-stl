@@ -94,7 +94,7 @@ module CommunityExtensions
         facet_count
       end
 
-      # GitHub Issue #162: Binary preview is black in Mac OS.
+      # GitHub Issue #163: Binary preview is black in Mac OS.
       # Caused because normals were not being requested in the Face#mesh call,
       # and so not being exported.
       # face.mesh was being called using only 0. We need to request normals

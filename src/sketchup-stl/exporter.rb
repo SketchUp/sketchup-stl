@@ -148,6 +148,8 @@ module CommunityExtensions
               pt = pt.to_a.map{|e| e * scale}
               file.write(pt.pack("e3"))
             end
+            # 2-byte "Attribute byte count" spacer. Nonstandard use by some stl software
+            # to store color data. Was never widely supported. Should be 0. 
             # C - Integer: 8-bit unsigned
             file.write([0, 0].pack("CC"))
             facets_written += 1

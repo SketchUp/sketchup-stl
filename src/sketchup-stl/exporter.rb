@@ -94,22 +94,11 @@ module CommunityExtensions
         facet_count
       end
 
-      # GitHub Issue #163: Binary preview is black in Mac OS.
-      # Caused because normals were not being requested in the Face#mesh call,
-      # and so not being exported.
-      # face.mesh was being called using only 0. We need to request normals
-      # using face.mesh(4)
-      # Flags for Face#mesh(flags)
-      #   0: Include PolygonMeshPoints
-      #   1: Include PolygonMeshUVQFront
-      #   2: Include PolygonMeshUVQBack
-      #   4: Include PolygonMeshNormals
-
       def self.write_face(file, face, scale, tform)
         normal = face.normal
         normal.transform!(tform)
         normal.normalize!
-        mesh = face.mesh(0 | 4)
+        mesh = face.mesh(0)
         mesh.transform!(tform)
         facets_written = @write_face.call(file, scale, mesh, normal)
         return(facets_written)
@@ -150,8 +139,8 @@ module CommunityExtensions
             end
             # 2-byte "Attribute byte count" spacer. Nonstandard use by some stl software
             # to store color data. Was never widely supported. Should be 0. 
-            # C - Integer: 8-bit unsigned
-            file.write([0, 0].pack("CC"))
+            # "S<" - 16-bit unsigned integer, little-endian
+            file.write([0].pack("S<"))
             facets_written += 1
           end
         end

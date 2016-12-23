@@ -130,14 +130,17 @@ module CommunityExtensions
         polygons = mesh.polygons
         polygons.each do |polygon|
           if (polygon.length == 3)
-            norm = mesh.normal_at(polygon[0].abs)
-            file.write(norm.to_a.pack("e3"))
+            # e - Float: single-precision, little endian byte order
+            file.write(normal.to_a.pack("e3"))
             for j in vertex_order do
               pt = mesh.point_at(polygon[j].abs)
               pt = pt.to_a.map{|e| e * scale}
               file.write(pt.pack("e3"))
             end
-            file.write([0].pack("v"))
+            # 2-byte "Attribute byte count" spacer. Nonstandard use by some stl software
+            # to store color data. Was never widely supported. Should be 0. 
+            # "S<" - 16-bit unsigned integer, little-endian
+            file.write([0].pack("S<"))
             facets_written += 1
           end
         end

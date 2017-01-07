@@ -352,13 +352,6 @@ module CommunityExtensions
             do_options
           }
         end
-        UI.menu('File').set_validation_proc(item) do
-          if Sketchup.active_model.entities.length == 0
-            MF_GRAYED
-          else
-            MF_ENABLED
-          end
-        end
         file_loaded(self.name)
       end
 

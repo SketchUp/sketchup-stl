@@ -225,6 +225,7 @@ module CommunityExtensions
         order
       end
 
+      # Return model.active_entites, selection, or nil
       def self.get_export_entities
         export_ents = nil
         if OPTIONS['selection_only']
@@ -233,7 +234,7 @@ module CommunityExtensions
           else
             msg = "SketchUp STL Exporter:\n\n"
             msg << "You have chosen \"Export only current selection\", but nothing is selected."
-            msg << "\nWould you like to export the entire model?"
+            msg << "\n\nWould you like to export the entire model?"
             if UI.messagebox(msg, MB_YESNO) == IDYES
               export_ents = Sketchup.active_model.active_entities
             end
@@ -325,11 +326,9 @@ module CommunityExtensions
         # Export and Cancel Buttons
         #
         btn_export = SKUI::Button.new('Export') { |control|
-
           write_setting('export_units'   , OPTIONS['export_units'])
           write_setting('stl_format'     , OPTIONS['stl_format'])
           write_setting('selection_only' , OPTIONS['selection_only'])
-
           control.window.close
           export_entities = get_export_entities()
           if export_entities
@@ -342,11 +341,8 @@ module CommunityExtensions
                 msg << exc.message << "\n"
                 msg << exc.backtrace.join("\n")
                 UI.messagebox(msg, MB_MULTILINE)
-             ensure
-                control.window.close
              end
           end
-          control.window.close
         }
 
         btn_export.position(125, -5)
@@ -362,7 +358,9 @@ module CommunityExtensions
         window.show
       end # do_options
 
-      # Display a notice if the model is empty, else
+
+      # Main entry point via menu item.
+      # Display a message and exit if the model is empty, else
       # show the export dialog.
       def self.main
         if Sketchup.active_model.active_entities.length == 0

@@ -261,7 +261,7 @@ module CommunityExtensions
 
         # Row 1 Export Selected
         chk_selection = SKUI::Checkbox.new(
-          'Export selected geometry only.',
+          'Export only current selection',
           OPTIONS['selection_only']
         )
         chk_selection.position(col[1], row[1])

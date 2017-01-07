@@ -355,11 +355,11 @@ module CommunityExtensions
         # (i) The menu_index argument isn't supported by older versions.
         if Sketchup::Menu.instance_method(:add_item).arity == 1
           item = UI.menu('File').add_item(STL.translate('Export STL...')) {
-            do_options
+            main()
           }
         else
           item = UI.menu('File').add_item(STL.translate('Export STL...'), insert_index) {
-            do_options
+            main()
           }
         end
         file_loaded(self.name)

@@ -51,27 +51,22 @@ module CommunityExtensions
         filename
       end
 
-      def self.export(path, options = OPTIONS)
-        filemode = 'w'
-        if RUBY_VERSION.to_f > 1.8
-          filemode << ':ASCII-8BIT'
-        end
-        file = File.new(path , filemode)
-        if options['stl_format'] == STL_BINARY
-          file.binmode
-          @write_face = method(:write_face_binary)
-        else
-          @write_face = method(:write_face_ascii)
-        end
-        scale = scale_factor(options['export_units'])
-        write_header(file, model_name(), options['stl_format'])
-        if options['selection_only']
-          export_ents = Sketchup.active_model.selection
-        else
-          export_ents = Sketchup.active_model.active_entities
-        end
-        facet_count = find_faces(file, export_ents, 0, scale, Geom::Transformation.new)
-        write_footer(file, facet_count, model_name(), options['stl_format'])
+      def self.export(path, export_entities, options = OPTIONS)
+         filemode = 'w'
+         if RUBY_VERSION.to_f > 1.8
+            filemode << ':ASCII-8BIT'
+         end
+         file = File.new(path , filemode)
+         if options['stl_format'] == STL_BINARY
+            file.binmode
+            @write_face = method(:write_face_binary)
+         else
+            @write_face = method(:write_face_ascii)
+         end
+         scale = scale_factor(options['export_units'])
+         write_header(file, model_name(), options['stl_format'])
+         facet_count = find_faces(file, export_entities, 0, scale, Geom::Transformation.new)
+         write_footer(file, facet_count, model_name(), options['stl_format'])
       end
 
       def self.find_faces(file, entities, facet_count, scale, tform)
@@ -230,6 +225,26 @@ module CommunityExtensions
         order
       end
 
+      def self.get_export_entities
+        export_ents = nil
+        if OPTIONS['selection_only']
+          if Sketchup.active_model.selection.length > 0
+            export_ents = Sketchup.active_model.selection
+          else
+            msg = "SketchUp STL Exporter:\n\n"
+            msg << "You have chosen \"Export only current selection\", but nothing is selected."
+            msg << "\nWould you like to export the entire model?"
+            if UI.messagebox(msg, MB_YESNO) == IDYES
+              export_ents = Sketchup.active_model.active_entities
+            end
+          end
+        else
+          export_ents = Sketchup.active_model.active_entities
+        end
+        return export_ents
+      end
+
+
       def self.do_options
 
         # Read last saved options
@@ -315,9 +330,21 @@ module CommunityExtensions
           write_setting('stl_format'     , OPTIONS['stl_format'])
           write_setting('selection_only' , OPTIONS['selection_only'])
 
-          path = select_export_file()
-
-          export(path, OPTIONS) unless path.nil?
+          export_entities = get_export_entities()
+          if export_entities
+             path = select_export_file()
+             begin
+                export(path, export_entities, OPTIONS) unless path.nil?
+             rescue => exc
+                msg = "SketchUp STL Exporter:\n"
+                msg << "An error occured during export.\n\n"
+                msg << exc.message << "\n"
+                msg << exc.backtrace.join("\n")
+                UI.messagebox(msg, MB_MULTILINE)
+             ensure
+                control.window.close
+             end
+          end
           control.window.close
         }
 
@@ -334,15 +361,18 @@ module CommunityExtensions
         window.show
       end # do_options
 
+      # Display a notice if the model is empty, else
+      # show the export dialog.
       def self.main
         if Sketchup.active_model.active_entities.length == 0
-          msg = "SketchUp STL Exporter\n\n" +
+          msg = "SketchUp STL Exporter:\n\n" +
             STL.translate("The model is empty - there is nothing to export.")
           UI.messagebox(msg, MB_OK)
         else
           do_options()
         end
       end
+
 
       unless file_loaded?(self.name)
         # Pick menu indexes for where to insert the Export menu. These numbers
@@ -364,6 +394,7 @@ module CommunityExtensions
         end
         file_loaded(self.name)
       end
+
 
     end # module Exporter
   end # module STL

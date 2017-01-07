@@ -330,6 +330,7 @@ module CommunityExtensions
           write_setting('stl_format'     , OPTIONS['stl_format'])
           write_setting('selection_only' , OPTIONS['selection_only'])
 
+          control.window.close
           export_entities = get_export_entities()
           if export_entities
              path = select_export_file()

@@ -51,7 +51,18 @@ module CommunityExtensions
         filename
       end
 
-      def self.export(path, options = OPTIONS)
+      def self.export(path = nil, options = OPTIONS)
+        if options['selection_only']
+          export_ents = Sketchup.active_model.selection
+        else
+          export_ents = Sketchup.active_model.active_entities
+        end
+        if export_ents.length == 0
+           UI.messagebox("There is nothing to export. Either the model or the selection is empty.")
+           return
+        end
+        path = select_export_file() if (path.nil? or path.empty?)
+        return if path.nil?
         filemode = 'w'
         if RUBY_VERSION.to_f > 1.8
           filemode << ':ASCII-8BIT'
@@ -65,11 +76,6 @@ module CommunityExtensions
         end
         scale = scale_factor(options['export_units'])
         write_header(file, model_name(), options['stl_format'])
-        if options['selection_only']
-          export_ents = Sketchup.active_model.selection
-        else
-          export_ents = Sketchup.active_model.active_entities
-        end
         facet_count = find_faces(file, export_ents, 0, scale, Geom::Transformation.new)
         write_footer(file, facet_count, model_name(), options['stl_format'])
       end
@@ -314,11 +320,8 @@ module CommunityExtensions
           write_setting('export_units'   , OPTIONS['export_units'])
           write_setting('stl_format'     , OPTIONS['stl_format'])
           write_setting('selection_only' , OPTIONS['selection_only'])
-
-          path = select_export_file()
-
-          export(path, OPTIONS) unless path.nil?
           control.window.close
+          export(nil, OPTIONS)
         }
 
         btn_export.position(125, -5)

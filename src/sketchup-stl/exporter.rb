@@ -335,11 +335,11 @@ module CommunityExtensions
              path = select_export_file
              begin
                 export(path, export_entities, OPTIONS) unless path.nil?
-             rescue => exc
+             rescue => exception
                 msg = "SketchUp STL Exporter:\n"
                 msg << "An error occured during export.\n\n"
-                msg << exc.message << "\n"
-                msg << exc.backtrace.join("\n")
+                msg << exception.message << "\n"
+                msg << exception.backtrace.join("\n")
                 UI.messagebox(msg, MB_MULTILINE)
              end
           end

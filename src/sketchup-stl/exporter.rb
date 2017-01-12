@@ -242,7 +242,7 @@ module CommunityExtensions
         else
           export_ents = Sketchup.active_model.active_entities
         end
-        return export_ents
+        export_ents
       end
 
 

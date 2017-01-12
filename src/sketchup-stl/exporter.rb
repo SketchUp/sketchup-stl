@@ -64,7 +64,7 @@ module CommunityExtensions
             @write_face = method(:write_face_ascii)
          end
          scale = scale_factor(options['export_units'])
-         write_header(file, model_name(), options['stl_format'])
+         write_header(file, model_name, options['stl_format'])
          facet_count = find_faces(file, export_entities, 0, scale, Geom::Transformation.new)
          write_footer(file, facet_count, model_name(), options['stl_format'])
       end

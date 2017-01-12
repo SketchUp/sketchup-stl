@@ -364,8 +364,8 @@ module CommunityExtensions
       # show the export dialog.
       def self.main
         if Sketchup.active_model.active_entities.length == 0
-          msg = "SketchUp STL Exporter:\n\n" +
-            STL.translate("The model is empty - there is nothing to export.")
+          msg = "SketchUp STL Exporter:\n\n"
+          msg << STL.translate("The model is empty - there is nothing to export.")
           UI.messagebox(msg, MB_OK)
         else
           do_options()

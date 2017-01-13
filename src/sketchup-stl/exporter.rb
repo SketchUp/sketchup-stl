@@ -40,13 +40,13 @@ module CommunityExtensions
 
       def self.select_export_file
         title_template  = STL.translate('%s file location')
-        default_filename = "#{model_name()}.#{file_extension()}"
+        default_filename = "#{model_name}.#{file_extension}"
         dialog_title = sprintf(title_template, default_filename)
         directory = nil
         filename = UI.savepanel(dialog_title, directory, default_filename)
         # Ensure the file has a file extensions if the user omitted it.
         if filename && File.extname(filename).empty?
-          filename = "#{filename}.#{file_extension()}"
+          filename = "#{filename}.#{file_extension}"
         end
         filename
       end
@@ -66,7 +66,7 @@ module CommunityExtensions
          scale = scale_factor(options['export_units'])
          write_header(file, model_name, options['stl_format'])
          facet_count = find_faces(file, export_entities, 0, scale, Geom::Transformation.new)
-         write_footer(file, facet_count, model_name(), options['stl_format'])
+         write_footer(file, facet_count, model_name, options['stl_format'])
       end
 
       def self.find_faces(file, entities, facet_count, scale, tform)
@@ -194,7 +194,7 @@ module CommunityExtensions
 
       def self.scale_factor(unit_key)
         if unit_key == 'Model Units'
-          selected_key = model_units()
+          selected_key = model_units
         else
           selected_key = unit_key
         end
@@ -368,7 +368,7 @@ module CommunityExtensions
           msg << STL.translate("The model is empty - there is nothing to export.")
           UI.messagebox(msg, MB_OK)
         else
-          do_options()
+          do_options
         end
       end
 
@@ -384,11 +384,11 @@ module CommunityExtensions
         # (i) The menu_index argument isn't supported by older versions.
         if Sketchup::Menu.instance_method(:add_item).arity == 1
           item = UI.menu('File').add_item(STL.translate('Export STL...')) {
-            main()
+            main
           }
         else
           item = UI.menu('File').add_item(STL.translate('Export STL...'), insert_index) {
-            main()
+            main
           }
         end
         file_loaded(self.name)

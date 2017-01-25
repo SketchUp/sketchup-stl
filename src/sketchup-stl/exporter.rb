@@ -40,38 +40,33 @@ module CommunityExtensions
 
       def self.select_export_file
         title_template  = STL.translate('%s file location')
-        default_filename = "#{model_name()}.#{file_extension()}"
+        default_filename = "#{model_name}.#{file_extension}"
         dialog_title = sprintf(title_template, default_filename)
         directory = nil
         filename = UI.savepanel(dialog_title, directory, default_filename)
         # Ensure the file has a file extensions if the user omitted it.
         if filename && File.extname(filename).empty?
-          filename = "#{filename}.#{file_extension()}"
+          filename = "#{filename}.#{file_extension}"
         end
         filename
       end
 
-      def self.export(path, options = OPTIONS)
-        filemode = 'w'
-        if RUBY_VERSION.to_f > 1.8
-          filemode << ':ASCII-8BIT'
-        end
-        file = File.new(path , filemode)
-        if options['stl_format'] == STL_BINARY
-          file.binmode
-          @write_face = method(:write_face_binary)
-        else
-          @write_face = method(:write_face_ascii)
-        end
-        scale = scale_factor(options['export_units'])
-        write_header(file, model_name(), options['stl_format'])
-        if options['selection_only']
-          export_ents = Sketchup.active_model.selection
-        else
-          export_ents = Sketchup.active_model.active_entities
-        end
-        facet_count = find_faces(file, export_ents, 0, scale, Geom::Transformation.new)
-        write_footer(file, facet_count, model_name(), options['stl_format'])
+      def self.export(path, export_entities, options = OPTIONS)
+         filemode = 'w'
+         if RUBY_VERSION.to_f > 1.8
+            filemode << ':ASCII-8BIT'
+         end
+         file = File.new(path , filemode)
+         if options['stl_format'] == STL_BINARY
+            file.binmode
+            @write_face = method(:write_face_binary)
+         else
+            @write_face = method(:write_face_ascii)
+         end
+         scale = scale_factor(options['export_units'])
+         write_header(file, model_name, options['stl_format'])
+         facet_count = find_faces(file, export_entities, 0, scale, Geom::Transformation.new)
+         write_footer(file, facet_count, model_name, options['stl_format'])
       end
 
       def self.find_faces(file, entities, facet_count, scale, tform)
@@ -199,7 +194,7 @@ module CommunityExtensions
 
       def self.scale_factor(unit_key)
         if unit_key == 'Model Units'
-          selected_key = model_units()
+          selected_key = model_units
         else
           selected_key = unit_key
         end
@@ -229,6 +224,27 @@ module CommunityExtensions
         order.reverse! if calculated_normal.dot(face_normal) < 0
         order
       end
+
+      # Return model.active_entites, selection, or nil
+      def self.get_export_entities
+        export_ents = nil
+        if OPTIONS['selection_only']
+          if Sketchup.active_model.selection.length > 0
+            export_ents = Sketchup.active_model.selection
+          else
+            msg = "SketchUp STL Exporter:\n\n"
+            msg << "You have chosen \"Export only current selection\", but nothing is selected."
+            msg << "\n\nWould you like to export the entire model?"
+            if UI.messagebox(msg, MB_YESNO) == IDYES
+              export_ents = Sketchup.active_model.active_entities
+            end
+          end
+        else
+          export_ents = Sketchup.active_model.active_entities
+        end
+        export_ents
+      end
+
 
       def self.do_options
 
@@ -261,7 +277,7 @@ module CommunityExtensions
 
         # Row 1 Export Selected
         chk_selection = SKUI::Checkbox.new(
-          'Export selected geometry only.',
+          'Export only current selection',
           OPTIONS['selection_only']
         )
         chk_selection.position(col[1], row[1])
@@ -310,15 +326,23 @@ module CommunityExtensions
         # Export and Cancel Buttons
         #
         btn_export = SKUI::Button.new('Export') { |control|
-
           write_setting('export_units'   , OPTIONS['export_units'])
           write_setting('stl_format'     , OPTIONS['stl_format'])
           write_setting('selection_only' , OPTIONS['selection_only'])
-
-          path = select_export_file()
-
-          export(path, OPTIONS) unless path.nil?
           control.window.close
+          export_entities = get_export_entities
+          if export_entities
+             path = select_export_file
+             begin
+                export(path, export_entities, OPTIONS) unless path.nil?
+             rescue => exception
+                msg = "SketchUp STL Exporter:\n"
+                msg << "An error occured during export.\n\n"
+                msg << exception.message << "\n"
+                msg << exception.backtrace.join("\n")
+                UI.messagebox(msg, MB_MULTILINE)
+             end
+          end
         }
 
         btn_export.position(125, -5)
@@ -334,6 +358,21 @@ module CommunityExtensions
         window.show
       end # do_options
 
+
+      # Main entry point via menu item.
+      # Display a message and exit if the model is empty, else
+      # show the export dialog.
+      def self.main
+        if Sketchup.active_model.active_entities.length == 0
+          msg = "SketchUp STL Exporter:\n\n"
+          msg << STL.translate("The model is empty - there is nothing to export.")
+          UI.messagebox(msg, MB_OK)
+        else
+          do_options
+        end
+      end
+
+
       unless file_loaded?(self.name)
         # Pick menu indexes for where to insert the Export menu. These numbers
         # where picked when SketchUp 8 M4 was the latest version.
@@ -345,22 +384,16 @@ module CommunityExtensions
         # (i) The menu_index argument isn't supported by older versions.
         if Sketchup::Menu.instance_method(:add_item).arity == 1
           item = UI.menu('File').add_item(STL.translate('Export STL...')) {
-            do_options
+            main
           }
         else
           item = UI.menu('File').add_item(STL.translate('Export STL...'), insert_index) {
-            do_options
+            main
           }
-        end
-        UI.menu('File').set_validation_proc(item) do
-          if Sketchup.active_model.entities.length == 0
-            MF_GRAYED
-          else
-            MF_ENABLED
-          end
         end
         file_loaded(self.name)
       end
+
 
     end # module Exporter
   end # module STL

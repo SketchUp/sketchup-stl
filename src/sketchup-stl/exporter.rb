@@ -52,21 +52,21 @@ module CommunityExtensions
       end
 
       def self.export(path, export_entities, options = OPTIONS)
-         filemode = 'w'
-         if RUBY_VERSION.to_f > 1.8
-            filemode << ':ASCII-8BIT'
-         end
-         file = File.new(path , filemode)
-         if options['stl_format'] == STL_BINARY
-            file.binmode
-            @write_face = method(:write_face_binary)
-         else
-            @write_face = method(:write_face_ascii)
-         end
-         scale = scale_factor(options['export_units'])
-         write_header(file, model_name, options['stl_format'])
-         facet_count = find_faces(file, export_entities, 0, scale, Geom::Transformation.new)
-         write_footer(file, facet_count, model_name, options['stl_format'])
+        filemode = 'w'
+        if RUBY_VERSION.to_f > 1.8
+          filemode << ':ASCII-8BIT'
+        end
+        file = File.new(path , filemode)
+        if options['stl_format'] == STL_BINARY
+          file.binmode
+          @write_face = method(:write_face_binary)
+        else
+          @write_face = method(:write_face_ascii)
+        end
+        scale = scale_factor(options['export_units'])
+        write_header(file, model_name, options['stl_format'])
+        facet_count = find_faces(file, export_entities, 0, scale, Geom::Transformation.new)
+        write_footer(file, facet_count, model_name, options['stl_format'])
       end
 
       def self.find_faces(file, entities, facet_count, scale, tform)
@@ -340,16 +340,16 @@ module CommunityExtensions
           control.window.close
           export_entities = get_export_entities
           if export_entities
-             path = select_export_file
-             begin
-                export(path, export_entities, OPTIONS) unless path.nil?
-             rescue => exception
-                msg = "SketchUp STL Exporter:\n"
-                msg << "An error occured during export.\n\n"
-                msg << exception.message << "\n"
-                msg << exception.backtrace.join("\n")
-                UI.messagebox(msg, MB_MULTILINE)
-             end
+            path = select_export_file
+            begin
+              export(path, export_entities, OPTIONS) unless path.nil?
+            rescue => exception
+              msg = "SketchUp STL Exporter:\n"
+              msg << "An error occured during export.\n\n"
+              msg << exception.message << "\n"
+              msg << exception.backtrace.join("\n")
+              UI.messagebox(msg, MB_MULTILINE)
+            end
           end
         }
 

@@ -133,7 +133,7 @@ module CommunityExtensions
               file.write(pt.pack("e3"))
             end
             # 2-byte "Attribute byte count" spacer. Nonstandard use by some stl software
-            # to store color data. Was never widely supported. Should be 0. 
+            # to store color data. Was never widely supported. Should be 0.
             # "S<" - 16-bit unsigned integer, little-endian
             file.write([0].pack("S<"))
             facets_written += 1

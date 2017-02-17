@@ -75,11 +75,7 @@ module CommunityExtensions
 
       def load_file(path, status)
         begin
-          start = Time.now
           status = main(path)
-          milli = (Time.now - start) * 1000.0
-          puts File.basename(path)
-          puts "Import took #{milli} ms"
         rescue => exception
           puts exception.message
           puts exception.backtrace.join("\n")

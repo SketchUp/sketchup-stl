@@ -332,6 +332,7 @@ module CommunityExtensions
         }
         btn_cancel.position(-10, -10)
         window.add_control(btn_cancel)
+        window.cancel_button = btn_cancel
 
         btn_export = SKUI::Button.new('Export') { |control|
           write_setting('export_units'   , OPTIONS['export_units'])

@@ -100,11 +100,13 @@ module CommunityExtensions
       end
 
       def self.write_face_ascii(file, scale, mesh, normal)
-        vertex_order = get_vertex_order(mesh.points, normal)
         facets_written = 0
+        points = mesh.points
+        return facets_written if points.empty? # Issue 173
+        vertex_order = get_vertex_order(points, normal)
         polygons = mesh.polygons
         polygons.each do |polygon|
-          if (polygon.length == 3)
+          if polygon.length == 3
             file.write("facet normal #{normal.x} #{normal.y} #{normal.z}\n")
             file.write("  outer loop\n")
             for j in vertex_order do
@@ -116,12 +118,14 @@ module CommunityExtensions
             facets_written += 1
           end
         end
-        return(facets_written)
+        return facets_written
       end
 
       def self.write_face_binary(file, scale, mesh, normal)
-        vertex_order = get_vertex_order(mesh.points, normal)
         facets_written = 0
+        points = mesh.points
+        return facets_written if points.empty? # Issue 173
+        vertex_order = get_vertex_order(points, normal)
         polygons = mesh.polygons
         polygons.each do |polygon|
           if (polygon.length == 3)
@@ -133,7 +137,7 @@ module CommunityExtensions
               file.write(pt.pack("e3"))
             end
             # 2-byte "Attribute byte count" spacer. Nonstandard use by some stl software
-            # to store color data. Was never widely supported. Should be 0. 
+            # to store color data. Was never widely supported. Should be 0.
             # "S<" - 16-bit unsigned integer, little-endian
             file.write([0].pack("S<"))
             facets_written += 1
@@ -213,7 +217,7 @@ module CommunityExtensions
         factor
       end
 
-      # Flipped insances in SketchUp may not follow the right-hand rule,
+      # Flipped instances in SketchUp may not follow the right-hand rule,
       # but the STL format expects vertices ordered by the right-hand rule.
       # If the SketchUp::Face normal does not match the normal calculated
       # using the right-hand rule, then reverse the vertex order written
@@ -225,7 +229,7 @@ module CommunityExtensions
         order
       end
 
-      # Return model.active_entites, selection, or nil
+      # Return model.active_entities, selection, or nil
       def self.get_export_entities
         export_ents = nil
         if OPTIONS['selection_only']

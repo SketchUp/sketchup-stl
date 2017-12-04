@@ -1,0 +1,16 @@
+require: rubocop-sketchup
+
+AllCops:
+  DisabledByDefault: true
+
+SketchupDeprecations:
+  Enabled: true
+
+SketchupPerformance:
+  Enabled: true
+
+SketchupRequirements:
+  Enabled: true
+
+SketchupSuggestions:
+  Enabled: true

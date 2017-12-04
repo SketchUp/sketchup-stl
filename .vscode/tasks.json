@@ -1,0 +1,15 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Debug SketchUp 2017",
+      "type": "shell",
+      "command": "open -a /Applications/SketchUp 2017/SketchUp.app --args -rdebug \"ide port=7000\"",
+      "windows": {
+        "command": "&'C:/Program Files/SketchUp/SketchUp 2017/SketchUp.exe' -rdebug 'ide port=7000'"
+      }
+    }
+  ]
+}

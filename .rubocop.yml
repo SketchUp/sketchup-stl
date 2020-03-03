@@ -14,3 +14,7 @@ SketchupRequirements:
 
 SketchupSuggestions:
   Enabled: true
+
+SketchupRequirements/ExtensionNamespace:
+  Exceptions:
+  - SKUI

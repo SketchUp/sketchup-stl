@@ -9,7 +9,7 @@ import and export.
 
 The latest and greatest is available as an RBZ file. Download the file from this URL:
 
-http://extensions.sketchup.com/content/sketchup-stl
+https://extensions.sketchup.com/extension/412723d4-1f7a-4a5f-b866-281a3e223337/sketch-up-stl
 
 Then inside SketchUp, select `Window` → `Preferences` (Microsoft Windows) or `SketchUp` → `Preferences` (Mac OS X) → `Extensions` → `Install Extension` and select the RBZ file you just downloaded. Voila! SketchUp installs the extension. You'll find a new import type under `File` → `Import` and a `File` → `Export STL` menu option as well.
 

@@ -8,7 +8,7 @@ GEM
     parser (2.7.0.4)
       ast (~> 2.4.0)
     rainbow (3.0.0)
-    rexml (3.2.4)
+    rexml (3.2.5)
     rubocop (0.80.0)
       jaro_winkler (~> 1.5.1)
       parallel (~> 1.10)
@@ -24,6 +24,7 @@ GEM
     unicode-display_width (1.6.1)
 
 PLATFORMS
+  ruby
   x64-mingw32
   x86-mingw32
 

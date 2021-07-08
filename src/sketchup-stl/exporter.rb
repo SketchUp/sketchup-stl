@@ -52,21 +52,21 @@ module CommunityExtensions
       end
 
       def self.export(path, export_entities, options = OPTIONS)
-         filemode = 'w'
-         if RUBY_VERSION.to_f > 1.8
-            filemode << ':ASCII-8BIT'
-         end
-         file = File.new(path , filemode)
-         if options['stl_format'] == STL_BINARY
-            file.binmode
-            @write_face = method(:write_face_binary)
-         else
-            @write_face = method(:write_face_ascii)
-         end
-         scale = scale_factor(options['export_units'])
-         write_header(file, model_name, options['stl_format'])
-         facet_count = find_faces(file, export_entities, 0, scale, Geom::Transformation.new)
-         write_footer(file, facet_count, model_name, options['stl_format'])
+        filemode = 'w'
+        if RUBY_VERSION.to_f > 1.8
+          filemode << ':ASCII-8BIT'
+        end
+        file = File.new(path , filemode)
+        if options['stl_format'] == STL_BINARY
+          file.binmode
+          @write_face = method(:write_face_binary)
+        else
+          @write_face = method(:write_face_ascii)
+        end
+        scale = scale_factor(options['export_units'])
+        write_header(file, model_name, options['stl_format'])
+        facet_count = find_faces(file, export_entities, 0, scale, Geom::Transformation.new)
+        write_footer(file, facet_count, model_name, options['stl_format'])
       end
 
       def self.find_faces(file, entities, facet_count, scale, tform)
@@ -273,11 +273,13 @@ module CommunityExtensions
         window_options = {
           :title           => STL.translate('STL Export Options'),
           :preferences_key => PREF_KEY,
-          :height          => 160,
-          :width           => 290,
+          :height          => 170,
+          :width           => 300,
           :modal           => true
         }
         window = SKUI::Window.new(window_options)
+        window.background_color = Sketchup::Color.new(240, 240, 240)
+        list_width = 160
 
         # Row 1 Export Selected
         chk_selection = SKUI::Checkbox.new(
@@ -296,7 +298,7 @@ module CommunityExtensions
         #
         lst_units = SKUI::Listbox.new(units_translated)
         lst_units.position(col[2], row[2])
-        lst_units.width = 169
+        lst_units.width = list_width
         lst_units.value = STL.translate(OPTIONS['export_units'])
         lst_units.on(:change) { |control, value|
           unit_index = units_translated.index(value)
@@ -314,7 +316,7 @@ module CommunityExtensions
         lst_format = SKUI::Listbox.new(formats_translated)
         lst_format.value = lst_format.items.first
         lst_format.position(col[2], row[3])
-        lst_format.width = 169
+        lst_format.width = list_width
         lst_format.value = STL.translate(OPTIONS['stl_format'])
         lst_format.on(:change) { |control, value|
           format_index = formats_translated.index(value)
@@ -329,6 +331,13 @@ module CommunityExtensions
         #
         # Export and Cancel Buttons
         #
+        btn_cancel = SKUI::Button.new('Cancel') { |control|
+          control.window.close
+        }
+        btn_cancel.position(-10, -10)
+        window.add_control(btn_cancel)
+        window.cancel_button = btn_cancel
+
         btn_export = SKUI::Button.new('Export') { |control|
           write_setting('export_units'   , OPTIONS['export_units'])
           write_setting('stl_format'     , OPTIONS['stl_format'])
@@ -336,27 +345,22 @@ module CommunityExtensions
           control.window.close
           export_entities = get_export_entities
           if export_entities
-             path = select_export_file
-             begin
-                export(path, export_entities, OPTIONS) unless path.nil?
-             rescue => exception
-                msg = "SketchUp STL Exporter:\n"
-                msg << "An error occured during export.\n\n"
-                msg << exception.message << "\n"
-                msg << exception.backtrace.join("\n")
-                UI.messagebox(msg, MB_MULTILINE)
-             end
+            path = select_export_file
+            begin
+              export(path, export_entities, OPTIONS) unless path.nil?
+            rescue => exception
+              msg = "SketchUp STL Exporter:\n"
+              msg << "An error occured during export.\n\n"
+              msg << exception.message << "\n"
+              msg << exception.backtrace.join("\n")
+              UI.messagebox(msg, MB_MULTILINE)
+            end
           end
         }
 
-        btn_export.position(125, -5)
+        btn_export.position(-btn_cancel.width - 25, -10)
         window.add_control(btn_export)
 
-        btn_cancel = SKUI::Button.new('Cancel') { |control|
-          control.window.close
-        }
-        btn_cancel.position(-5, -5)
-        window.add_control(btn_cancel)
 
         window.default_button = btn_export
         window.show

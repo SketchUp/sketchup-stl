@@ -21,9 +21,9 @@ module CommunityExtensions
       STL_BINARY = 'Binary'.freeze
 
       OPTIONS = {
-        'selection_only' => false,
         'export_units'   => 'Model Units',
-        'stl_format'     => STL_ASCII
+        'stl_format'     => STL_ASCII,
+        'component_selection' => 'One file for each Main Component'
       }
 
       PREF_KEY = 'CommunityExtensions\STL\Exporter'.freeze
@@ -56,17 +56,36 @@ module CommunityExtensions
          if RUBY_VERSION.to_f > 1.8
             filemode << ':ASCII-8BIT'
          end
-         file = File.new(path , filemode)
-         if options['stl_format'] == STL_BINARY
-            file.binmode
-            @write_face = method(:write_face_binary)
-         else
-            @write_face = method(:write_face_ascii)
-         end
-         scale = scale_factor(options['export_units'])
-         write_header(file, model_name, options['stl_format'])
-         facet_count = find_faces(file, export_entities, 0, scale, Geom::Transformation.new)
-         write_footer(file, facet_count, model_name, options['stl_format'])
+        if OPTIONS['component_selection'] == 'One file for each Main Component'
+          for entity in export_entities
+            suffix_filename = File.basename(path, File.extname(path))
+            file_path = File.dirname(path) +'/' + suffix_filename + '_' + Utils.definition(entity).name + '.stl'
+            file = File.new(file_path , filemode)
+            if options['stl_format'] == STL_BINARY
+                file.binmode
+                @write_face = method(:write_face_binary)
+            else
+                @write_face = method(:write_face_ascii)
+            end
+            scale = scale_factor(options['export_units'])
+            write_header(file, model_name, options['stl_format'])
+            facet_count = find_faces(file, Utils.definition(entity).entities, 0, scale, Geom::Transformation.new)
+            write_footer(file, facet_count, model_name, options['stl_format'])
+          end
+
+        else 
+          file = File.new(path , filemode)
+          if options['stl_format'] == STL_BINARY
+              file.binmode
+              @write_face = method(:write_face_binary)
+          else
+              @write_face = method(:write_face_ascii)
+          end
+          scale = scale_factor(options['export_units'])
+          write_header(file, model_name, options['stl_format'])
+          facet_count = find_faces(file, export_entities, 0, scale, Geom::Transformation.new)
+          write_footer(file, facet_count, model_name, options['stl_format'])
+        end
       end
 
       def self.find_faces(file, entities, facet_count, scale, tform)
@@ -232,7 +251,10 @@ module CommunityExtensions
       # Return model.active_entities, selection, or nil
       def self.get_export_entities
         export_ents = nil
-        if OPTIONS['selection_only']
+        if OPTIONS['component_selection'] == 'One file for each Main Component'
+          model = Sketchup.active_model
+          export_ents = model.entities
+        elsif OPTIONS['component_selection'] == 'Selection Only'
           if Sketchup.active_model.selection.length > 0
             export_ents = Sketchup.active_model.selection
           else
@@ -253,12 +275,14 @@ module CommunityExtensions
       def self.do_options
 
         # Read last saved options
-        ['selection_only', 'stl_format', 'export_units'].each do |key|
+        ['stl_format', 'export_units','component_selection'].each do |key|
           OPTIONS[key] = read_setting(key, OPTIONS[key])
         end
 
         units = ['Model Units', 'Meters', 'Centimeters', 'Millimeters', 'Inches', 'Feet']
         units_translated = units.map { |unit| STL.translate(unit) }
+        export_type = ['Full Model', 'One file for each Main Component', 'Selection Only']
+        component_selection = export_type.map { |export_type| STL.translate(export_type) }
 
         formats = [STL_ASCII, STL_BINARY]
         formats_translated = formats.map { |format| STL.translate(format) }
@@ -267,29 +291,31 @@ module CommunityExtensions
         col = [0, 10, 110]
         first_row = 7
         vspace = 30
-        row = (0..4).map{|e| e * vspace + first_row}
+        row = (0..5).map{|e| e * vspace + first_row}
         row.unshift(0)
 
         window_options = {
           :title           => STL.translate('STL Export Options'),
           :preferences_key => PREF_KEY,
           :height          => 160,
-          :width           => 290,
+          :width           => 300,
           :modal           => true
         }
         window = SKUI::Window.new(window_options)
 
-        # Row 1 Export Selected
-        chk_selection = SKUI::Checkbox.new(
-          'Export only current selection',
-          OPTIONS['selection_only']
-        )
-        chk_selection.position(col[1], row[1])
-        chk_selection.check if OPTIONS['selection_only']
-        chk_selection.on(:change) { |control|
-          OPTIONS['selection_only'] = control.checked?
+        lst_component_selection = SKUI::Listbox.new(component_selection)
+        lst_component_selection.position(col[2], row[1])
+        lst_component_selection.width = 169
+        lst_component_selection.value = STL.translate(OPTIONS['component_selection'])
+        lst_component_selection.on(:change) { |control, value|
+          component_selection_index = component_selection.index(value)
+          OPTIONS['component_selection'] = export_type[component_selection_index]
         }
-        window.add_control(chk_selection)
+        window.add_control(lst_component_selection)
+
+        lst_component_selection = SKUI::Label.new(STL.translate('Export type:'), lst_component_selection)
+        lst_component_selection.position(col[1], row[1])
+        window.add_control(lst_component_selection)
 
         #
         # Row 2 Export Units
@@ -321,22 +347,24 @@ module CommunityExtensions
           OPTIONS['stl_format'] = formats[format_index]
         }
         window.add_control(lst_format)
-
+        
         lbl_type = SKUI::Label.new(STL.translate('File format:'), lst_format)
         lbl_type.position(col[1], row[3])
         window.add_control(lbl_type)
-
+      
+        
         #
         # Export and Cancel Buttons
         #
         btn_export = SKUI::Button.new('Export') { |control|
           write_setting('export_units'   , OPTIONS['export_units'])
           write_setting('stl_format'     , OPTIONS['stl_format'])
-          write_setting('selection_only' , OPTIONS['selection_only'])
+          write_setting('component_selection' , OPTIONS['component_selection'])
           control.window.close
           export_entities = get_export_entities
           if export_entities
-             path = select_export_file
+            
+            path = select_export_file            
              begin
                 export(path, export_entities, OPTIONS) unless path.nil?
              rescue => exception

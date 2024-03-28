@@ -42,7 +42,7 @@ module CommunityExtensions
         title_template  = STL.translate('%s file location')
         default_filename = "#{model_name}.#{file_extension}"
         dialog_title = sprintf(title_template, default_filename)
-        directory = nil
+        directory = Sketchup.active_model.path
         filename = UI.savepanel(dialog_title, directory, default_filename)
         # Ensure the file has a file extensions if the user omitted it.
         if filename && File.extname(filename).empty?

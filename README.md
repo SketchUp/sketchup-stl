@@ -50,6 +50,16 @@ If you're a SketchUp Ruby community member, you need to fork this repo (If you d
 
 1. From your GitHub repo, send a Pull Request.
 
+#### Debuging advice
+
+To debug, the following steps will allow to reload the app without closing sketchup on each modification:
+
+- uncomment the line `` Sketchup::require File.join(PLUGIN_PATH, 'reload')`` in loader.rb
+- copy `` sketchup-stl.rb`` S file and `` sketchup-stl`` folder in `` SC:\Users\tks\AppData\Roaming\SketchUp\SketchUp 2023\SketchUp\Plugins`` folder 
+
+Once Sketchup launched, you can modify scrripts and reload the extensions by going to "Extensions">"Developer"> "Reload Code Files: sketchup-stl"
+
+	
 
 ## License
 

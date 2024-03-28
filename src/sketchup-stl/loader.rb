@@ -24,6 +24,7 @@ module CommunityExtensions
     Sketchup::require File.join(PLUGIN_PATH, 'utils')
     Sketchup::require File.join(PLUGIN_PATH, 'importer')
     Sketchup::require File.join(PLUGIN_PATH, 'exporter')
+    # Sketchup::require File.join(PLUGIN_PATH, 'reload')
 
   end # module STL
 end # module CommunityExtensions
